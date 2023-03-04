@@ -5,16 +5,20 @@ import {
   Route,
   Link
 } from "react-router-dom";
-import Footer from './components/Footer';
-import Navbar from './components/Navbar';
 import Login from './components/Login';
 import Register from "./components/Register";
-
+import Footer from './components/Footer';
+import Navbar from './components/Navbar';
+import About from "./components/About";
+import Login from './components/Login';
 function App() {
   return (
     <Router>
       <Navbar/>
       <Routes>
+      <Route path="/" element={
+          <About/>
+        }/>
         <Route path="/login" element={
           <Login/>
         }/>
