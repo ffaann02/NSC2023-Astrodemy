@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import {FaFacebook,FaGoogle} from 'react-icons/fa'
 const Login=()=>{
+
     return(
         <div className="w-full h-[96vh] text-center">
             <div className="h-full max-w-md mx-auto flex">

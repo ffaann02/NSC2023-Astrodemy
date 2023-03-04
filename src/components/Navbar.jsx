@@ -1,6 +1,6 @@
 const Navbar = () => {
     return (
-        <nav className="sticky w-full bg-white h-16 top-0 shadow-lg shadow-gray-100 font-golos">
+        <nav className="sticky w-full bg-white h-16 top-0 shadow-lg font-golos z-10">
             <div className="max-w-6xl mx-auto h-full flex justify-between">
                 <div className="py-2 flex cursor-pointer">
                     <img src="/logo192.png" className="w-full h-full py-1" />
