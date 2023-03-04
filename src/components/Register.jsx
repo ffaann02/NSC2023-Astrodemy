@@ -72,7 +72,7 @@ const Register=()=>{
                         <label className="text-left text-lg font-bold text-gray-600">ชื่อผู้ใช้</label>
                         <input type="text" name="username" id="username" onChange={handleForm(setUsername)}
                         className="border-[1.5px] rounded-md px-3 py-2 w-full h-12 text-gray-500  text-lg
-                        focus:outline-gray-300"/>
+                        focus:outline-gray-300 "/>
                         <label className="text-left text-lg font-bold mt-10 text-gray-600">อีเมล</label>
                         <input type="text" name="email" id="email" onChange={handleForm(setEmail)}
                         className="border-[1.5px] rounded-md px-3 py-2 w-full h-12 text-gray-500  text-lg
