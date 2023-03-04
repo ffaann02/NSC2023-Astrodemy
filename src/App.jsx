@@ -7,6 +7,7 @@ import {
   Link
 } from "react-router-dom";
 import Login from './components/Login';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Login/>
         }/>
       </Routes>
+      <Footer/>
     </Router>
   );
 }
