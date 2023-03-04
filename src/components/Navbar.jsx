@@ -3,8 +3,8 @@ const Navbar = () => {
         <nav className="sticky w-full bg-white h-16 top-0 shadow-lg shadow-gray-100 font-golos">
             <div className="max-w-6xl mx-auto h-full flex justify-between">
                 <div className="py-2 flex cursor-pointer">
-                    <img src="/logo192.png" className="w-full h-full py-1" />
-                    <p className="my-auto ml-2 font-bold text-2xl tracking-wider text-gray-800">Astrodemy</p>
+                    <img src="/logoAS.png" className="w-full h-full py-1" />
+                    <p className="my-auto ml-2 font-bold text-2xl tracking-wider text-[#852E97]">Astrodemy</p>
                 </div>
                 <div className="h-full flex w-fit font-ibm-thai">
                     <div className="w-fit h-full flex mr-2 text-lg cursor-pointer text-gray-600 hover:text-gray-800">

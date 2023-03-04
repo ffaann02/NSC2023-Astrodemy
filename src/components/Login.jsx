@@ -12,7 +12,7 @@ const Login=()=>{
                         className="border-[1.5px] rounded-md px-3 py-2 w-full h-12 text-gray-500  text-lg
                         focus:outline-gray-300"/>
                         <label className="text-left font-ibm-thai text-lg font-bold mt-10 text-gray-600">รหัสผ่าน</label>
-                        <input type="text" name="email" id="email"
+                        <input type="password" name="password" id="password"
                         className="border-[1.5px] rounded-md px-3 py-2 w-full h-12 text-gray-500  text-lg
                         focus:outline-gray-300"/>
                         <p className="mt-2 text-left font-semibold text-gray-600 cursor-pointer">ลืมรหัสผ่าน?</p>
@@ -25,7 +25,7 @@ const Login=()=>{
                             <FaGoogle className="text-2xl text-[#a94fa4] hover:text-[#6e3f92] mx-1"/>
                         </div>
                         <div className="mt-10 text-center text-gray-600 text-lg flex mx-auto">
-                            <p>ยังไม่ได้เป็นสมาชิก?</p>
+                            <p>ยังไม่ได้สมัครสมาชิก?</p>
                             <p className="ml-1 text-[#a94fa4] hover:text-[#6e3f92] cursor-pointer">ลงทะเบียนเลย</p>
                         </div>
                     </div>
