@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {FaFacebook,FaGoogle} from 'react-icons/fa'
 import axios from 'axios';
-
+import { Link } from "react-router-dom";
 const Login=()=>{
 
     const [username,setUsername] = useState("");
@@ -49,7 +49,7 @@ const Login=()=>{
                         </div>
                         <div className="mt-10 text-center text-gray-600 text-lg flex mx-auto">
                             <p>ยังไม่ได้สมัครสมาชิก?</p>
-                            <p className="ml-1 text-[#a94fa4] hover:text-[#6e3f92] cursor-pointer">ลงทะเบียนเลย</p>
+                            <p className="ml-1 text-[#a94fa4] hover:text-[#6e3f92] cursor-pointer"><Link to="/register">ลงทะเบียนเลย</Link></p>
                         </div>
                     </div>
                 </div>
