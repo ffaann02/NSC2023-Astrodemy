@@ -8,9 +8,6 @@ const Login=()=>{
     const [password,setPassword] = useState("");
 
     const SubmitLogin=()=>{
-        console.log("hello")
-        console.log(username);
-        console.log(password);
         axios.post('http://localhost:3005/login', {
             username: username,
             password: password
@@ -19,12 +16,11 @@ const Login=()=>{
             console.log(response.data); // "Login Pass"
           })
           .catch(error => {
-            console.error(error);
+            console.log(error.response.status);
           });
     }
     const handleForm = (setState) => (event) => {
         setState(event.target.value);
-        console.log(username + " " + password);
     }
 
     return(
