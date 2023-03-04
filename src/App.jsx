@@ -6,10 +6,11 @@ import {
   Link
 } from "react-router-dom";
 import Login from './components/Login';
+import Register from "./components/Register";
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import About from "./components/About";
-
+import Login from './components/Login';
 function App() {
   return (
     <Router>
@@ -20,6 +21,9 @@ function App() {
         }/>
         <Route path="/login" element={
           <Login/>
+        }/>
+        <Route path="/register" element={
+          <Register/>
         }/>
       </Routes>
       <Footer/>
