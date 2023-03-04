@@ -1,8 +1,8 @@
 import {FaFacebook,FaGoogle} from 'react-icons/fa'
 const Login=()=>{
     return(
-        <div className="w-full h-screen text-center">
-            <div className="h-full max-w-md mx-auto flex mt-4">
+        <div className="w-full h-[96vh] text-center">
+            <div className="h-full max-w-md mx-auto flex">
                 <div className="w-full h-fit my-auto relative">
                     <p className="text-2xl font-ibm-thai font-bold">เข้าสู่ระบบ</p>
                     <div className="font-ibm-thai  w-full flex flex-col  px-4 py-4 shadow-none sm:shadow-md 
