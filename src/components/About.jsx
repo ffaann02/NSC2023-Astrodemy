@@ -1,13 +1,13 @@
 import "./HomeAssets/style.css"
 import React, { useEffect } from "react"
 const About = () => {
-    // useEffect(() => {
-    //     const body = document.getElementById("star");
-    //     let meteorNumber = 35;
-    //     for (let i = 1; i <= meteorNumber; i++) {
-    //         body.innerHTML += `<div class="meteor-${i}"></div>`;
-    //     }
-    // },[]);
+    useEffect(() => {
+        const body = document.getElementById("star");
+        let meteorNumber = 35;
+        for (let i = 1; i <= meteorNumber; i++) {
+            body.innerHTML += `<div class="meteor-${i}"></div>`;
+        }
+    },[]);
     return (
         <div className="w-full h-full relative overflow-hidden" id="star">
             <div className="h-screen w-full flex">
