@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState ,useEffect} from 'react';
 import {FaFacebook,FaGoogle} from 'react-icons/fa'
 import axios from 'axios';
 import { Link, useNavigate } from "react-router-dom";
