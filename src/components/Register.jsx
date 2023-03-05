@@ -1,9 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
+import axios from "axios";
 import { useState } from 'react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content'
 
 const Register=()=>{
+
+    const navigate = useNavigate();
 
     const sweetAlert = withReactContent(Swal)
     const showAlert = (title, html, icon) => {
@@ -24,11 +27,6 @@ const Register=()=>{
     const [password,setPassword] = useState("");
     const [confirmpassword,setConfirmPassword] = useState("");
 
-    // case duplicate   
-    const username_duplicate = "examplename";
-    const email_duplicate = "example@gmail.com";
-
-    // case format
     const email_format = "@gmail.com";
 
     const resetAlertText = () => {
@@ -40,48 +38,8 @@ const Register=()=>{
         setState(event.target.value);
     }
     
+    
     const validateSubmit=()=>{
-        // validate username
-        if(username === ""){
-            setAlertText("กรุณาระบุชื่อผู้ใช้");
-            setIsSuccess(false);
-            setErrorCase(1);
-            return;
-        }
-        else if(username.length < 8 || username.length > 16){
-            setAlertText("ชื่อผู้ใช้ต้องมีความยาวไม่น้อยกว่า 8 และไม่เกิน 16 ตัวอักษร");
-            setIsSuccess(false);
-            setErrorCase(1);
-            return;
-        }
-        else if(username === username_duplicate){
-            setAlertText("ชื่อผู้ใช้นี้ถูกใช้ไปแล้ว");
-            setIsSuccess(false);
-            setErrorCase(1);
-            return;
-        }
-
-        // validate email
-        if(email===""){
-            setAlertText("กรุณาระบุอีเมลของคุณ");
-            setIsSuccess(false);
-            setErrorCase(2);
-            return;
-        }
-        else if(email===email_duplicate){
-            setAlertText("อีเมลนี้ถูกใช้ไปแล้ว");
-            setIsSuccess(false);
-            setErrorCase(2);
-            return;
-        }
-        else if(!email.includes(email_format)){
-            setAlertText("กรุณาระบุอีเมลให้ถูกต้อง");
-            setIsSuccess(false);
-            setErrorCase(2);
-            return;
-        }
-
-        // validate password
         if(password===""){
             setAlertText("กรุณาระบุรหัสผ่าน");
             setIsSuccess(false);
@@ -94,13 +52,57 @@ const Register=()=>{
             setErrorCase(3);
             return;
         }
-
+        if(username === ""){
+            setAlertText("กรุณาระบุชื่อผู้ใช้");
+            setIsSuccess(false);
+            setErrorCase(1);
+            return;
+        }
+        else if(username.length < 8 || username.length > 16){
+            setAlertText("ชื่อผู้ใช้ต้องมีความยาวไม่น้อยกว่า 8 และไม่เกิน 16 ตัวอักษร");
+            setIsSuccess(false);
+            setErrorCase(1);
+            return;
+        }
+        if(email===""){
+            setAlertText("กรุณาระบุอีเมลของคุณ");
+            setIsSuccess(false);
+            setErrorCase(2);
+            return;
+        }
+        else if(!email.includes(email_format)){
+            setAlertText("กรุณาระบุอีเมลให้ถูกต้อง");
+            setIsSuccess(false);
+            setErrorCase(2);
+            return;
+        }
         // pass every case
         else{
-            showAlert("ลงทะเบียนสำเร็จ!", "ดำเนินการเสร็จสิ้น", "success");
+            axios.post('http://localhost:3005/register', {
+            username: username,
+            email: email,
+            password: password
+          })
+          .then(response => {
+            console.log(response.data); // "Register Success"
             setIsSuccess(true);
-            // alert("ลงทะเบียนสำเร็จ")
-            return;
+            navigate("/login");
+          })
+          .catch(error => {
+            if(error.response.status==400){
+                setErrorCase(1);
+                setAlertText("ชื่อผู้ใช้ได้ถูกใช้งานแล้ว");
+                setIsSuccess(false);
+            }
+            if(error.response.status==401){
+                setErrorCase(2);
+                setAlertText("อีเมลนี้ได้ถูกใช้งานแล้ว");
+                setIsSuccess(false);
+            }
+            else{
+                return;
+            }
+          });
         }
     }
 
