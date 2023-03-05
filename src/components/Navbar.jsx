@@ -1,6 +1,11 @@
 import { Link } from "react-router-dom";
+import { useContext,useEffect, useState } from "react";
+import {UserContext} from "../App"
+import {FaAngleDown} from 'react-icons/fa'
 
 const Navbar = () => {
+    const {userData,logged,setLogged} = useContext(UserContext)
+    const [username,setUsername] = useState("");
     return (
         <nav className="sticky w-full bg-white h-16 top-0 shadow-lg font-golos z-10">
             <div className="max-w-6xl mx-auto h-full flex justify-between">
@@ -16,12 +21,18 @@ const Navbar = () => {
                         <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">คอร์สออนไลน์</p>
                         <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">แบบจำลอง 3D</p>
                     </div>
-                    <div className="flex">
+                    {!logged ? <div className="flex">
                         <p className="my-auto mr-4 text-gray-600 hover:text-gray-800 text-lg cursor-pointer"><Link to="/register">ลงทะเบียน</Link></p>
                         <button className="rounded-3xl text-lg bg-gradient-to-r px-4 my-2
                         from-[#6e3f92] to-[#a94fa4]
                         hover:marker:from-[#754798] hover:to-[#a65ea3] text-white"><Link to="/login">เข้าสู่ระบบ</Link></button>
-                    </div>
+                    </div>:null}
+                    {logged? <div className="flex border-l-2 my-2 w-fit cursor-pointer relative">
+                        <img src={userData.userProfile === "default" ? "/assets/default.png":userData.userProfile} 
+                        className="ml-2 rounded-full my-1"/>
+                        <FaAngleDown className="absolute bg-white rounded-full
+                        text-md p-[1px] bottom-0 -right-[2px]"/>
+                    </div>:null}
                 </div>
             </div>
         </nav>
