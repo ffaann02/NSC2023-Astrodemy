@@ -22,7 +22,7 @@ const Register=()=>{
     }
 
     const [isSuccess,setIsSuccess] = useState(null);
-    const [alertText,setAlertText] = useState("");
+    const [alertText,setAlertText] = useState(null);
     const [errorCase,setErrorCase] = useState(0);
 
     const [username,setUsername] = useState("");
@@ -156,11 +156,11 @@ const Register=()=>{
                             <p>รหัสผ่านต้องมี 8 - 24 ตัวอักษร</p>
                         </div>
 
-                        {!isSuccess ? <div className="mt-5 text-center text-gray-600 text-lg flex mx-auto">
+                        {!isSuccess && isSuccess!==null ? <div className="mt-5 text-center text-gray-600 text-lg flex mx-auto">
                             <p className="mx-10 text-red-600">{alertText}</p>
                         </div> :null}
 
-                        <div className="mt-10 ml-2 text-left text-gray-600 text-base flex">
+                        <div className="mt-6 ml-2 text-left text-gray-600 text-base flex">
                             <label><input type="checkbox" className="mr-2" onChange={handleCheckbox(setAcceptPDPA)}/>  
                                 ฉันรับทราบและยอมรับ นโยบายความเป็นส่วนตัว
                             </label>
