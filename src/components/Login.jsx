@@ -1,7 +1,7 @@
 import { useState ,useEffect} from 'react';
 import {FaFacebook,FaGoogle} from 'react-icons/fa'
 import axios from 'axios';
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 
@@ -16,7 +16,10 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const Login=()=>{
-    console.log(process.env.REACT_APP_API_KEY)
+  
+    const [isSuccess,setIsSuccess] = useState(null);
+    const [alertText,setAlertText] = useState("");
+    const [errorCase,setErrorCase] = useState(0);
     const [username,setUsername] = useState("");
     const [password,setPassword] = useState("");
 
