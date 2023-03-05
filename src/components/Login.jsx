@@ -17,11 +17,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const Login=()=>{
-
-    console.log(process.env.REACT_APP_API_KEY)
-
     const navigate = useNavigate();
-
     const [isSuccess,setIsSuccess] = useState(null);
     const [alertText,setAlertText] = useState("");
     const [errorCase,setErrorCase] = useState(0);
