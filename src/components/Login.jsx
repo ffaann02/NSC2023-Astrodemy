@@ -16,7 +16,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const Login=()=>{
-  
+    const navigate = useNavigate();
     const [isSuccess,setIsSuccess] = useState(null);
     const [alertText,setAlertText] = useState("");
     const [errorCase,setErrorCase] = useState(0);
