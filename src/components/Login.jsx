@@ -17,9 +17,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const Login=()=>{
-
-    console.log(process.env.REACT_APP_API_KEY)
-
     const navigate = useNavigate();
 
     const [isSuccess,setIsSuccess] = useState(null);
@@ -65,6 +62,28 @@ const Login=()=>{
         setState(event.target.value);
     }
 
+    const handleLoginWithFacebook = () => {
+      const provider = new firebase.auth.FacebookAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+        .then((result) => {
+          console.log(result.user);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+  
+    const handleLoginWithGoogle = () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+        .then((result) => {
+          console.log(result.user);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+
     return(
         <div className="w-full h-[96vh] text-center">
             <div className="h-full max-w-md mx-auto flex">
@@ -92,8 +111,10 @@ const Login=()=>{
                         hover:marker:from-[#754798] hover:to-[#a65ea3] text-white" onClick={SubmitLogin}>เข้าสู่ระบบ</button>
                         <p className="mt-4 text-center font-semibold text-gray-600 text-sm">หรือเข้าสู่ระบบด้วย</p>
                         <div className="mx-auto flex mt-4 cursor-pointer">
-                            <FaFacebook className="text-2xl text-[#a94fa4] hover:text-[#6e3f92] mx-1"/>
-                            <FaGoogle className="text-2xl text-[#a94fa4] hover:text-[#6e3f92] mx-1"/>
+                            <FaFacebook className="text-2xl text-[#a94fa4] hover:text-[#6e3f92] mx-1"
+                            onClick={handleLoginWithFacebook}/>
+                            <FaGoogle className="text-2xl text-[#a94fa4] hover:text-[#6e3f92] mx-1"
+                            onClick={handleLoginWithGoogle}/>
                         </div>
                         <div className="mt-10 text-center text-gray-600 text-lg flex mx-auto">
                             <p>ยังไม่ได้สมัครสมาชิก?</p>
