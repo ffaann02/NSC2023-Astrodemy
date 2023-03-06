@@ -13,6 +13,7 @@ import Navbar from './components/Navbar';
 import About from "./components/About";
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
+import DrawingGame from "./components/DrawingGame/DrawingGame";
 
 export const UserContext = createContext();
 
@@ -77,6 +78,9 @@ function App() {
         }/>
         <Route path="/register" element={
           <Register/>
+        }/>
+        <Route path="/game/drawing" element={
+          <DrawingGame/>
         }/>
       </Routes>
       <Footer/>
