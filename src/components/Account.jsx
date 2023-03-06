@@ -1,15 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { useContext, useState } from 'react';
-
 import { initializeApp } from "firebase/app";
 import 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-
 import firebase from 'firebase/compat/app';
-
-import {UserContext} from "../App"
+import { UserContext } from "../App"
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content'
+import { AiOutlineEdit } from 'react-icons/ai';
+import { BiImageAdd } from 'react-icons/bi';
 
 const firebaseConfig = {
     apiKey: process.env.REACT_APP_API_KEY,
@@ -25,12 +24,15 @@ const storage = getStorage(app);
 
 const Account = () => {
 
-    const {userData,logged,setLogged, setUserData} = useContext(UserContext)
+    const { userData, logged, setLogged, setUserData } = useContext(UserContext)
 
     const [urlTemp, setUrlTemp] = useState(null);
     const [image, setimage] = useState(null);
     const [userID, setuserID] = useState(null);
     const [chooseFile, setchooseFile] = useState(false);
+    const [isHover, setIsHover] = useState(false);
+    const [editUsernameBox, setEditUsernameBox] = useState(false);
+    const [newUsername, setNewUsername] = useState("");
 
     const handleImageChange = (event) => {
         // Choosen image file
@@ -39,11 +41,11 @@ const Account = () => {
             setchooseFile(true);
         }
         // Choosen another type file
-        else if (event.target.files[0] && !(event.target.files[0].name.endsWith('.png') || event.target.files[0].name.endsWith('.jpg'))){
+        else if (event.target.files[0] && !(event.target.files[0].name.endsWith('.png') || event.target.files[0].name.endsWith('.jpg'))) {
             showAlert('บันทึกข้อมูลไม่สำเร็จ', 'กรุณาเลือกไฟล์ที่เป็นรูป', 'error', '/account');
         }
         // No file choosen (used to choosen and then cancel)
-        else{
+        else {
             setchooseFile(false);
         }
     }
@@ -62,7 +64,7 @@ const Account = () => {
                     .catch((error) => {
                         console.log(error.message, "error getting the image url");
                     })
-                    setimage(null);
+                setimage(null);
             })
             .catch((error) => {
                 console.log(error.message);
@@ -72,25 +74,38 @@ const Account = () => {
     // Upload real image that user want to use (after click save)
     const handleSubmit = () => {
         const imageRef = ref(storage, `profile_image/${userID}/save/image_saved`);
-        if(chooseFile){
+        if (chooseFile) {
             uploadBytes(imageRef, image)
-            .then(() => {
-                getDownloadURL(imageRef)
-                    .then((url) => {
-                        updateImageProfile(url);
-                        showAlert('บันทึกข้อมูลสำเร็จ', 'ข้อมูลบัญชีของคุณอัปเดตแล้ว', 'success', '/');
-                    })
-                    .catch((error) => {
-                        console.log(error.message, "error getting the image url");
-                    })
-            })
-            .catch((error) => {
-                console.log(error.message);
-            })
+                .then(() => {
+                    getDownloadURL(imageRef)
+                        .then((url) => {
+                            updateImageProfile(url);
+                        })
+                        .catch((error) => {
+                            console.log(error.message, "error getting the image url");
+                        })
+                })
+                .catch((error) => {
+                    console.log(error.message);
+                })
         }
-        else{
+        if (newUsername === "") {
             showAlert('บันทึกข้อมูลสำเร็จ', 'ข้อมูลบัญชีของคุณอัปเดตแล้ว', 'success', '/');
+            return;
         }
+        else {
+            const userId = userData.userId;
+            const userRef = firebase.firestore().collection('users').doc(userId);
+            userRef.update({
+                username: newUsername
+                })
+                .catch((error) => {
+                        console.error('Error updating profile image: ', error);
+                });
+            showAlert('บันทึกข้อมูลสำเร็จ', 'ข้อมูลบัญชีของคุณอัปเดตแล้ว', 'success', '/');
+            return;
+        }
+
     }
 
     const updateImageProfile = (url) => {
@@ -98,9 +113,9 @@ const Account = () => {
         const userRef = firebase.firestore().collection('users').doc(userId);
         userRef.update({
             profileImage: url
-            })
+        })
             .catch((error) => {
-            console.error('Error updating profile image: ', error);
+                console.error('Error updating profile image: ', error);
             });
     }
 
@@ -115,7 +130,23 @@ const Account = () => {
         })
             .then(() => {
                 navigate(path);
+                window.location.reload();
             });
+    }
+
+    const editUsername = () => {
+        if (!editUsernameBox) {
+            setEditUsernameBox(current => !current);
+            return;
+        }
+        else {
+            return;
+        }
+    }
+
+    const handleForm = (setState) => (event) => {
+        console.log(event.target.value);
+        setState(event.target.value);
     }
 
     return (
@@ -128,13 +159,26 @@ const Account = () => {
                         <label className="text-left text-lg font-bold text-gray-600">รูปโปรไฟล์</label>
 
                         <div className="flex flex-wrap justify-center">
-                            <div className="w-6/12 sm:w-4/12 px-4 mb-5">
-                                <img src={ !chooseFile ? ( userData.userProfile === "default" ? "/assets/default.png" : userData.userProfile ) : urlTemp}
-                                    alt="profile" className="shadow rounded-full max-w-full h-auto align-middle border-none" />
+                            <div className="w-1/2 sm:w-1/3 px-4 mb-5 relative flex">
+                                {isHover ? <BiImageAdd className="text-3xl absolute mt-16 ml-16" /> : null}
+                                <img src={!chooseFile ? (userData.userProfile === "default" ? "/assets/default.png" : userData.userProfile) : urlTemp}
+                                    alt="profile" className={`${isHover ? "opacity-75" : "opacity-100"} shadow rounded-full max-w-full h-auto align-middle border-none`} />
+                                <input type="file" accept="image/png" onChange={handleImageChange}
+                                    onMouseOver={() => { setIsHover(true) }} onMouseLeave={() => { setIsHover(false) }}
+                                    className="opacity-0 absolute w-full h-full cursor-pointer" />
                             </div>
                         </div>
 
-                        <input type="file" accept="image/png" onChange={handleImageChange} />
+
+                        <label className="mt-10 text-left text-lg font-bold text-gray-600 flex">ชื่อผู้ใช้เดิม : {userData.username}
+                            <AiOutlineEdit className="my-auto ml-2 cursor-pointer" onClick={editUsername} />
+                        </label>
+                        {editUsernameBox ? (<input type="text" name="editUsername" id="editUsername"
+                            placeholder="ชื่อผู้ใช้ใหม่" onChange={handleForm(setNewUsername)}
+                            className={`mt-2 border-[1.5px] rounded-md px-3 py-2 w-full h-12 text-gray-500  text-lg
+                             focus:outline-gray-300`} />) : (null)
+                        }
+
                         <button onClick={handleSubmit}
                             className="py-3 rounded-xl mt-6 text-lg bg-gradient-to-r 
                         from-[#6e3f92] to-[#a94fa4]
