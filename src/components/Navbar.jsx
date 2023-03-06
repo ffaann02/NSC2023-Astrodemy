@@ -55,7 +55,7 @@ const Navbar = () => {
                 {toggleUserIcon ? <div className="w-fit bg-white absolute pt-2 h-fit right-0 mt-[4.25rem]
                 rounded-md shadow-md shadow-white">
                     <div className="py-2 px-4 font-ibm-thai text-lg flex"><AiFillSetting className="my-auto text-xl mr-2"/>
-                    <p>ตั้งค่าบัญชี</p></div>
+                    <p><Link to="/account">ตั้งค่าบัญชี</Link></p></div>
                     <p className="px-2"><button className="rounded-xl text-lg bg-gradient-to-r px-6 my-2 py-2 font-ibm-thai
                         from-[#6e3f92] to-[#a94fa4]
                         hover:marker:from-[#754798] hover:to-[#a65ea3] text-white" onClick={Logout}>ออกจากระบบ </button></p>
