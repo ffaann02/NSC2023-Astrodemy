@@ -128,10 +128,10 @@ const Account = () => {
             icon: icon,
             confirmButtonText: 'ตกลง'
         })
+        .then(() => navigate(path))
             .then(() => {
-                navigate(path);
                 window.location.reload();
-            });
+            })
     }
 
     const editUsername = () => {
