@@ -30,45 +30,68 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 function App() {
-
   const [logged,setLogged] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [userId, setUserId] = useState("");
+  // Get userData from local storage on mount
+  useEffect(() => {
+    const storedUserData = localStorage.getItem('userData');
+    const storedUserId = localStorage.getItem('userId');
+    if (logged && storedUserData) {
+      setLogged(true);
+      setUserId(storedUserId);
+      setUserData(JSON.parse(storedUserData));
+    }
+    else{
+      setLogged(false);
+    }
+  }, [logged]);
+  
+
+  // Save userData to local storage before unmount
+  // Save userData to local storage before unmount
+useEffect(() => {
+  const handleBeforeUnload = () => {
+    if (userData && logged) {
+      localStorage.setItem('userData', JSON.stringify(userData));
+    } else {
+      localStorage.removeItem('userData');
+    }
+  };
+  window.addEventListener('beforeunload', handleBeforeUnload);
+  return () => {
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+  };
+}, [userData, logged]);
+
+
+  // Fetch userData from database if not in local storage
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
-    const storedUserData = localStorage.getItem('userData');
-  
-    if (storedUserId && storedUserData) {
-      setLogged(true);
-      setUserData(JSON.parse(storedUserData));
-    } else {
-      setLogged(false);
-      setUserData(null);
-      return;
+    if (storedUserId && !userData) {
+      const firestore = firebase.firestore();
+      firestore.collection('users').doc(storedUserId).get()
+        .then(doc => {
+          if (doc.exists) {
+            const userDataFetched = {
+              userId: storedUserId,
+              username: doc.data().username,
+              userProfile: doc.data().profileImage
+            };
+            setUserData(userDataFetched);
+            localStorage.setItem('userData', JSON.stringify(userDataFetched));
+          } else {
+            console.log('No user data found');
+          }
+        })
+        .catch(error => {
+          console.error(error);
+        });
     }
-  
-    const firestore = firebase.firestore();
-    firestore.collection('users').doc(storedUserId).get()
-      .then(doc => {
-        if (doc.exists) {
-          const userData = {
-            userId: storedUserId,
-            username: doc.data().username,
-            userProfile: doc.data().profileImage
-          };
-          setUserData(userData);
-          localStorage.setItem('userId', storedUserId);
-          localStorage.setItem('userData', JSON.stringify(userData));
-        } else {
-          console.log('No user data found');
-        }
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }, []);
+  }, [userData]);
   
   return (
-    <UserContext.Provider value={{logged,setLogged,userData,setUserData}}>
+    <UserContext.Provider value={{logged,setLogged,userData,setUserData,userId}}>
       <Router>
       <Navbar/>
       <Routes>

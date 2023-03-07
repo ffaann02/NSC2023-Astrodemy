@@ -19,7 +19,7 @@ const DrawingGame = () => {
     };
     return (
         <div className="w-full h-screen flex">
-            <div className="h-fit w-full max-w-4xl mx-auto grid grid-cols-12">
+            <div className="h-fit w-full max-w-[52rem] mx-auto grid grid-cols-12">
                 <div className="w-full h-[55vh] mx-auto mb-auto mt-20 rounded-l-2xl bg-white border-2 col-span-11 
                 " id="canvas-container">
                     <Canvas color={color} clear={clear} size={size}/>
@@ -61,8 +61,8 @@ const DrawingGame = () => {
                     <div className=" bg-red-200 col-span-3">
                         <input
                             type="range"
-                            min="1"
-                            max="20"
+                            min="5"
+                            max="50"
                             value={size}
                             onChange={(event) => setSize(parseInt(event.target.value))}
                             className="w-[100%] block cursor-pointer"
