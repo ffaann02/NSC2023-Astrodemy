@@ -11,6 +11,7 @@ import Register from "./components/Register";
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import About from "./components/About";
+import Account from "./components/Account";
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 import DrawingGame from "./components/DrawingGame/DrawingGame";
@@ -27,6 +28,7 @@ const firebaseConfig = {
   measurementId: process.env.REACT_APP_MEASUREMENT_ID
 };
 firebase.initializeApp(firebaseConfig);
+
 function App() {
 
   const [logged,setLogged] = useState(false);
@@ -81,6 +83,8 @@ function App() {
         }/>
         <Route path="/game/drawing" element={
           <DrawingGame/>
+        <Route path="/account" element={
+          <Account/>
         }/>
       </Routes>
       <Footer/>
