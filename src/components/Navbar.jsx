@@ -35,7 +35,7 @@ const Navbar = () => {
                         </p>
                         <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">บทความ</p>
                         <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">คอร์สออนไลน์</p>
-                        <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">แบบจำลอง 3D</p>
+                        <p className="my-auto mx-2 text-gray-600 hover:text-gray-800"><Link to="/simulate">แบบจำลอง 3D</Link></p>
                     </div>
                     {!userData && logged===false ? <div className="flex">
                         <p className="my-auto mr-4 text-gray-600 hover:text-gray-800 text-lg cursor-pointer"><Link to="/register">ลงทะเบียน</Link></p>
