@@ -43,7 +43,8 @@ const Navbar = () => {
                         <img src={userData.userProfile === "default" ? "/assets/default.png":userData.userProfile} 
                         className="ml-3 rounded-full my-" onClick={()=>setToggleUserIcon(prev=>!prev)}/>
                         <FaAngleDown className="absolute bg-white rounded-full
-                        text-md p-[0.5px] bottom-0 -right-[2px] border-gray-100 border-[2px]"/>
+                        text-md p-[0.5px] bottom-0 -right-[2px] border-gray-100 border-[2px]"
+                        onClick={()=>setToggleUserIcon(prev=>!prev)}/>
                         {/* <div className="h-fit bg-red-200 absolute w-full">
                             <p>hello</p>
                             <p>hello</p>
