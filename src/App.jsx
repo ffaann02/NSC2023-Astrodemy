@@ -83,6 +83,7 @@ function App() {
         }/>
         <Route path="/game/drawing" element={
           <DrawingGame/>
+        }/>
         <Route path="/account" element={
           <Account/>
         }/>
