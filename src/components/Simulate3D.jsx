@@ -115,7 +115,7 @@ const Simulate3D = () => {
     }, []);
 
     return (
-        <div>
+        <div className="overflow-hidden">
             <canvas id="bg" alt="bg"></canvas>
         </div>
     );
