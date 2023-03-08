@@ -7,6 +7,7 @@ import { GrClearOption } from "react-icons/gr"
 import{RiBrushFill} from "react-icons/ri"
 import io from "socket.io-client"
 // const socket = io.connect("http://localhost:3001")
+const socket = io.connect("http://localhost:3001")
 const DrawingGame = () => {
     const [color, setColor] = useState("#000000");
     const [size, setSize] = useState(5);
@@ -55,7 +56,7 @@ const DrawingGame = () => {
             <div className="h-fit w-full max-w-[52rem] mx-auto grid grid-cols-12 z-10">
                 <div className="w-full h-[55vh] mx-auto mb-auto mt-20 rounded-l-2xl bg-white border-2 col-span-11 
                 " id="canvas-container">
-                    <Canvas color={color} clear={clear} size={size} />
+                    <Canvas color={color} clear={clear} size={size} socket={socket}/>
                 </div>
                 <div className="col-span-1 mt-20 rounded-r-lg border-2 border-l-[0px] bg-sky-500 relative">
                     <div className="grid grid-cols-3 h-fit">

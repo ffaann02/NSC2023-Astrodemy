@@ -1,16 +1,13 @@
 import './DrawingCanvas.css';
 import { useEffect, useRef, useState } from 'react';
 import "./canvas.css"
-import io from 'socket.io-client';
-const socket = io.connect("http://localhost:3001")
 const Canvas = (props) => {
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [color, setColor] = useState(props.color);
-  const [shouldClear, setShouldClear] = useState(false);
-
+  const { socket } = props;
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
@@ -49,8 +46,7 @@ const Canvas = (props) => {
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
       context.clearRect(0, 0, canvas.width, canvas.height);
-      setShouldClear(false);
-    
+      socket.emit('clearCanvas');
   }, [props.clear]);
   
   const [points, setPoints] = useState([]);
@@ -102,10 +98,6 @@ const Canvas = (props) => {
     let image = canvasRef.current.toDataURL('image/png');
     link.setAttribute('href', image);
   };
-
-  const clearCanvas = () => {
-    setShouldClear(true);
-  }
   useEffect(() => {
     socket.on('startDrawing', ({ x, y }) => {
       contextRef.current.beginPath();
@@ -121,13 +113,17 @@ const Canvas = (props) => {
       });
       contextRef.current.stroke();
     });
-    
   
     socket.on('stopDrawing', () => {
       contextRef.current.closePath();
     });
     socket.on('setColor', (color) => {
       contextRef.current.strokeStyle = color;
+    });
+    socket.on('clearCanvas', () => {
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      context.clearRect(0, 0, canvas.width, canvas.height);
     });
   }, []);
 
