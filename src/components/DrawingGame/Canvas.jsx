@@ -1,10 +1,13 @@
 import './DrawingCanvas.css';
 import { useEffect, useRef, useState } from 'react';
 import "./canvas.css"
+import io from 'socket.io-client';
+const socket = io.connect("http://localhost:3001")
 const Canvas = (props) => {
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
   const [color, setColor] = useState(props.color);
   const [shouldClear, setShouldClear] = useState(false);
 
@@ -45,40 +48,47 @@ const Canvas = (props) => {
       setShouldClear(false);
     
   }, [props.clear]);
+  
+  const [points, setPoints] = useState([]);
+  
 
   const startDrawing = ({ nativeEvent }) => {
+    if (isLocked) {
+      return;
+    }
     const { offsetX, offsetY } = nativeEvent;
     contextRef.current.beginPath();
     contextRef.current.moveTo(offsetX, offsetY);
-    contextRef.current.lineTo(offsetX, offsetY);
-    contextRef.current.stroke();
     setIsDrawing(true);
-    nativeEvent.preventDefault();
+    setPoints([{ x: offsetX, y: offsetY }]);
+    socket.emit('startDrawing', { x: offsetX, y: offsetY });
   };
 
   const draw = ({ nativeEvent }) => {
     if (!isDrawing) {
       return;
     }
-
+  
     const { offsetX, offsetY } = nativeEvent;
     contextRef.current.lineTo(offsetX, offsetY);
     contextRef.current.stroke();
-    nativeEvent.preventDefault();
+  
+    // Add the new point to the list of points for the current drawing
+    const newPoints = [...points, { x: offsetX, y: offsetY }];
+    setPoints(newPoints);
+  
+    // Send the entire list of points for the current drawing to the other player
+    socket.emit('draw', newPoints);
   };
+  
 
   const stopDrawing = () => {
     contextRef.current.closePath();
     setIsDrawing(false);
+  
+    socket.emit('stopDrawing');
   };
 
-  const setToDraw = () => {
-    setColor(props.color);
-  };
-
-  const setToErase = () => {
-    setColor('white');
-  };
 
   const saveImageToLocal = (event) => {
     let link = event.currentTarget;
@@ -90,6 +100,26 @@ const Canvas = (props) => {
   const clearCanvas = () => {
     setShouldClear(true);
   }
+  useEffect(() => {
+    socket.on('startDrawing', ({ x, y }) => {
+      contextRef.current.beginPath();
+      contextRef.current.moveTo(x, y);
+    });
+  
+    socket.on('draw', (points) => {
+      contextRef.current.beginPath();
+      contextRef.current.moveTo(points[0].x, points[0].y);
+      points.forEach((point) => {
+        contextRef.current.lineTo(point.x, point.y);
+      });
+      contextRef.current.stroke();
+    });
+    
+  
+    socket.on('stopDrawing', () => {
+      contextRef.current.closePath();
+    });
+  }, []);
 
   return (
     <div className="canvas-container">

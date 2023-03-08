@@ -6,7 +6,7 @@ import { FaEraser } from 'react-icons/fa'
 import { GrClearOption } from "react-icons/gr"
 import{RiBrushFill} from "react-icons/ri"
 import io from "socket.io-client"
-const socket = io.connect("http://localhost:3001")
+// const socket = io.connect("http://localhost:3001")
 const DrawingGame = () => {
     const [color, setColor] = useState("#000000");
     const [size, setSize] = useState(5);
@@ -30,11 +30,11 @@ const DrawingGame = () => {
         setState(event.target.value);
         // socket.emit("send_message", {message:"Hello"});
       }
-    useEffect(()=>{
-        socket.on("receive_message",(data)=>{
-            setReceivedRoomId(data.message);
-        })
-    },[socket])
+    // useEffect(()=>{
+    //     socket.on("receive_message",(data)=>{
+    //         setReceivedRoomId(data.message);
+    //     })
+    // },[socket])
     return (
         <div className="w-full h-screen flex">
             {!isJoin && (
@@ -43,7 +43,7 @@ const DrawingGame = () => {
                   className={`border-[1.5px] rounded-md px-3 py-2 w-full h-12 text-gray-500  text-lg
                             focus:outline-gray-300`} />
                             <button className="px-2 bg-blue-200" onClick={()=>{
-                                 socket.emit("send_message", {message:roomId});
+                                //  socket.emit("send_message", {message:roomId});
                             }}>Join</button>
                     
                 </div>
