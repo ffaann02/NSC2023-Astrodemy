@@ -30,6 +30,10 @@ const Canvas = (props) => {
   useEffect(() => {
     setColor(props.color);
   }, [props.color]);
+  
+  useEffect(() => {
+    socket.emit('setColor', color);
+  }, [color]);
 
   useEffect(() => {
     contextRef.current.lineWidth = props.size;
@@ -77,9 +81,11 @@ const Canvas = (props) => {
     const newPoints = [...points, { x: offsetX, y: offsetY }];
     setPoints(newPoints);
   
-    // Send the entire list of points for the current drawing to the other player
-    socket.emit('draw', newPoints);
+    // Send the entire list of points for the current drawing, along with the current size, to the other player
+    socket.emit('draw', { points: newPoints, size: props.size });
   };
+  
+  
   
 
   const stopDrawing = () => {
@@ -106,9 +112,10 @@ const Canvas = (props) => {
       contextRef.current.moveTo(x, y);
     });
   
-    socket.on('draw', (points) => {
+    socket.on('draw', ({ points, size }) => {
       contextRef.current.beginPath();
       contextRef.current.moveTo(points[0].x, points[0].y);
+      contextRef.current.lineWidth = size; // Set the line width to the size sent from the other player
       points.forEach((point) => {
         contextRef.current.lineTo(point.x, point.y);
       });
@@ -118,6 +125,9 @@ const Canvas = (props) => {
   
     socket.on('stopDrawing', () => {
       contextRef.current.closePath();
+    });
+    socket.on('setColor', (color) => {
+      contextRef.current.strokeStyle = color;
     });
   }, []);
 
