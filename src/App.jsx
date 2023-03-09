@@ -15,7 +15,7 @@ import Account from "./components/Account";
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 import DrawingGame from "./components/DrawingGame/DrawingGame";
-import Simulate3D from "./components/Simulate3D";
+import Simulator from "./components/Simulator";
 
 export const UserContext = createContext();
 
@@ -112,7 +112,7 @@ useEffect(() => {
           <Account/>
         }/>
         <Route path="/simulate" element={
-          <Simulate3D/>
+          <Simulator/>
         }/>
       </Routes>
       <Footer/>
