@@ -20,6 +20,7 @@ const DrawingGame = () => {
     const [start, setStart] = useState(false);
     const [roomId, setRoomId] = useState("");
     const [playerNames, setPlayerNames] = useState([]);
+    const [playerProfiles, setPlayerProfiles] = useState({});
     function generateRoomID() {
         const length = 8;
         const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -65,10 +66,11 @@ const DrawingGame = () => {
         setStart(true);
         socket.emit("startGame", roomId);
     };
-    const [playerProfiles,setPlayerProfiles] = useState(null);
     useEffect(() => {
         if (roomId) {
             socket.on("playerList", ({playerNames, playerProfiles}) => {
+                console.log(playerNames);
+                console.log(playerProfiles)
                 setPlayerProfiles(playerProfiles);
                 setPlayerNames(playerNames);
             });
@@ -76,6 +78,9 @@ const DrawingGame = () => {
         socket.on("startGame", () => {
             setStart(true);
         });
+        return () => {
+            socket.off("playerList");
+        };
     }, [roomId]);
     const [copyLink,setCopyLink] = useState(false);
     return (
