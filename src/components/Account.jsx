@@ -36,7 +36,6 @@ const Account = () => {
     useEffect(() => {
         const storedUserId = localStorage.getItem('userId');
         const storedUserData = localStorage.getItem('userData');
-        console.log(storedUserData);
         setAccountUserData(storedUserData);
     }, []);
 
