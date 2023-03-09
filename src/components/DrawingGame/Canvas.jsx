@@ -29,7 +29,7 @@ const Canvas = (props) => {
   }, [props.color]);
   
   useEffect(() => {
-    socket.emit('setColor', color);
+    socket.emit('setColor', {color,roomId: props.roomId});
   }, [color]);
 
   useEffect(() => {
@@ -43,11 +43,12 @@ const Canvas = (props) => {
   }, [color]);
 
   useEffect(() => {
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      socket.emit('clearCanvas');
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    socket.emit('clearCanvas', { roomId: props.roomId });
   }, [props.clear]);
+  
   
   const [points, setPoints] = useState([]);
   
@@ -61,8 +62,9 @@ const Canvas = (props) => {
     contextRef.current.moveTo(offsetX, offsetY);
     setIsDrawing(true);
     setPoints([{ x: offsetX, y: offsetY }]);
-    socket.emit('startDrawing', { x: offsetX, y: offsetY });
+    socket.emit('startDrawing', { x: offsetX, y: offsetY, roomId: props.roomId });
   };
+  
 
   const draw = ({ nativeEvent }) => {
     if (!isDrawing) {
@@ -78,7 +80,7 @@ const Canvas = (props) => {
     setPoints(newPoints);
   
     // Send the entire list of points for the current drawing, along with the current size, to the other player
-    socket.emit('draw', { points: newPoints, size: props.size });
+    socket.emit('draw', { points: newPoints, size: props.size , roomId: props.roomId});
   };
   
   
@@ -88,7 +90,7 @@ const Canvas = (props) => {
     contextRef.current.closePath();
     setIsDrawing(false);
   
-    socket.emit('stopDrawing');
+    socket.emit('stopDrawing',{ roomId: props.roomId});
   };
 
 
@@ -121,6 +123,7 @@ const Canvas = (props) => {
       contextRef.current.strokeStyle = color;
     });
     socket.on('clearCanvas', () => {
+      console.log("should clear");
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
       context.clearRect(0, 0, canvas.width, canvas.height);
