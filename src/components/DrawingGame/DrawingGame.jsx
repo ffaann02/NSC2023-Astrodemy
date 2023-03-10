@@ -7,8 +7,8 @@ import { GrClearOption } from "react-icons/gr"
 import { RiBrushFill } from "react-icons/ri"
 import { BiUser } from "react-icons/bi"
 import { IoPlanetSharp } from "react-icons/io5"
-import {MdOutlineContentCopy,MdDone} from "react-icons/md"
-import {AiOutlineLink} from "react-icons/ai"
+import { MdOutlineContentCopy, MdDone, MdAccessTimeFilled } from "react-icons/md"
+import { AiOutlineLink } from "react-icons/ai"
 import io from "socket.io-client"
 const socket = io.connect("http://localhost:3001")
 const DrawingGame = () => {
@@ -47,7 +47,7 @@ const DrawingGame = () => {
         if (roomId) {
             socket.emit("join", roomId);
             // Emit an event to the server to inform that a new player has joined the room
-            socket.emit("newPlayer", { roomId, playerName: userData.username,playerProfile: userData.userProfile});
+            socket.emit("newPlayer", { roomId, playerName: userData.username, playerProfile: userData.userProfile });
             setIsJoin(true);
         }
     };
@@ -58,21 +58,27 @@ const DrawingGame = () => {
         if (newRoomId) {
             socket.emit("join", newRoomId);
             // Emit an event to the server to inform that a new player has joined the room
-            socket.emit("newPlayer", { roomId: newRoomId, playerName: userData.username ,playerProfile: userData.userProfile});
+            socket.emit("newPlayer", { roomId: newRoomId, playerName: userData.username, playerProfile: userData.userProfile });
             setIsJoin(true);
         }
     };
     const handleStartGame = () => {
-        setStart(true);
-        socket.emit("startGame", roomId);
+        if (playerNames.length > 0 && playerNames[0] === userData.username) {
+            setStart(true);
+            socket.emit("startGame", roomId);
+        } else {
+            console.log("You do not have permission to start the game.");
+        }
     };
+
     useEffect(() => {
         if (roomId) {
-            socket.on("playerList", ({playerNames, playerProfiles}) => {
+            socket.on("playerList", ({ playerNames, playerProfiles }) => {
                 console.log(playerNames);
                 console.log(playerProfiles)
                 setPlayerProfiles(playerProfiles);
                 setPlayerNames(playerNames);
+                setTotalRounds(playerNames.length - 1);
             });
         }
         socket.on("startGame", () => {
@@ -82,7 +88,47 @@ const DrawingGame = () => {
             socket.off("playerList");
         };
     }, [roomId]);
-    const [copyLink,setCopyLink] = useState(false);
+    const [copyLink, setCopyLink] = useState(false);
+    const [totalRounds, setTotalRounds] = useState(0);
+    const [currentRound, setCurrentRound] = useState(0);
+    const [currentPlayer, setCurrentPlayer] = useState(0);
+    const [roundTime, setRoundTime] = useState(15); // in seconds
+    const [timeLeft, setTimeLeft] = useState(roundTime);
+    const resetGame = () => {
+        setCopyLink(false);
+        setTotalRounds(playerNames.length - 1);
+        setCurrentRound(0);
+        setCurrentPlayer(0);
+        setRoundTime(5);
+        setTimeLeft(5);
+    };
+    useEffect(() => {
+        let timerId;
+
+        if (start && timeLeft > 0) {
+            timerId = setInterval(() => {
+                setTimeLeft((timeLeft) => timeLeft - 1);
+            }, 1000);
+        } else if (start) {
+            setTimeLeft(roundTime);
+            if (currentPlayer === playerNames.length - 1 && currentRound === totalRounds - 1) {
+                // End of the game
+                setStart(false);
+                resetGame();
+            } else if (currentPlayer === playerNames.length - 1) {
+                setCurrentRound((currentRound) => currentRound + 1);
+                setCurrentPlayer(0);
+                // setClear(Date.now()); // clear canvas for the next round
+            } else {
+                setCurrentPlayer((currentPlayer) => currentPlayer + 1);
+                setClear(Date.now());
+            }
+        }
+        return () => {
+            clearInterval(timerId);
+        };
+    }, [start, timeLeft, currentPlayer, currentRound, totalRounds, roundTime, playerNames]);
+    const barWidth = `${((timeLeft / roundTime) * 100)}%`;
     return (
         <div className="w-full h-screen flex">
             {!isJoin && userData && (
@@ -129,55 +175,84 @@ const DrawingGame = () => {
             )}
             {isJoin && !start && (
                 <>
-                <div className="w-full max-w-4xl h-full mx-auto p-4 relative">
-                    <div className="flex w-fit mx-auto mt-6" 
-                    onClick={()=>{
-                        navigator.clipboard.writeText(roomId);
-                        setCopyLink(true)}} 
-                    onMouseLeave={()=>{
-                        setTimeout(() => {
-                            setCopyLink(false)
-                          }, 1000);
-                    }}>
-                        <p className="font-ibm-thai text-xl mt-[6px] mr-2">ห้อง: </p>
-                        <p className="text-3xl font-golos font-bold text-violet-900 cursor-pointer">{roomId}</p>
-                        {!copyLink ? <MdOutlineContentCopy className="ml-1 text-2xl my-auto cursor-pointer text-violet-900"/>
-                        :<MdDone className="ml-1 text-2xl my-auto cursor-pointer text-green-500"/>}
-                    </div>
-                    <p id="loading-text" className="font-ibm-thai font-bold text-xl text-center mt-4"
-                    >กำลังรอผู้เล่นคนอื่น<span id="dot-animation"></span></p>
-                    <img src="/assets/drawing-game_page/animal group.png" id="animal_group_waiting"
-                    className="w-3/4 auto top-24  absolute"/>
-                </div>
-                <div className="flex-row w-fit h-full pt-10 pb-20 px-4 absolute left-0 z-[100]">
-                    <div className="w-full h-full bg-white drop-shadow-lg border-2 rounded-xl px-3">
-                        <p className="font-ibm-thai mt-4 ml-1 flex font-bold">
-                            <p className="text-lg my-auto">ห้อง:</p>
-                            <p className="ml-1 font-golos font-semibold text-violet-900 text-xl">{roomId}</p>
-                            
+                    <div className="w-full max-w-4xl h-full mx-auto p-4 relative">
+                        <div className="flex w-fit mx-auto mt-6"
+                            onClick={() => {
+                                navigator.clipboard.writeText(roomId);
+                                setCopyLink(true)
+                            }}
+                            onMouseLeave={() => {
+                                setTimeout(() => {
+                                    setCopyLink(false)
+                                }, 1000);
+                            }}>
+                            <p className="font-ibm-thai text-xl mt-[6px] mr-2">ห้อง: </p>
+                            <p className="text-3xl font-golos font-bold text-violet-900 cursor-pointer">{roomId}</p>
+                            {!copyLink ? <MdOutlineContentCopy className="ml-1 text-2xl my-auto cursor-pointer text-violet-900" />
+                                : <MdDone className="ml-1 text-2xl my-auto cursor-pointer text-green-500" />}
+                        </div>
+                        <p id="loading-text" className="font-ibm-thai font-bold text-xl text-center mt-4"
+                        >กำลังรอผู้เล่นคนอื่น<span id="dot-animation"></span></p>
+                        <p className="text-center">
+                            {playerNames.length > 0 && playerNames[0] === userData.username &&
+                                (<button className="bg-gradient-to-r px-4 mx-auto py-3 mt-2
+                                    from-[#6e3f92] to-[#a94fa4]
+                                    hover:marker:from-[#754798] hover:to-[#a65ea3] text-white rounded-xl flex
+                                    font-ibm-thai"><IoPlanetSharp className="text-xl my-auto" />
+                                    <p className="ml-3 text-xl" onClick={handleStartGame}>เริ่มเกม</p></button>)}
                         </p>
+                        <img src="/assets/drawing-game_page/animal group.png" id="animal_group_waiting"
+                            className="w-3/4 auto top-45  absolute" />
+                    </div>
+                </>)}
+            {isJoin && (
+                <>
+                    <div className="flex-row w-fit h-full pt-10 pb-20 px-4 absolute left-0 z-[100]">
+                        <div className="w-full h-full bg-white drop-shadow-lg border-2 rounded-xl px-3">
+                            <p className="font-ibm-thai mt-4 ml-1 flex font-bold">
+                                <p className="text-lg my-auto">ห้อง:</p>
+                                <p className="ml-1 font-golos font-semibold text-violet-900 text-xl">{roomId}</p>
+
+                            </p>
                             {playerNames && playerProfiles && playerNames.map((name, index) => (
                                 <div className="flex my-2 px-2 rounded-lg border-2">
-                                   <img src={playerProfiles[index]}
-                                    className="w-12 rounded-full my-2 border-2 p-[1.5px] 
+                                    <img src={playerProfiles[index]}
+                                        className="w-12 rounded-full my-2 border-2 p-[1.5px] 
                                     border-blue-800"/>
-                                    <p className="my-auto ml-2 text-xl text-purple-800 font-semibold opacity-60 font-golos">{name}</p>
+                                    <p className="my-auto ml-2 text-xl text-purple-800 font-semibold opacity-80 font-golos">
+                                        {name}
+                                    </p>
                                 </div>
                             ))}
-                    </div>
-                </div>
-                </>
+                        </div>
+                    </div></>
             )}
+
             {isJoin && start && (<>
                 <img src="/assets/astranaunt-painting.png"
                     id="astranaunt-painting"
                     className="max-w-md absolute -z-10" />
-                <div className="h-fit w-full max-w-[52rem] mx-auto grid grid-cols-12 z-10">
-                    <div className="w-full h-[55vh] mx-auto mb-auto mt-20 rounded-l-2xl bg-white border-2 col-span-11 
+                <div className="h-fit w-full max-w-[52rem] mx-auto grid grid-cols-12 z-10 mt-20">
+                    <div className="col-span-full">
+                        {/* <p>ผู้เล่น: {playerNames[currentPlayer]}</p> */}
+                        <p className="text-2xl font-ibm-thai font-bold">คนวาด: playerName02</p>
+                        <div className="w-full flex mb-1">
+                            <MdAccessTimeFilled className="text-2xl my-auto z-[10] text-violet-900"/>
+                            <div className="w-full h-4  my-auto border-[2px] -ml-2 z-[2] rounded-r-md 
+                            border-violet-900">
+                                <div style={{ width: barWidth }}
+                                className={`h-full bg-gradient-to-r from-[#a279c2] to-[#a746a2] ease-linear duration-300`}></div>
+                            </div>
+                        </div>
+                        {/* <p className="text-xl flex my-auto">
+                            <p className="text-3xl font-golos font-bold">{timeLeft}</p>
+                        </p> */}
+                    </div>
+                    <div className="w-full h-[55vh] mx-auto mb-auto mt-0 rounded-l-2xl bg-white border-2 col-span-11 
                 " id="canvas-container">
                         <Canvas color={color} clear={clear} size={size} socket={socket} roomId={roomId} />
                     </div>
-                    <div className="col-span-1 mt-20 rounded-r-lg border-2 border-l-[0px] bg-sky-500 relative">
+                    <div className="col-span-1 rounded-r-lg border-2 border-l-[0px] bg-sky-500 relative h-full">
                         <div className="grid grid-cols-3 h-fit">
                             {pencil_color_list.map((item, index) => {
                                 let ml = '';
