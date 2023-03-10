@@ -67,20 +67,19 @@ const Canvas = (props) => {
   
 
   const draw = ({ nativeEvent }) => {
-    if (!isDrawing) {
+    if (!isDrawing || props.username !== props.currentPlayerName)  {
       return;
     }
-  
-    const { offsetX, offsetY } = nativeEvent;
-    contextRef.current.lineTo(offsetX, offsetY);
-    contextRef.current.stroke();
-  
-    // Add the new point to the list of points for the current drawing
-    const newPoints = [...points, { x: offsetX, y: offsetY }];
-    setPoints(newPoints);
-  
-    // Send the entire list of points for the current drawing, along with the current size, to the other player
-    socket.emit('draw', { points: newPoints, size: props.size , roomId: props.roomId});
+      const { offsetX, offsetY } = nativeEvent;
+      contextRef.current.lineTo(offsetX, offsetY);
+      contextRef.current.stroke();
+    
+      // Add the new point to the list of points for the current drawing
+      const newPoints = [...points, { x: offsetX, y: offsetY }];
+      setPoints(newPoints);
+    
+      // Send the entire list of points for the current drawing, along with the current size, to the other player
+      socket.emit('draw', { points: newPoints, size: props.size , roomId: props.roomId});
   };
   
   

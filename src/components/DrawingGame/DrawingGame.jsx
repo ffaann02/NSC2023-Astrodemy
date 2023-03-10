@@ -2,13 +2,14 @@ import { useState, useContext, useEffect } from "react"
 import Canvas from "./Canvas"
 import { UserContext } from "../../App"
 import "./canvas.css"
-import { FaEraser } from 'react-icons/fa'
+import { FaEraser, FaPaintBrush } from 'react-icons/fa'
 import { GrClearOption } from "react-icons/gr"
 import { RiBrushFill } from "react-icons/ri"
 import { BiUser } from "react-icons/bi"
 import { IoPlanetSharp } from "react-icons/io5"
-import { MdOutlineContentCopy, MdDone, MdAccessTimeFilled } from "react-icons/md"
+import { MdOutlineContentCopy, MdDone, MdAccessTimeFilled, MdColorLens } from "react-icons/md"
 import { AiOutlineLink } from "react-icons/ai"
+import { FaCrown } from "react-icons/fa"
 import io from "socket.io-client"
 const socket = io.connect("http://localhost:3001")
 const DrawingGame = () => {
@@ -22,14 +23,18 @@ const DrawingGame = () => {
     const [playerNames, setPlayerNames] = useState([]);
     const [playerProfiles, setPlayerProfiles] = useState({});
     function generateRoomID() {
-        const length = 8;
-        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const numbers = '0123456789';
         let result = '';
-        for (let i = 0; i < length; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        for (let i = 0; i < 5; i++) {
+            // pick a random letter
+            result += letters.charAt(Math.floor(Math.random() * letters.length));
+            // pick a random number
+            result += numbers.charAt(Math.floor(Math.random() * numbers.length));
         }
         return result;
     }
+
     const handleColorChange = (newColor) => {
         setColor(newColor);
     }
@@ -70,7 +75,6 @@ const DrawingGame = () => {
             console.log("You do not have permission to start the game.");
         }
     };
-
     useEffect(() => {
         if (roomId) {
             socket.on("playerList", ({ playerNames, playerProfiles }) => {
@@ -88,47 +92,64 @@ const DrawingGame = () => {
             socket.off("playerList");
         };
     }, [roomId]);
+    const TOTAL_ROUND_TIME = 10;
     const [copyLink, setCopyLink] = useState(false);
     const [totalRounds, setTotalRounds] = useState(0);
     const [currentRound, setCurrentRound] = useState(0);
     const [currentPlayer, setCurrentPlayer] = useState(0);
-    const [roundTime, setRoundTime] = useState(15); // in seconds
+    const [roundTime, setRoundTime] = useState(TOTAL_ROUND_TIME); // in seconds
     const [timeLeft, setTimeLeft] = useState(roundTime);
     const resetGame = () => {
+        setSize(5);
+        setColor("#000000")
         setCopyLink(false);
         setTotalRounds(playerNames.length - 1);
         setCurrentRound(0);
         setCurrentPlayer(0);
-        setRoundTime(5);
-        setTimeLeft(5);
+        setRoundTime(TOTAL_ROUND_TIME);
+        setTimeLeft(TOTAL_ROUND_TIME);
     };
-    useEffect(() => {
-        let timerId;
+    const [waiting, setWaiting] = useState(false);
 
-        if (start && timeLeft > 0) {
-            timerId = setInterval(() => {
-                setTimeLeft((timeLeft) => timeLeft - 1);
-            }, 1000);
-        } else if (start) {
-            setTimeLeft(roundTime);
-            if (currentPlayer === playerNames.length - 1 && currentRound === totalRounds - 1) {
-                // End of the game
-                setStart(false);
-                resetGame();
-            } else if (currentPlayer === playerNames.length - 1) {
-                setCurrentRound((currentRound) => currentRound + 1);
-                setCurrentPlayer(0);
-                // setClear(Date.now()); // clear canvas for the next round
-            } else {
-                setCurrentPlayer((currentPlayer) => currentPlayer + 1);
-                setClear(Date.now());
-            }
-        }
-        return () => {
-            clearInterval(timerId);
-        };
-    }, [start, timeLeft, currentPlayer, currentRound, totalRounds, roundTime, playerNames]);
-    const barWidth = `${((timeLeft / roundTime) * 100)}%`;
+useEffect(() => {
+  let timerId;
+  if (start && timeLeft > 0 && !waiting) {
+    timerId = setInterval(() => {
+      setTimeLeft((timeLeft) => timeLeft - 1);
+    }, 1000);
+  } else if (start && !waiting) {
+    setTimeLeft(roundTime);
+    if (currentPlayer === playerNames.length - 1 && currentRound === totalRounds - 1) {
+      // End of the game
+      setStart(false);
+      resetGame();
+    } else if (currentPlayer === playerNames.length - 1) {
+      setWaiting(true);
+      setTimeout(() => {
+        setCurrentRound((currentRound) => currentRound + 1);
+        setCurrentPlayer(0);
+        setClear(Date.now()); // clear canvas for the next round
+        setWaiting(false);
+      }, 5000); // wait for 5 seconds before starting the next round
+    } else {
+      setWaiting(true);
+      setTimeout(() => {
+        setCurrentPlayer((currentPlayer) => currentPlayer + 1);
+        setSize(5);
+        setColor("#000000");
+        setClear(Date.now());
+        setWaiting(false);
+      }, 5000); // wait for 5 seconds before starting the next round
+    }
+  }
+
+  return () => {
+    clearInterval(timerId);
+  };
+}, [start, timeLeft, currentPlayer, currentRound, totalRounds, roundTime, playerNames, waiting]);
+
+const barWidth = `${((timeLeft / roundTime) * 100)}%`;
+      
     return (
         <div className="w-full h-screen flex">
             {!isJoin && userData && (
@@ -205,25 +226,42 @@ const DrawingGame = () => {
                             className="w-3/4 auto top-45  absolute" />
                     </div>
                 </>)}
+            {/* [#754798] hover:to-[#a65ea3] */}
             {isJoin && (
                 <>
-                    <div className="flex-row w-fit h-full pt-10 pb-20 px-4 absolute left-0 z-[100]">
-                        <div className="w-full h-full bg-white drop-shadow-lg border-2 rounded-xl px-3">
+                    <div className="flex-row w-fit h-full pt-10 pb-20 pr-4 absolute left-0 z-[100]">
+                        <div className="w-fit h-full bg-white drop-shadow-lg border-2 rounded-2xl rounded-l-none left-0
+                        px-3">
                             <p className="font-ibm-thai mt-4 ml-1 flex font-bold">
                                 <p className="text-lg my-auto">ห้อง:</p>
-                                <p className="ml-1 font-golos font-semibold text-violet-900 text-xl">{roomId}</p>
+                                <p className="ml-1 font-ibm-thai font-bold text-violet-900 text-xl">{roomId}</p>
 
                             </p>
                             {playerNames && playerProfiles && playerNames.map((name, index) => (
-                                <div className="flex my-2 px-2 rounded-lg border-2">
+                                <div className={`flex border-2 my-2 rounded-r-[25px] rounded-l-[100px] pl-1 pr-2 
+                                border-[#703a9a] bg-gradient-to-r ${index === currentPlayer && start ? "from-[#EEC371] to-[#e6b150]"
+                                        : "from-[#ad4ea8] to-[#a43d9f]"}`}>
                                     <img src={playerProfiles[index]}
-                                        className="w-12 rounded-full my-2 border-2 p-[1.5px] 
-                                    border-blue-800"/>
-                                    <p className="my-auto ml-2 text-xl text-purple-800 font-semibold opacity-80 font-golos">
-                                        {name}
+                                        className="w-12 rounded-full my-1 border-1 p-[1.5px] border-white bg-white ml-[1px]" />
+                                    <p className={`my-auto mx-2 text-xl text-white tracking-widest font-golos`}>
+                                        {name.length > 10 ? name.slice(0, 10) + "..." : name}
                                     </p>
+
+                                    {index === currentPlayer && start &&
+                                        <MdColorLens className="text-3xl my-auto text-[#703a9a] mr-1" />}
+                                    {index === 0 && !start && <FaCrown className="text-2xl my-auto bg-white rounded-full p-1 text-[#703a9a] mr-1" />}
                                 </div>
                             ))}
+                            {!start && (
+                                <div className="flex border-2 my-2 rounded-r-[25px] rounded-l-[100px] pl-1 pr-2 
+                             border-[#703a9a] bg-white p-[1.5px]">
+                                    <div className="w-12 h-12 my-1 border-[#703a9a] bg-slate-300 rounded-full ml-[1px] p-[1.5px]
+                                 border-2"></div>
+                                    <p className="my-auto mx-2 text-xl text-[#703a9a] font-golos font-bold tracking-wider">
+                                        Empty
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div></>
             )}
@@ -232,27 +270,35 @@ const DrawingGame = () => {
                 <img src="/assets/astranaunt-painting.png"
                     id="astranaunt-painting"
                     className="max-w-md absolute -z-10" />
-                <div className="h-fit w-full max-w-[52rem] mx-auto grid grid-cols-12 z-10 mt-20">
-                    <div className="col-span-full">
+                <div className="h-fit w-full max-w-[52rem] mx-auto grid grid-cols-12 z-10 mt-10 ">
+                {playerNames[currentPlayer] !== userData.username && <div clasName="col-span-1"></div>}
+                    <div className={`${playerNames[currentPlayer] === userData.username ? "col-span-full" : "col-span-11"}`}>
                         {/* <p>ผู้เล่น: {playerNames[currentPlayer]}</p> */}
-                        <p className="text-2xl font-ibm-thai font-bold">คนวาด: playerName02</p>
+                        <p className="text-2xl font-ibm-thai font-bold">คนวาด: {playerNames[currentPlayer]}</p>
                         <div className="w-full flex mb-1">
-                            <MdAccessTimeFilled className="text-2xl my-auto z-[10] text-violet-900"/>
+                            <MdAccessTimeFilled className="text-2xl my-auto z-[10] text-violet-900" />
                             <div className="w-full h-4  my-auto border-[2px] -ml-2 z-[2] rounded-r-md 
                             border-violet-900">
                                 <div style={{ width: barWidth }}
-                                className={`h-full bg-gradient-to-r from-[#a279c2] to-[#a746a2] ease-linear duration-300`}></div>
+                                    className={`h-full bg-gradient-to-r from-[#a279c2] to-[#a746a2] ease-linear duration-300`}></div>
                             </div>
                         </div>
-                        {/* <p className="text-xl flex my-auto">
-                            <p className="text-3xl font-golos font-bold">{timeLeft}</p>
-                        </p> */}
                     </div>
-                    <div className="w-full h-[55vh] mx-auto mb-auto mt-0 rounded-l-2xl bg-white border-2 col-span-11 
-                " id="canvas-container">
-                        <Canvas color={color} clear={clear} size={size} socket={socket} roomId={roomId} />
+                    {playerNames[currentPlayer] !== userData.username && <div clasName="col-span-1"></div>}
+                    <div className={`w-full h-[55vh] mt-0 rounded-l-2xl bg-white border-2
+                    ${playerNames[currentPlayer] === userData.username ? "rounded-r-none" : "rounded-r-2xl"}
+                    ${playerNames[currentPlayer] === userData.username ? "col-span-11" : "col-span-11"}`}
+                        id="canvas-container">
+                        <Canvas 
+                        currentPlayerName={playerNames[currentPlayer]}
+                        username={userData.username}
+                        color={color} 
+                        clear={clear} 
+                        size={size} 
+                        socket={socket} 
+                        roomId={roomId} />
                     </div>
-                    <div className="col-span-1 rounded-r-lg border-2 border-l-[0px] bg-sky-500 relative h-full">
+                    {playerNames[currentPlayer] === userData.username && (<div className="col-span-1 rounded-r-lg border-2 border-l-[0px] bg-sky-500 relative h-full">
                         <div className="grid grid-cols-3 h-fit">
                             {pencil_color_list.map((item, index) => {
                                 let ml = '';
@@ -305,7 +351,7 @@ const DrawingGame = () => {
                                 </p>
                             </div>
                         </div>
-                    </div>
+                    </div>)}
                 </div></>)}
         </div>
     )
