@@ -26,6 +26,7 @@ import Saturn from "./components/PlanetSimulator/Saturn";
 import Sun from "./components/PlanetSimulator/Sun";
 import Uranus from "./components/PlanetSimulator/Uranus";
 import Venus from "./components/PlanetSimulator/Venus";
+import Game from "./components/Game";
 
 export const UserContext = createContext();
 
@@ -114,6 +115,9 @@ useEffect(() => {
         }/>
         <Route path="/register" element={
           <Register/>
+        }/>
+        <Route path="/game" element={
+          <Game/>
         }/>
         <Route path="/game/drawing" element={
           <DrawingGame/>

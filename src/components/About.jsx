@@ -14,7 +14,7 @@ const About = () => {
                 <div className="text-6xl font-ibm-thai font-bold mx-auto mt-24 ">
                     <p className="text-white">แพลตฟอร์มการเรียนรู้ยุคใหม่</p>
                     <p className="text-white mt-6">ที่ทำให้อวกาศอยู่ใกล้แค่หน้าจอ</p>
-                    <div className="mr-[25%] mt-6">
+                    <div className="mt-6">
                     <p className="text-xl font-normal text-gray-200 leading-8">เรามุ่งเน้นที่จะสร้างประสบการณ์ใหม่แห่งการเรียนรู้ดาราศาสตร์แก่คนทุกคน
                     มาเริ่มเรียนรู้กันเลยเถอะ!</p>
                     </div>

@@ -21,7 +21,7 @@ const Navbar = () => {
     }
 
     return (
-        <nav className="sticky w-full bg-white h-16 top-0 shadow-lg font-golos z-10">
+        <nav className="sticky w-full bg-white h-16 top-0 shadow-lg font-golos z-[1000] overflow-hidden">
             <div className="max-w-6xl mx-auto h-full flex justify-between relative">
                 <div className="py-2 flex cursor-pointer">
                     <Link to="/"><img src="/logoAS.png" className="w-full h-full py-1" /></Link>
