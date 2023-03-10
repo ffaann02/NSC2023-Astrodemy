@@ -92,7 +92,7 @@ const DrawingGame = () => {
             socket.off("playerList");
         };
     }, [roomId]);
-    const TOTAL_ROUND_TIME = 10;
+    const TOTAL_ROUND_TIME = 1000;
     const [copyLink, setCopyLink] = useState(false);
     const [totalRounds, setTotalRounds] = useState(0);
     const [currentRound, setCurrentRound] = useState(0);
@@ -111,45 +111,65 @@ const DrawingGame = () => {
     };
     const [waiting, setWaiting] = useState(false);
 
-useEffect(() => {
-  let timerId;
-  if (start && timeLeft > 0 && !waiting) {
-    timerId = setInterval(() => {
-      setTimeLeft((timeLeft) => timeLeft - 1);
-    }, 1000);
-  } else if (start && !waiting) {
-    setTimeLeft(roundTime);
-    if (currentPlayer === playerNames.length - 1 && currentRound === totalRounds - 1) {
-      // End of the game
-      setStart(false);
-      resetGame();
-    } else if (currentPlayer === playerNames.length - 1) {
-      setWaiting(true);
-      setTimeout(() => {
-        setCurrentRound((currentRound) => currentRound + 1);
-        setCurrentPlayer(0);
-        setClear(Date.now()); // clear canvas for the next round
-        setWaiting(false);
-      }, 5000); // wait for 5 seconds before starting the next round
-    } else {
-      setWaiting(true);
-      setTimeout(() => {
-        setCurrentPlayer((currentPlayer) => currentPlayer + 1);
-        setSize(5);
-        setColor("#000000");
-        setClear(Date.now());
-        setWaiting(false);
-      }, 5000); // wait for 5 seconds before starting the next round
-    }
-  }
+    useEffect(() => {
+        let timerId;
+        if (start && timeLeft > 0 && !waiting) {
+            timerId = setInterval(() => {
+                setTimeLeft((timeLeft) => timeLeft - 1);
+            }, 1000);
+        } else if (start && !waiting) {
+            setTimeLeft(roundTime);
+            if (currentPlayer === playerNames.length - 1 && currentRound === totalRounds - 1) {
+                // End of the game
+                setStart(false);
+                resetGame();
+            } else if (currentPlayer === playerNames.length - 1) {
+                setWaiting(true);
+                setTimeout(() => {
+                    setCurrentRound((currentRound) => currentRound + 1);
+                    setCurrentPlayer(0);
+                    setClear(Date.now()); // clear canvas for the next round
+                    setWaiting(false);
+                }, 5000); // wait for 5 seconds before starting the next round
+            } else {
+                setWaiting(true);
+                setTimeout(() => {
+                    setCurrentPlayer((currentPlayer) => currentPlayer + 1);
+                    setSize(5);
+                    setColor("#000000");
+                    setClear(Date.now());
+                    setWaiting(false);
+                }, 5000); // wait for 5 seconds before starting the next round
+            }
+        }
 
-  return () => {
-    clearInterval(timerId);
-  };
-}, [start, timeLeft, currentPlayer, currentRound, totalRounds, roundTime, playerNames, waiting]);
+        return () => {
+            clearInterval(timerId);
+        };
+    }, [start, timeLeft, currentPlayer, currentRound, totalRounds, roundTime, playerNames, waiting]);
 
-const barWidth = `${((timeLeft / roundTime) * 100)}%`;
+    const barWidth = `${((timeLeft / roundTime) * 100)}%`;
+    const [answer, setAnswer] = useState("");
+    const dummyQuestionList = ["นีล อาร์มสตรอง", "ดาวเสาร์", "ดวงอาทิตย์"]
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+          const newAnswer = answer;
+          setAnswer('');
+          socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username });
+          event.target.value = '';
+        }
+      };
       
+      const [answerList, setAnswerList] = useState([]);
+      useEffect(() => {
+        socket.on('answer', (newAnswerData) => {
+          setAnswerList(prevAnswerList => [...prevAnswerList, newAnswerData]);
+        });
+      
+        return () => {
+          socket.off('answer');
+        };
+      }, [socket]);
     return (
         <div className="w-full h-screen flex">
             {!isJoin && userData && (
@@ -271,9 +291,15 @@ const barWidth = `${((timeLeft / roundTime) * 100)}%`;
                     id="astranaunt-painting"
                     className="max-w-md absolute -z-10" />
                 <div className="h-fit w-full max-w-[52rem] mx-auto grid grid-cols-12 z-10 mt-10 ">
-                {playerNames[currentPlayer] !== userData.username && <div clasName="col-span-1"></div>}
-                    <div className={`${playerNames[currentPlayer] === userData.username ? "col-span-full" : "col-span-11"}`}>
+                    {userData && playerNames[currentPlayer] !== userData.username && <div clasName="col-span-1"></div>}
+                    <div className={`${userData && playerNames[currentPlayer] === userData.username ? "col-span-full" : "col-span-11"}`}>
                         {/* <p>ผู้เล่น: {playerNames[currentPlayer]}</p> */}
+                        <div className="text-3xl font-ibm-thai font-bold text-center flex w-full ">
+                            <div className="text-center mx-auto flex">
+                                <p className="text-gray-800">โจทย์:</p>
+                                <p className="ml-2 text-[#864db3]">{dummyQuestionList[0]}</p>
+                            </div>
+                        </div>
                         <p className="text-2xl font-ibm-thai font-bold">คนวาด: {playerNames[currentPlayer]}</p>
                         <div className="w-full flex mb-1">
                             <MdAccessTimeFilled className="text-2xl my-auto z-[10] text-violet-900" />
@@ -284,74 +310,92 @@ const barWidth = `${((timeLeft / roundTime) * 100)}%`;
                             </div>
                         </div>
                     </div>
-                    {playerNames[currentPlayer] !== userData.username && <div clasName="col-span-1"></div>}
-                    <div className={`w-full h-[55vh] mt-0 rounded-l-2xl bg-white border-2
-                    ${playerNames[currentPlayer] === userData.username ? "rounded-r-none" : "rounded-r-2xl"}
-                    ${playerNames[currentPlayer] === userData.username ? "col-span-11" : "col-span-11"}`}
+                    {userData && playerNames[currentPlayer] !== userData.username && <div clasName="col-span-1"></div>}
+                    <div className={`w-full h-[55vh] mt-0 rounded-l-2xl bg-white border-2 rounded-bl-none rounded-br-none
+                    ${userData && playerNames[currentPlayer] === userData.username ? "rounded-r-none" : "rounded-r-2xl"}
+                    ${userData && playerNames[currentPlayer] === userData.username ? "col-span-11" : "col-span-11"}`}
                         id="canvas-container">
-                        <Canvas 
-                        currentPlayerName={playerNames[currentPlayer]}
-                        username={userData.username}
-                        color={color} 
-                        clear={clear} 
-                        size={size} 
-                        socket={socket} 
-                        roomId={roomId} />
+                        <Canvas
+                            currentPlayerName={playerNames[currentPlayer]}
+                            username={userData && (userData.username)}
+                            color={color}
+                            clear={clear}
+                            size={size}
+                            socket={socket}
+                            roomId={roomId} />
                     </div>
-                    {playerNames[currentPlayer] === userData.username && (<div className="col-span-1 rounded-r-lg border-2 border-l-[0px] bg-sky-500 relative h-full">
-                        <div className="grid grid-cols-3 h-fit">
-                            {pencil_color_list.map((item, index) => {
-                                let ml = '';
-                                let mr = '';
-                                if (index % 3 === 0) {
-                                    ml = 'ml-2';
-                                    mr = 'mr-0';
-                                } else if (index % 3 === 1) {
-                                    ml = 'ml-1';
-                                    mr = 'mr-1';
-                                } else if (index % 3 === 2) {
-                                    ml = 'ml-0';
-                                    mr = 'mr-2';
-                                }
-                                return (
-                                    <div
-                                        key={index}
-                                        style={{ backgroundColor: item }}
-                                        className={`rounded-sm mt-2 h-4 cursor-pointer ${ml} ${mr}`}
-                                        onClick={() => handleColorChange(item)}
-                                    />
-                                )
-                            })}
-                        </div>
-                        <div className="h-fit w-full flex mt-1">
-                            <input type="color" value={color} onChange={(e) => setColor(e.target.value)}
-                                className="cursor-pointer ml-[0.5rem]
-                            h-6 w-1/2 my-auto bg-transparent"/>
-                            <div className="w-1/2 ml-1 mr-2 my-1 flex border-2 rounded-md bg-white border-white">
-                                <FaEraser className="m-auto text-xl p-[1px] cursor-pointer"
-                                    onClick={() => handleColorChange("#ffffff")} />
+                    {userData && playerNames[currentPlayer] === userData.username &&
+                        (<div className="col-span-1 rounded-r-lg border-2 border-l-[0px] bg-sky-500 relative h-full">
+                            <div className="grid grid-cols-3 h-fit">
+                                {pencil_color_list.map((item, index) => {
+                                    let ml = '';
+                                    let mr = '';
+                                    if (index % 3 === 0) {
+                                        ml = 'ml-2';
+                                        mr = 'mr-0';
+                                    } else if (index % 3 === 1) {
+                                        ml = 'ml-1';
+                                        mr = 'mr-1';
+                                    } else if (index % 3 === 2) {
+                                        ml = 'ml-0';
+                                        mr = 'mr-2';
+                                    }
+                                    return (
+                                        <div
+                                            key={index}
+                                            style={{ backgroundColor: item }}
+                                            className={`rounded-sm mt-2 h-4 cursor-pointer ${ml} ${mr}`}
+                                            onClick={() => handleColorChange(item)}
+                                        />
+                                    )
+                                })}
                             </div>
-                        </div>
-                        <div className="w-full h-1/2 pb-10">
-                            <div className="w-full h-full flex relative pb-4">
-                                <RiBrushFill className="text-2xl bg-white p-[2px] rounded-full mx-auto mt-1" />
-                                <input id="large-range" type="range" value={size} min="5" max="100"
-                                    onChange={(event) => setSize(parseInt(event.target.value))}
-                                    className="w-[100px] 2xl:w-[120px] h-5 bg-white rounded-lg m-auto -mb-2
+                            <div className="h-fit w-full flex mt-1">
+                                <input type="color" value={color} onChange={(e) => setColor(e.target.value)}
+                                    className="cursor-pointer ml-[0.5rem]
+                            h-6 w-1/2 my-auto bg-transparent"/>
+                                <div className="w-1/2 ml-1 mr-2 my-1 flex border-2 rounded-md bg-white border-white">
+                                    <FaEraser className="m-auto text-xl p-[1px] cursor-pointer"
+                                        onClick={() => handleColorChange("#ffffff")} />
+                                </div>
+                            </div>
+                            <div className="w-full h-1/2 pb-10">
+                                <div className="w-full h-full flex relative pb-4">
+                                    <RiBrushFill className="text-2xl bg-white p-[2px] rounded-full mx-auto mt-1" />
+                                    <input id="large-range" type="range" value={size} min="5" max="100"
+                                        onChange={(event) => setSize(parseInt(event.target.value))}
+                                        className="w-[100px] 2xl:w-[120px] h-5 bg-white rounded-lg m-auto -mb-2
                             appearance-none cursor-pointer range-lg absolute bottom-1/2 -right-[25%] 2xl:-right-[41%]
                             transform -rotate-90"/>
 
+                                </div>
                             </div>
-                        </div>
-                        <div className="w-full my-1 flex border-2 col-span-3
+                            <div className="w-full my-1 flex border-2 col-span-3
                         border-none cursor-pointer absolute bottom-1" onClick={() => { setClear(Date.now()) }}>
-                            <div className="mx-2 w-full h-full bg-red-500 py-1 rounded-md hover:bg-red-600">
-                                <p className="text-center font-golos font-bold text-white my-auto tracking-wider">
-                                    Clear
-                                </p>
+                                <div className="mx-2 w-full h-full bg-red-500 py-1 rounded-md hover:bg-red-600">
+                                    <p className="text-center font-golos font-bold text-white my-auto tracking-wider">
+                                        Clear
+                                    </p>
+                                </div>
                             </div>
+                        </div>)}
+                    {userData && playerNames[currentPlayer] !== userData.username && <div className="col-span-1"></div>}
+                    <div className="col-span-11 w-full h-fit border-2 border-t-0 rounded-lg py-20 relative bg-white
+                    rounded-t-none">
+                        <div className="absolute top-2">
+                            {answerList.slice(-4).map((answer, index) => (
+                                <p className="w-fit h-fit ml-2 font-ibm-thai flex font-bold" key={index}>
+                                    <span className="text-gray-600">{answer.username}:</span>
+                                    <span className="ml-2 text-[#a746a2]">{answer.answer}</span>
+                                </p>
+                            ))}
                         </div>
-                    </div>)}
+
+                        <input type="text" id="answer_box" placeholder="พิมพ์คำตอบในนี้" onKeyDown={handleKeyDown}
+                            className="w-1/2 ml-2 bottom-2 absolute border-2 font-ibm-thai py-2 px-2 rounded-lg text-gray-700
+                        focus:outline-gray-400  placeholder:text-gray-500" onChange={(e) => { setAnswer(e.target.value) }} />
+                    </div>
+
                 </div></>)}
         </div>
     )
