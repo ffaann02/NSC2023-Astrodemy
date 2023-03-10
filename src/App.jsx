@@ -17,6 +17,16 @@ import 'firebase/compat/firestore';
 import DrawingGame from "./components/DrawingGame/DrawingGame";
 import Simulator from "./components/Simulator";
 
+import Earth from "./components/PlanetSimulator/Earth";
+import Jupiter from "./components/PlanetSimulator/Jupiter";
+import Mars from "./components/PlanetSimulator/Mars";
+import Mercury from "./components/PlanetSimulator/Mercury";
+import Neptune from "./components/PlanetSimulator/Neptune";
+import Saturn from "./components/PlanetSimulator/Saturn";
+import Sun from "./components/PlanetSimulator/Sun";
+import Uranus from "./components/PlanetSimulator/Uranus";
+import Venus from "./components/PlanetSimulator/Venus";
+
 export const UserContext = createContext();
 
 const firebaseConfig = {
@@ -113,6 +123,12 @@ useEffect(() => {
         }/>
         <Route path="/simulate" element={
           <Simulator/>
+        }/>
+        <Route path="/simulate/sun" element={
+          <Sun/>
+        }/>
+        <Route path="/simulate/earth" element={
+          <Earth/>
         }/>
       </Routes>
       <Footer/>
