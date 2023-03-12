@@ -19,11 +19,13 @@ const DrawingGame = () => {
     useEffect(() => {
         AOS.init();
     }, [])
+    const [gameRound,setGameRoud] = useState(0);
+    const [playRound,setPlayRound] = useState(2)
+    const [correct,setCorrect] = useState(false);
     const [color, setColor] = useState("#000000");
     const [size, setSize] = useState(5);
     const [clear, setClear] = useState("");
     const [isJoin, setIsJoin] = useState(false);
-    const dummyUserList = ["Player 1 ", "Player 2 "];
     const [start, setStart] = useState(false);
     const [roomId, setRoomId] = useState("");
     const [playerNames, setPlayerNames] = useState([]);
@@ -102,7 +104,7 @@ const DrawingGame = () => {
             axios
                 .get('http://localhost:3005/quiz', {
                     params: {
-                        n: playerNames.length
+                        n: (playerNames.length)
                     }
                 })
                 .then((response) => {
@@ -112,7 +114,7 @@ const DrawingGame = () => {
                     socket.emit('startGame', roomId);
                     socket.emit('sendStatus', {
                         roomId: roomId,
-                        message: `${playerNames[currentPlayer]} กำลังวาด`,
+                        message: `🎨 ${playerNames[currentPlayer]} กำลังวาด`,
                     });
                     // Start the game here
                 })
@@ -131,7 +133,7 @@ const DrawingGame = () => {
                 console.log(playerProfiles)
                 setPlayerProfiles(playerProfiles);
                 setPlayerNames(playerNames);
-                setTotalRounds(playerNames.length - 1);
+                setTotalRounds(playerNames.length);
             });
         }
         socket.on("startGame", () => {
@@ -141,7 +143,7 @@ const DrawingGame = () => {
             socket.off("playerList");
         };
     }, [roomId]);
-    const TOTAL_ROUND_TIME = 1000;
+    const TOTAL_ROUND_TIME = 10;
     const [copyLink, setCopyLink] = useState(false);
     const [totalRounds, setTotalRounds] = useState(0);
     const [currentRound, setCurrentRound] = useState(0);
@@ -152,14 +154,13 @@ const DrawingGame = () => {
         setSize(5);
         setColor("#000000")
         setCopyLink(false);
-        setTotalRounds(playerNames.length - 1);
+        setTotalRounds(playerNames.length);
         setCurrentRound(0);
         setCurrentPlayer(0);
         setRoundTime(TOTAL_ROUND_TIME);
         setTimeLeft(TOTAL_ROUND_TIME);
     };
     const [waiting, setWaiting] = useState(false);
-
     useEffect(() => {
         let timerId;
         if (start && timeLeft > 0 && !waiting) {
@@ -174,20 +175,51 @@ const DrawingGame = () => {
                 resetGame();
             } else if (currentPlayer === playerNames.length - 1) {
                 setWaiting(true);
+                axios
+                .get('http://localhost:3005/quiz', {
+                    params: {
+                        n: (playerNames.length)
+                    }
+                })
+                .then((response) => {
+                    setQuizData(response.data);
+                    socket.emit('quizData', { roomId: roomId, quizData: response.data });
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
                 setTimeout(() => {
+                    setRoundTime(TOTAL_ROUND_TIME);
+                    setTimeLeft(TOTAL_ROUND_TIME);
                     setCurrentRound((currentRound) => currentRound + 1);
                     setCurrentPlayer(0);
+                    setCorrect(false);
                     setClear(Date.now()); // clear canvas for the next round
                     setWaiting(false);
+                    socket.emit('resetScore',{roomId:roomId});
+                    socket.emit('sendStatus', {
+                        roomId: roomId,
+                        message: `🎨 ${playerNames[0]} กำลังวาดอยู่`,
+                    });
                 }, 5000); // wait for 5 seconds before starting the next round
             } else {
                 setWaiting(true);
                 setTimeout(() => {
+                    setRoundTime(TOTAL_ROUND_TIME);
+                    setTimeLeft(TOTAL_ROUND_TIME);
                     setCurrentPlayer((currentPlayer) => currentPlayer + 1);
                     setSize(5);
                     setColor("#000000");
+                    setCorrect(false);
                     setClear(Date.now());
                     setWaiting(false);
+                    socket.emit('resetScore',{roomId:roomId});
+                    if(playerNames[currentPlayer+1]===userData.username){
+                        socket.emit('sendStatus', {
+                            roomId: roomId,
+                            message: `🎨 ${playerNames[currentPlayer+1]} กำลังวาดอยู่`,
+                        });
+                    }
                 }, 5000); // wait for 5 seconds before starting the next round
             }
         }
@@ -207,29 +239,30 @@ const DrawingGame = () => {
             setAnswer('');
             if (newAnswer === quizData[currentPlayer]) {
                 const score = [100, 75, 50, 30];
+                setCorrect(true);
                 if (correctPlayerAmount === 0) {
-                    socket.emit('sendStatus', { roomId: roomId, message: `${userData.username} ตอบถูกแล้ว! ได้ ${score[0]} คะแนน` });
+                    socket.emit('sendStatus', { roomId: roomId, message: `✨ ${userData.username} ได้รับ ${score[0]} คะแนน` });
                     socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
                     socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
                     event.target.value = '';
                     return;
                 }
                 if (correctPlayerAmount === 1) {
-                    socket.emit('sendStatus', { roomId: roomId, message: `${userData.username} ตอบถูกแล้ว! ได้ ${score[1]} คะแนน` });
+                    socket.emit('sendStatus', { roomId: roomId, message: `✨ ${userData.username} ได้รับ ${score[1]} คะแนน` });
                     socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
                     socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
                     event.target.value = '';
                     return;
                 }
                 if (correctPlayerAmount === 2) {
-                    socket.emit('sendStatus', { roomId: roomId, message: `${userData.username} ตอบถูกแล้ว! ได้ ${score[2]} คะแนน` });
+                    socket.emit('sendStatus', { roomId: roomId, message: `✨ ${userData.username} ได้รับ ${score[2]} คะแนน` });
                     socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
                     socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
                     event.target.value = '';
                     return;
                 }
                 else {
-                    socket.emit('sendStatus', { roomId: roomId, message: `${userData.username} ตอบถูกแล้ว! ได้ ${score[3]} คะแนน` });
+                    socket.emit('sendStatus', { roomId: roomId, message: `✨ ${userData.username} ได้รับ ${score[3]} คะแนน` });
                     socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
                     socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
                     event.target.value = '';
@@ -414,7 +447,7 @@ const DrawingGame = () => {
                             {/* <p>ผู้เล่น: {playerNames[currentPlayer]}</p> */}
                             {userData && playerNames[currentPlayer] === userData.username && (
                                 <div className="text-3xl font-ibm-thai font-bold text-center flex w-full ">
-                                    {quizData && <div className="text-center mx-auto flex">
+                                    {quizData && !waiting && <div className="text-center mx-auto flex">
                                         <p className="text-gray-800">โจทย์:</p>
                                         <p className="ml-2 text-[#864db3]">{quizData[currentPlayer]}</p>
                                     </div>}
@@ -502,28 +535,37 @@ const DrawingGame = () => {
                             </div>)}
                         {userData && playerNames[currentPlayer] !== userData.username && <div className="col-span-1"></div>}
                         <div className="col-span-6 h-fit py-20 relative border-2 border-t-0 rounded-bl-xl border-r-0 bg-white">
-                            <div className="absolute top-2">
+                            <div className="absolute top-2 left-1">
                                 {answerList.slice(-4).map((answer, index) => {
                                     if (answer.isCorrect) {
                                         if (answer.username === userData.username) {
                                             return (
                                                 <p className="w-fit h-fit ml-2 font-ibm-thai flex font-bold" key={index}>
-                                                    <span className="text-gray-600">{answer.username}:</span>
-                                                    <span className="ml-2 text-[#a746a2]">{answer.answer}</span>
-                                                    <span className="ml-2 text-gray-400">เป็นคำตอบที่ถูกต้อง</span>
+                                                    {/* <span className="text-gray-600">{answer.username===userData.username?
+                                                    "คุณ":answer.username}:</span> */}
+                                                    <span className="ml-0 text-[#a746a2]">{answer.answer}</span>
+                                                    <span className="ml-2 text-green-800">เป็นคำตอบที่ถูกต้อง</span>
                                                 </p>
                                             );
                                         } else {
-                                            return;
+                                            return (
+                                                <p className="w-fit h-fit ml-2 font-ibm-thai flex font-bold" key={index}>
+                                                    <span className="text-gray-600">{answer.username===userData.username?
+                                                    "คุณ":answer.username}</span>
+                                                    <span className="ml-1 text-green-800">ตอบถูกแล้ว!</span>
+                                                </p>
+                                            );
                                         }
                                     } else {
                                         return (
                                             <p className="w-fit h-fit ml-2 font-ibm-thai flex font-bold" key={index}>
-                                                <span className="text-gray-600">{answer.username}:</span>
+                                                <span className="text-gray-600">{answer.username===userData.username?
+                                                    "คุณ":answer.username}:</span>
                                                 <span className="ml-2 text-[#a746a2]">{answer.answer}</span>
                                             </p>
                                         );
                                     }
+                                    
                                 })}
                             </div>
                             <div className="w-full px-2 bottom-2 absolute ">
@@ -532,7 +574,7 @@ const DrawingGame = () => {
                                     id="answer_box"
                                     placeholder="พิมพ์คำตอบในนี้"
                                     onKeyDown={handleKeyDown}
-                                    disabled={playerNames[currentPlayer] === userData.username}
+                                    disabled={(playerNames[currentPlayer] === userData.username) || correct}
                                     className={`w-full border-2 font-ibm-thai py-2 px-4 rounded-lg
                                      text-gray-700 focus:outline-gray-400 placeholder:text-gray-500 
                                      ${playerNames[currentPlayer] === userData.username ? "cursor-not-allowed" : ""
