@@ -93,7 +93,12 @@ const DrawingGame = () => {
     };
     const [quizData, setQuizData] = useState([]);
     const handleStartGame = () => {
-        if (playerNames.length > 0 && playerNames[0] === userData.username) {
+        if (playerNames.length < 2) {
+            setPopupFade(true);
+            setPopupText("ต้องการผู้เล่นขั้นต่ำ 2 คน")
+            setPopupColor("text-red-700");
+        }
+        if (playerNames.length >= 2 && playerNames[0] === userData.username) {
             axios
                 .get('http://localhost:3005/quiz', {
                     params: {
@@ -195,18 +200,47 @@ const DrawingGame = () => {
     const barWidth = `${((timeLeft / roundTime) * 100)}%`;
     const [answer, setAnswer] = useState("");
     const dummyQuestionList = ["นีล อาร์มสตรอง", "ดาวเสาร์", "ดวงอาทิตย์"]
+    const [correctPlayerAmount, setCorrectPlayerAmount] = useState(0);
     const handleKeyDown = (event) => {
         if (event.key === 'Enter') {
             const newAnswer = answer;
             setAnswer('');
             if (newAnswer === quizData[currentPlayer]) {
-                socket.emit('sendStatus', { roomId: roomId, message: `${userData.username} ตอบถูกแล้ว!` });
-                socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
+                const score = [100, 75, 50, 30];
+                if (correctPlayerAmount === 0) {
+                    socket.emit('sendStatus', { roomId: roomId, message: `${userData.username} ตอบถูกแล้ว! ได้ ${score[0]} คะแนน` });
+                    socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
+                    socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
+                    event.target.value = '';
+                    return;
+                }
+                if (correctPlayerAmount === 1) {
+                    socket.emit('sendStatus', { roomId: roomId, message: `${userData.username} ตอบถูกแล้ว! ได้ ${score[1]} คะแนน` });
+                    socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
+                    socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
+                    event.target.value = '';
+                    return;
+                }
+                if (correctPlayerAmount === 2) {
+                    socket.emit('sendStatus', { roomId: roomId, message: `${userData.username} ตอบถูกแล้ว! ได้ ${score[2]} คะแนน` });
+                    socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
+                    socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
+                    event.target.value = '';
+                    return;
+                }
+                else {
+                    socket.emit('sendStatus', { roomId: roomId, message: `${userData.username} ตอบถูกแล้ว! ได้ ${score[3]} คะแนน` });
+                    socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
+                    socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
+                    event.target.value = '';
+                    return;
+                }
             }
             else {
                 socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: false });
+                event.target.value = '';
+                return;
             }
-            event.target.value = '';
         }
     };
 
@@ -221,10 +255,13 @@ const DrawingGame = () => {
         socket.on("getQuizData", (quizData) => {
             setQuizData(quizData);
         })
-
+        socket.on("updateCorrectPlayerAmount", (amount) => {
+            setCorrectPlayerAmount(amount);
+        })
         return () => {
             socket.off('answer');
             socket.off("statusUpdate");
+            socket.off("updateCorrectPlayerAmount");
         };
 
     }, [socket]);
@@ -477,7 +514,7 @@ const DrawingGame = () => {
                                                 </p>
                                             );
                                         } else {
-                                            return <></>;
+                                            return;
                                         }
                                     } else {
                                         return (
