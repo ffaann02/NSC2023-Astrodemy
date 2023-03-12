@@ -19,9 +19,9 @@ const DrawingGame = () => {
     useEffect(() => {
         AOS.init();
     }, [])
-    const [gameRound,setGameRoud] = useState(0);
-    const [playRound,setPlayRound] = useState(2)
-    const [correct,setCorrect] = useState(false);
+    const [gameRound, setGameRoud] = useState(0);
+    const [playRound, setPlayRound] = useState(2)
+    const [correct, setCorrect] = useState(false);
     const [color, setColor] = useState("#000000");
     const [size, setSize] = useState(5);
     const [clear, setClear] = useState("");
@@ -85,7 +85,6 @@ const DrawingGame = () => {
     const handleGenerateRoomID = () => {
         const newRoomId = generateRoomID();
         setRoomId(newRoomId);
-        console.log("new roomId:", newRoomId);
         if (newRoomId) {
             socket.emit("join", newRoomId);
             // Emit an event to the server to inform that a new player has joined the room
@@ -95,12 +94,12 @@ const DrawingGame = () => {
     };
     const [quizData, setQuizData] = useState([]);
     const handleStartGame = () => {
-        if (playerNames.length < 2) {
+        if (playerNames.length < 1) {
             setPopupFade(true);
             setPopupText("ต้องการผู้เล่นขั้นต่ำ 2 คน")
             setPopupColor("text-red-700");
         }
-        if (playerNames.length >= 2 && playerNames[0] === userData.username) {
+        if (playerNames.length >= 1 && playerNames[0] === userData.username) {
             axios
                 .get('http://localhost:3005/quiz', {
                     params: {
@@ -128,12 +127,14 @@ const DrawingGame = () => {
 
     useEffect(() => {
         if (roomId) {
-            socket.on("playerList", ({ playerNames, playerProfiles }) => {
+            socket.on("playerList", ({ playerNames, playerProfiles,playerScores}) => {
                 console.log(playerNames);
                 console.log(playerProfiles)
+                console.log(playerScores);
                 setPlayerProfiles(playerProfiles);
                 setPlayerNames(playerNames);
                 setTotalRounds(playerNames.length);
+                setScoreList(playerScores)
             });
         }
         socket.on("startGame", () => {
@@ -143,7 +144,7 @@ const DrawingGame = () => {
             socket.off("playerList");
         };
     }, [roomId]);
-    const TOTAL_ROUND_TIME = 10;
+    const TOTAL_ROUND_TIME = 90;
     const [copyLink, setCopyLink] = useState(false);
     const [totalRounds, setTotalRounds] = useState(0);
     const [currentRound, setCurrentRound] = useState(0);
@@ -176,18 +177,18 @@ const DrawingGame = () => {
             } else if (currentPlayer === playerNames.length - 1) {
                 setWaiting(true);
                 axios
-                .get('http://localhost:3005/quiz', {
-                    params: {
-                        n: (playerNames.length)
-                    }
-                })
-                .then((response) => {
-                    setQuizData(response.data);
-                    socket.emit('quizData', { roomId: roomId, quizData: response.data });
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+                    .get('http://localhost:3005/quiz', {
+                        params: {
+                            n: (playerNames.length)
+                        }
+                    })
+                    .then((response) => {
+                        setQuizData(response.data);
+                        socket.emit('quizData', { roomId: roomId, quizData: response.data });
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
                 setTimeout(() => {
                     setRoundTime(TOTAL_ROUND_TIME);
                     setTimeLeft(TOTAL_ROUND_TIME);
@@ -196,7 +197,7 @@ const DrawingGame = () => {
                     setCorrect(false);
                     setClear(Date.now()); // clear canvas for the next round
                     setWaiting(false);
-                    socket.emit('resetScore',{roomId:roomId});
+                    socket.emit('resetScore', { roomId: roomId });
                     socket.emit('sendStatus', {
                         roomId: roomId,
                         message: `🎨 ${playerNames[0]} กำลังวาดอยู่`,
@@ -213,11 +214,11 @@ const DrawingGame = () => {
                     setCorrect(false);
                     setClear(Date.now());
                     setWaiting(false);
-                    socket.emit('resetScore',{roomId:roomId});
-                    if(playerNames[currentPlayer+1]===userData.username){
+                    socket.emit('resetScore', { roomId: roomId });
+                    if (playerNames[currentPlayer + 1] === userData.username) {
                         socket.emit('sendStatus', {
                             roomId: roomId,
-                            message: `🎨 ${playerNames[currentPlayer+1]} กำลังวาดอยู่`,
+                            message: `🎨 ${playerNames[currentPlayer + 1]} กำลังวาดอยู่`,
                         });
                     }
                 }, 5000); // wait for 5 seconds before starting the next round
@@ -234,6 +235,8 @@ const DrawingGame = () => {
     const dummyQuestionList = ["นีล อาร์มสตรอง", "ดาวเสาร์", "ดวงอาทิตย์"]
     const [correctPlayerAmount, setCorrectPlayerAmount] = useState(0);
     const handleKeyDown = (event) => {
+        const index = playerNames.findIndex((name) => name === userData.username);
+        const newScoreList = [...scoreList];
         if (event.key === 'Enter') {
             const newAnswer = answer;
             setAnswer('');
@@ -241,6 +244,8 @@ const DrawingGame = () => {
                 const score = [100, 75, 50, 30];
                 setCorrect(true);
                 if (correctPlayerAmount === 0) {
+                    newScoreList[index] += score[0];
+                    socket.emit('sendScoreList',{roomId:roomId, newScoreList:newScoreList});
                     socket.emit('sendStatus', { roomId: roomId, message: `✨ ${userData.username} ได้รับ ${score[0]} คะแนน` });
                     socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
                     socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
@@ -248,6 +253,8 @@ const DrawingGame = () => {
                     return;
                 }
                 if (correctPlayerAmount === 1) {
+                    newScoreList[index] += score[1];
+                    socket.emit('sendScoreList',{roomId:roomId, newScoreList:newScoreList});
                     socket.emit('sendStatus', { roomId: roomId, message: `✨ ${userData.username} ได้รับ ${score[1]} คะแนน` });
                     socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
                     socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
@@ -255,6 +262,8 @@ const DrawingGame = () => {
                     return;
                 }
                 if (correctPlayerAmount === 2) {
+                    newScoreList[index] += score[2];
+                    socket.emit('sendScoreList',{roomId:roomId, newScoreList:newScoreList});
                     socket.emit('sendStatus', { roomId: roomId, message: `✨ ${userData.username} ได้รับ ${score[2]} คะแนน` });
                     socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
                     socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
@@ -262,6 +271,8 @@ const DrawingGame = () => {
                     return;
                 }
                 else {
+                    newScoreList[index] += score[3];
+                    socket.emit('sendScoreList',{roomId:roomId, newScoreList:newScoreList});
                     socket.emit('sendStatus', { roomId: roomId, message: `✨ ${userData.username} ได้รับ ${score[3]} คะแนน` });
                     socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
                     socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
@@ -276,7 +287,7 @@ const DrawingGame = () => {
             }
         }
     };
-
+    const [scoreList,setScoreList] = useState([]);
     const [answerList, setAnswerList] = useState([]);
     useEffect(() => {
         socket.on('answer', (newAnswerData) => {
@@ -290,6 +301,9 @@ const DrawingGame = () => {
         })
         socket.on("updateCorrectPlayerAmount", (amount) => {
             setCorrectPlayerAmount(amount);
+        })
+        socket.on("updateScoreList", (newScoreList)=>{
+            setScoreList(newScoreList);
         })
         return () => {
             socket.off('answer');
@@ -323,7 +337,9 @@ const DrawingGame = () => {
                     <div className="w-full max-w-4xl h-full mx-auto p-4 relative">
                         <div className="grid grid-cols-2 bg-white border-2 mt-10 rounded-2xl pt-10 pb-16
                     drop-shadow-md">
-                            <p className="col-span-2 mb-10 text-center mt-4 text-2xl">Drawing Game</p>
+                            <div className="col-span-2 mb-14 text-center mt-0 text-2xl w-fit mx-auto">
+                                <img src="/assets/drawing-game_page/AstroDraw.png" className="w-48" />
+                            </div>
                             <div className="">
                                 <p className="font-ibm-thai text-2xl font-bold text-center">ผู้เล่น</p>
                                 <div className="w-1/3 h-fit mx-auto rounded-full p-1 mt-2 border-[3px] border-[#663299]">
@@ -400,7 +416,7 @@ const DrawingGame = () => {
                 {/* [#754798] hover:to-[#a65ea3] */}
                 {isJoin && (
                     <>
-                        <div className="flex-row w-fit h-full pt-10 pb-20 pr-4 absolute left-0 z-[100]">
+                        <div className="flex-row w-fit h-full pt-8 pb-20 pr-4 absolute left-0 z-[100]">
                             <div className="w-fit h-full bg-white drop-shadow-lg border-2 rounded-2xl rounded-l-none left-0
                         px-3">
                                 <p className="font-ibm-thai mt-4 ml-1 flex font-bold">
@@ -414,9 +430,18 @@ const DrawingGame = () => {
                                             : "from-[#ad4ea8] to-[#a43d9f]"}`}>
                                         <img src={playerProfiles[index]}
                                             className="w-12 rounded-full my-1 border-1 p-[1.5px] border-white bg-white ml-[1px]" />
-                                        <p className={`my-auto mx-2 text-xl text-white tracking-widest font-golos`}>
-                                            {name.length > 10 ? name.slice(0, 10) + "..." : name}
-                                        </p>
+                                        <div className="my-auto mx-2">
+                                            <p className={`text-md ${index === currentPlayer && start ? "text-[#703a9a]":"text-white"} font-semibold
+                                            tracking-widest font-golos leading-0`}>
+                                                {name}
+                                            </p>
+                                            {start && <p className={`text-md text-white tracking-widest font-golos leading-0 font-bold flex`}>
+                                                <p className={`font-ibm-thai text-md ${index === currentPlayer && start ? "text-[#703a9a]":"text-white"} `}>
+                                                    {scoreList[index]}
+                                                </p>
+                                                <p className={`font-ibm-thai ml-1 text-sm my-auto ${index === currentPlayer && start ? "text-[#703a9a]":"text-white"} `}>คะแนน</p>
+                                            </p>}
+                                        </div>
 
                                         {index === currentPlayer && start &&
                                             <MdColorLens className="text-3xl my-auto text-[#703a9a] mr-1" />}
@@ -428,7 +453,7 @@ const DrawingGame = () => {
                              border-[#703a9a] bg-white p-[1.5px]">
                                         <div className="w-12 h-12 my-1 border-[#703a9a] bg-slate-300 rounded-full ml-[1px] p-[1.5px]
                                  border-2"></div>
-                                        <p className="my-auto mx-2 text-xl text-[#703a9a] font-golos font-bold tracking-wider">
+                                        <p className="my-auto mx-2 text-md text-[#703a9a] font-golos font-bold tracking-wider">
                                             Empty
                                         </p>
                                     </div>
@@ -550,8 +575,8 @@ const DrawingGame = () => {
                                         } else {
                                             return (
                                                 <p className="w-fit h-fit ml-2 font-ibm-thai flex font-bold" key={index}>
-                                                    <span className="text-gray-600">{answer.username===userData.username?
-                                                    "คุณ":answer.username}</span>
+                                                    <span className="text-gray-600">{answer.username === userData.username ?
+                                                        "คุณ" : answer.username}</span>
                                                     <span className="ml-1 text-green-800">ตอบถูกแล้ว!</span>
                                                 </p>
                                             );
@@ -559,13 +584,13 @@ const DrawingGame = () => {
                                     } else {
                                         return (
                                             <p className="w-fit h-fit ml-2 font-ibm-thai flex font-bold" key={index}>
-                                                <span className="text-gray-600">{answer.username===userData.username?
-                                                    "คุณ":answer.username}:</span>
+                                                <span className="text-gray-600">{answer.username === userData.username ?
+                                                    "คุณ" : answer.username}:</span>
                                                 <span className="ml-2 text-[#a746a2]">{answer.answer}</span>
                                             </p>
                                         );
                                     }
-                                    
+
                                 })}
                             </div>
                             <div className="w-full px-2 bottom-2 absolute ">
