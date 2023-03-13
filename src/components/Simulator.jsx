@@ -138,7 +138,7 @@ const Simulator = () => {
         const mercury = createPlanet('Mercury', 'mercury', 3.2, 28, 0.004, 0.04, '/assets/3d_page/texture/mercury.jpg', 0xffffff);
         const venus = createPlanet('Venus', 'venus', 5.8, 44, 0.002, 0.015, '/assets/3d_page/texture/venus.jpg', 0xffffff);
         const earth = createPlanet('Earth', 'earth', 6, 62, 0.02, 0.01, '/assets/3d_page/texture/earth.jpg', 0xffffff);
-        const mars = createPlanet('Mar', 'mar', 4, 78, 0.018, 0.008, '/assets/3d_page/texture/mars.jpg', 0xffffff);
+        const mars = createPlanet('Mars', 'mars', 4, 78, 0.018, 0.008, '/assets/3d_page/texture/mars.jpg', 0xffffff);
         const jupiter = createPlanet('Jupiter', 'jupiter', 12, 100, 0.04, 0.002, '/assets/3d_page/texture/jupiter.jpg', 0xffffff);
         const saturn = createPlanet('Saturn', 'saturn', 10, 138, 0.038, 0.0009, '/assets/3d_page/texture/saturn.jpg', 0xffffff, {
             innerRadius: 10,
