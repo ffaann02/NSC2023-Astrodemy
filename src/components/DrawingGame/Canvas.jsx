@@ -67,7 +67,7 @@ const Canvas = (props) => {
   
 
   const draw = ({ nativeEvent }) => {
-    if (!isDrawing || props.username !== props.currentPlayerName)  {
+    if (!isDrawing || props.username !== props.currentPlayerName || props.waiting)  {
       return;
     }
       const { offsetX, offsetY } = nativeEvent;
@@ -122,7 +122,6 @@ const Canvas = (props) => {
       contextRef.current.strokeStyle = color;
     });
     socket.on('clearCanvas', () => {
-      console.log("should clear");
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
       context.clearRect(0, 0, canvas.width, canvas.height);

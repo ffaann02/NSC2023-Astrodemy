@@ -53,10 +53,21 @@ input[type=color]::-webkit-color-swatch-wrapper {
   }
 }
   
-#loading-text {
-
+#popup-text {
+  opacity: 0;
+  animation: fadeup 0.5s ease-out forwards;
 }
 
+@keyframes fadeup {
+  from {
+    opacity: 0;
+    transform: translateY(50%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 #dot-animation::after {
   content: ".";
   animation: dot 1.5s infinite;

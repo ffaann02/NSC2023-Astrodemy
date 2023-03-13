@@ -118,7 +118,6 @@ const Account = () => {
         const userRef = firebase.firestore().collection('users').doc(userId);
         userRef.update({
             profileImage: url
-
         })
             .catch((error) => {
                 console.error('Error updating profile image: ', error);
@@ -136,6 +135,7 @@ const Account = () => {
         })
             .then(() => navigate(path))
             .then(() => {
+                localStorage.removeItem("userData");
                 window.location.reload();
             })
     }
@@ -166,7 +166,7 @@ const Account = () => {
                         rounded-md border-t-[0] sm:border-t-[1px] mt-4 z-5 bg-white">
                                 <label className="text-left text-lg font-bold text-gray-600">รูปโปรไฟล์</label>
 
-                                <div className="justify-center relative ">
+                                <div className="justify-center relative">
                                     <div className="w-1/2 sm:w-1/3 mb-5 flex mx-auto p-4">
                                         <img src={!chooseFile ? (userData.userProfile === "default" ? "/assets/default.png" : userData.userProfile) : urlTemp}
                                             alt="profile" className={`${isHover ? "opacity-50" : "opacity-100"} shadow
