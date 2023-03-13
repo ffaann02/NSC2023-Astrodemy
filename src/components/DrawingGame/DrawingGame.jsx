@@ -26,7 +26,7 @@ const DrawingGame = () => {
     const [size, setSize] = useState(5);
     const [clear, setClear] = useState("");
     const [isJoin, setIsJoin] = useState(false);
-    const [start, setStart] = useState(true);
+    const [start, setStart] = useState(false);
     const [roomId, setRoomId] = useState("");
     const [playerNames, setPlayerNames] = useState([]);
     const [playerProfiles, setPlayerProfiles] = useState({});
@@ -151,7 +151,7 @@ const DrawingGame = () => {
             socket.off("playerList");
         };
     }, [roomId]);
-    const TOTAL_ROUND_TIME = 1000;
+    const TOTAL_ROUND_TIME = 10;
     const [copyLink, setCopyLink] = useState(false);
     const [currentRound, setCurrentRound] = useState(0);
     const [currentPlayer, setCurrentPlayer] = useState(0);
@@ -183,35 +183,48 @@ const DrawingGame = () => {
             } else if (currentPlayer === playerNames.length - 1) {
                 setWaiting(true);
                 axios
-                    .get('http://localhost:3005/quiz', {
-                        params: {
-                            n: (playerNames.length)
-                        }
-                    })
-                    .then((response) => {
-                        setQuizData(response.data);
-                        socket.emit('quizData', { roomId: roomId, quizData: response.data });
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
-                setTimeout(() => {
+                  .get('http://localhost:3005/quiz', {
+                    params: {
+                      n: playerNames.length
+                    }
+                  })
+                  .then((response) => {
+                    setQuizData(response.data);
+                    socket.emit('quizData', { roomId: roomId, quizData: response.data });
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                  });
+                let countDown = 5;
+                const intervalId = setInterval(() => {
+                    setClear(Date.now());
+                  countDown--;
+                  setCountdown(countDown);
+                  if (countDown === 0) {
+                    clearInterval(intervalId);
                     setRoundTime(TOTAL_ROUND_TIME);
                     setTimeLeft(TOTAL_ROUND_TIME);
                     setCurrentRound((currentRound) => currentRound + 1);
                     setCurrentPlayer(0);
-                    setCorrect(false);
-                    setClear(Date.now()); // clear canvas for the next round
+                    setCorrect(false); // clear canvas for the next round
                     setWaiting(false);
+                    setCountdown(null);
                     socket.emit('resetScore', { roomId: roomId });
                     socket.emit('sendStatus', {
-                        roomId: roomId,
-                        message: `🎨 ${playerNames[0]} กำลังวาดอยู่`,
+                      roomId: roomId,
+                      message: `🎨 ${playerNames[0]} กำลังวาดอยู่`,
                     });
-                }, 5000); // wait for 5 seconds before starting the next round
-            } else {
+                  }
+                }, 1000);
+              } else {
                 setWaiting(true);
-                setTimeout(() => {
+                setClear(Date.now());
+                let countDown = 5;
+                const intervalId = setInterval(() => {
+                  countDown--;
+                  setCountdown(countDown);
+                  if (countDown === 0) {
+                    clearInterval(intervalId);
                     setRoundTime(TOTAL_ROUND_TIME);
                     setTimeLeft(TOTAL_ROUND_TIME);
                     setCurrentPlayer((currentPlayer) => currentPlayer + 1);
@@ -220,15 +233,17 @@ const DrawingGame = () => {
                     setCorrect(false);
                     setClear(Date.now());
                     setWaiting(false);
+                    setCountdown(null);
                     socket.emit('resetScore', { roomId: roomId });
                     if (playerNames[currentPlayer + 1] === userData.username) {
-                        socket.emit('sendStatus', {
-                            roomId: roomId,
-                            message: `🎨 ${playerNames[currentPlayer + 1]} กำลังวาดอยู่`,
-                        });
+                      socket.emit('sendStatus', {
+                        roomId: roomId,
+                        message: `🎨 ${playerNames[currentPlayer + 1]} กำลังวาดอยู่`,
+                      });
                     }
-                }, 5000); // wait for 5 seconds before starting the next round
-            }
+                  }
+                }, 1000);
+              }
         }
 
         return () => {
@@ -240,6 +255,7 @@ const DrawingGame = () => {
     const [answer, setAnswer] = useState("");
     const dummyQuestionList = ["นีล อาร์มสตรอง", "ดาวเสาร์", "ดวงอาทิตย์"]
     const [correctPlayerAmount, setCorrectPlayerAmount] = useState(0);
+    const [countdown, setCountdown] = useState(null);
     const handleKeyDown = (event) => {
         const index = playerNames.findIndex((name) => name === userData.username);
         const newScoreList = [...scoreList];
@@ -483,11 +499,12 @@ const DrawingGame = () => {
                         id="astranaunt-painting"
                         className="max-w-md absolute -z-10" />
                     <div className="h-fit w-full max-w-[52rem] mx-auto grid grid-cols-12 z-10 mt-10 relative">
-                            <div className="h-full flex absolute w-full">
-                                <p className="mx-auto z-[10000] mt-[20%] mb-auto text-[12rem] font-golos font-bold">
-                                    {timeLeft}
+                            {start && waiting && <div className="h-full flex absolute w-full">
+                                <p className="mx-auto z-[10000] mt-[20%] mb-auto text-[12rem] font-golos font-bold
+                                text-violet-900">
+                                    {countdown}
                                 </p>
-                            </div>
+                            </div>}
                         {userData && playerNames[currentPlayer] !== userData.username && <div className="col-span-1"></div>}
                         <div className={`${userData && playerNames[currentPlayer] === userData.username ? "col-span-full" : "col-span-11"}`}>
                             {/* <p>ผู้เล่น: {playerNames[currentPlayer]}</p> */}
