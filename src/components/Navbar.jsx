@@ -7,8 +7,6 @@ const Navbar = () => {
     const {userData,logged,setLogged, setUserData,userId} = useContext(UserContext)
     const [toggleUserIcon,setToggleUserIcon] = useState(false);
 
-
-
     const navigate = useNavigate();
     const Logout=()=>{
         setToggleUserIcon(false);
@@ -19,9 +17,8 @@ const Navbar = () => {
         window.location.reload();
         navigate("/");
     }
-
     return (
-        <nav className="sticky w-full bg-white h-16 top-0 shadow-lg font-golos z-[1000] overflow-hidden">
+        <nav className="sticky w-full bg-white h-16 top-0 shadow-lg font-golos z-[500]">
             <div className="max-w-6xl mx-auto h-full flex justify-between relative">
                 <div className="py-2 flex cursor-pointer">
                     <Link to="/"><img src="/logoAS.png" className="w-full h-full py-1" /></Link>
@@ -57,13 +54,14 @@ const Navbar = () => {
                         </div> */}
                     </div>:null}
                 </div>
-                {toggleUserIcon ? <div className="w-fit bg-white absolute pt-2 h-fit right-0 mt-[4.25rem]
-                rounded-md shadow-md shadow-white">
+                {toggleUserIcon ? <div className="w-fit bg-white absolute pt-2 h-fit right-0 top-[4.25rem]
+                rounded-md shadow-md shadow-white z-[501]">
                     <div className="py-2 px-4 font-ibm-thai text-lg flex"><AiFillSetting className="my-auto text-xl mr-2"/>
-                    <p><Link to="/account">ตั้งค่าบัญชี</Link></p></div>
+                    <p onClick={()=>{setToggleUserIcon(false)}}><Link to="/account">ตั้งค่าบัญชี</Link></p></div>
                     <p className="px-2"><button className="rounded-xl text-lg bg-gradient-to-r px-6 my-2 py-2 font-ibm-thai
                         from-[#6e3f92] to-[#a94fa4]
-                        hover:marker:from-[#754798] hover:to-[#a65ea3] text-white" onClick={Logout}>ออกจากระบบ </button></p>
+                        hover:marker:from-[#754798] hover:to-[#a65ea3] text-white" onClick={Logout}>ออกจากระบบ </button>
+                    </p>
                 </div>:null}
             </div>
         </nav>

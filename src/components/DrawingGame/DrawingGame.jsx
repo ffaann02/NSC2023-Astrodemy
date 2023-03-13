@@ -26,7 +26,7 @@ const DrawingGame = () => {
     const [size, setSize] = useState(5);
     const [clear, setClear] = useState("");
     const [isJoin, setIsJoin] = useState(false);
-    const [start, setStart] = useState(false);
+    const [start, setStart] = useState(true);
     const [roomId, setRoomId] = useState("");
     const [playerNames, setPlayerNames] = useState([]);
     const [playerProfiles, setPlayerProfiles] = useState({});
@@ -70,7 +70,10 @@ const DrawingGame = () => {
             if (roomExists) {
                 socket.emit("join", roomId);
                 // Emit an event to the server to inform that a new player has joined the room
-                socket.emit("newPlayer", { roomId, playerName: userData.username, playerProfile: userData.userProfile });
+                socket.emit("newPlayer", {
+                    roomId, playerName: userData.username, playerProfile: userData.userProfile,
+                    totalRound: 0
+                });
                 setIsJoin(true);
             } else {
                 // Handle the case where the room doesn't exist
@@ -81,14 +84,18 @@ const DrawingGame = () => {
             }
         });
     };
-
+    const [totalRounds, setTotalRounds] = useState(1);
     const handleGenerateRoomID = () => {
         const newRoomId = generateRoomID();
         setRoomId(newRoomId);
         if (newRoomId) {
             socket.emit("join", newRoomId);
             // Emit an event to the server to inform that a new player has joined the room
-            socket.emit("newPlayer", { roomId: newRoomId, playerName: userData.username, playerProfile: userData.userProfile });
+            console.log(totalRounds);
+            socket.emit("newPlayer", {
+                roomId: newRoomId, playerName: userData.username, playerProfile: userData.userProfile,
+                totalRound: totalRounds
+            });
             setIsJoin(true);
         }
     };
@@ -127,13 +134,13 @@ const DrawingGame = () => {
 
     useEffect(() => {
         if (roomId) {
-            socket.on("playerList", ({ playerNames, playerProfiles,playerScores}) => {
+            socket.on("playerList", ({ playerNames, playerProfiles, playerScores, totalRounds }) => {
                 console.log(playerNames);
                 console.log(playerProfiles)
                 console.log(playerScores);
                 setPlayerProfiles(playerProfiles);
                 setPlayerNames(playerNames);
-                setTotalRounds(playerNames.length);
+                setTotalRounds(totalRounds[0]);
                 setScoreList(playerScores)
             });
         }
@@ -144,9 +151,8 @@ const DrawingGame = () => {
             socket.off("playerList");
         };
     }, [roomId]);
-    const TOTAL_ROUND_TIME = 90;
+    const TOTAL_ROUND_TIME = 1000;
     const [copyLink, setCopyLink] = useState(false);
-    const [totalRounds, setTotalRounds] = useState(0);
     const [currentRound, setCurrentRound] = useState(0);
     const [currentPlayer, setCurrentPlayer] = useState(0);
     const [roundTime, setRoundTime] = useState(TOTAL_ROUND_TIME); // in seconds
@@ -155,7 +161,7 @@ const DrawingGame = () => {
         setSize(5);
         setColor("#000000")
         setCopyLink(false);
-        setTotalRounds(playerNames.length);
+        setTotalRounds(totalRounds);
         setCurrentRound(0);
         setCurrentPlayer(0);
         setRoundTime(TOTAL_ROUND_TIME);
@@ -229,7 +235,7 @@ const DrawingGame = () => {
             clearInterval(timerId);
         };
     }, [start, timeLeft, currentPlayer, currentRound, totalRounds, roundTime, playerNames, waiting]);
-
+    const [timeShow, setTimeShow] = useState(0);
     const barWidth = `${((timeLeft / roundTime) * 100)}%`;
     const [answer, setAnswer] = useState("");
     const dummyQuestionList = ["นีล อาร์มสตรอง", "ดาวเสาร์", "ดวงอาทิตย์"]
@@ -245,7 +251,7 @@ const DrawingGame = () => {
                 setCorrect(true);
                 if (correctPlayerAmount === 0) {
                     newScoreList[index] += score[0];
-                    socket.emit('sendScoreList',{roomId:roomId, newScoreList:newScoreList});
+                    socket.emit('sendScoreList', { roomId: roomId, newScoreList: newScoreList });
                     socket.emit('sendStatus', { roomId: roomId, message: `✨ ${userData.username} ได้รับ ${score[0]} คะแนน` });
                     socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
                     socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
@@ -254,7 +260,7 @@ const DrawingGame = () => {
                 }
                 if (correctPlayerAmount === 1) {
                     newScoreList[index] += score[1];
-                    socket.emit('sendScoreList',{roomId:roomId, newScoreList:newScoreList});
+                    socket.emit('sendScoreList', { roomId: roomId, newScoreList: newScoreList });
                     socket.emit('sendStatus', { roomId: roomId, message: `✨ ${userData.username} ได้รับ ${score[1]} คะแนน` });
                     socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
                     socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
@@ -263,7 +269,7 @@ const DrawingGame = () => {
                 }
                 if (correctPlayerAmount === 2) {
                     newScoreList[index] += score[2];
-                    socket.emit('sendScoreList',{roomId:roomId, newScoreList:newScoreList});
+                    socket.emit('sendScoreList', { roomId: roomId, newScoreList: newScoreList });
                     socket.emit('sendStatus', { roomId: roomId, message: `✨ ${userData.username} ได้รับ ${score[2]} คะแนน` });
                     socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
                     socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
@@ -272,7 +278,7 @@ const DrawingGame = () => {
                 }
                 else {
                     newScoreList[index] += score[3];
-                    socket.emit('sendScoreList',{roomId:roomId, newScoreList:newScoreList});
+                    socket.emit('sendScoreList', { roomId: roomId, newScoreList: newScoreList });
                     socket.emit('sendStatus', { roomId: roomId, message: `✨ ${userData.username} ได้รับ ${score[3]} คะแนน` });
                     socket.emit('sendCorrectPlayerAmount', { roomId: roomId, amount: correctPlayerAmount + 1 });
                     socket.emit('newAnswer', { roomId: roomId, newAnswer: newAnswer, username: userData.username, isCorrect: true });
@@ -287,7 +293,7 @@ const DrawingGame = () => {
             }
         }
     };
-    const [scoreList,setScoreList] = useState([]);
+    const [scoreList, setScoreList] = useState([]);
     const [answerList, setAnswerList] = useState([]);
     useEffect(() => {
         socket.on('answer', (newAnswerData) => {
@@ -302,13 +308,17 @@ const DrawingGame = () => {
         socket.on("updateCorrectPlayerAmount", (amount) => {
             setCorrectPlayerAmount(amount);
         })
-        socket.on("updateScoreList", (newScoreList)=>{
+        socket.on("updateScoreList", (newScoreList) => {
             setScoreList(newScoreList);
+        })
+        socket.on("globalCountdown", (timeLeft) => {
+            setTimeShow(timeLeft);
         })
         return () => {
             socket.off('answer');
             socket.off("statusUpdate");
             socket.off("updateCorrectPlayerAmount");
+            socket.off("updateScoreList");
         };
 
     }, [socket]);
@@ -355,7 +365,7 @@ const DrawingGame = () => {
                             </div>
                             <div className="px-4 border-l-2 border-gray-200 ">
                                 <div className="w-full h-fit flex flex-col">
-                                    <p className="text-lg font-golos">ID ห้อง</p>
+                                    <p className="text-lg font-ibm-thai">ID ห้อง</p>
                                     <div className="w-full h-full flex">
                                         <input type="text" name="roomId" id="roomId" value={roomId}
                                             onChange={(event) => setRoomId(event.target.value.substring(0, 10))}
@@ -364,15 +374,21 @@ const DrawingGame = () => {
                                         <button className={`bg-gradient-to-r px-4
                                     from-[#6e3f92] to-[#a94fa4]
                                     hover:marker:from-[#754798] hover:to-[#a65ea3] text-white rounded-xl
-                                    rounded-l-none ${!roomId ? "cursor-no-drop" : "cursor-pointer"}`}
+                                    rounded-l-none ${!roomId ? "cursor-no-drop" : "cursor-pointer"} font-ibm-thai`}
                                             onClick={handleJoinRoom} disabled={!roomId}>เล่น</button>
                                     </div>
-                                    <p className="text-lg font-ibm-thai mx-auto mt-6">หรือ</p>
-                                    <button className="bg-gradient-to-r px-4 mx-[30%] py-3 mt-6
+                                    <p className="text-lg font-ibm-thai mx-auto mt-4">หรือ</p>
+
+                                </div>
+                                <div className="flex flex-col">
+                                    <button className="bg-gradient-to-r px-4 mx-[30%] py-3 mt-2
                                     from-[#6e3f92] to-[#a94fa4]
                                     hover:marker:from-[#754798] hover:to-[#a65ea3] text-white rounded-xl flex
                                     font-ibm-thai"><IoPlanetSharp className="text-xl my-auto" />
-                                        <p className="ml-3" onClick={handleGenerateRoomID}>สร้างห้องใหม่</p></button>
+                                        <p className="ml-3" onClick={handleGenerateRoomID}>สร้างห้องใหม่</p></button></div>
+                                <p className="text-center mt-2 font-ibm-thai">จำนวนรอบที่เล่น</p>
+                                <div>
+                                    <p>{ }</p>
                                 </div>
                             </div>
                         </div>
@@ -431,15 +447,15 @@ const DrawingGame = () => {
                                         <img src={playerProfiles[index]}
                                             className="w-12 rounded-full my-1 border-1 p-[1.5px] border-white bg-white ml-[1px]" />
                                         <div className="my-auto mx-2">
-                                            <p className={`text-md ${index === currentPlayer && start ? "text-[#703a9a]":"text-white"} font-semibold
+                                            <p className={`text-md ${index === currentPlayer && start ? "text-[#703a9a]" : "text-white"} font-semibold
                                             tracking-widest font-golos leading-0`}>
                                                 {name}
                                             </p>
                                             {start && <p className={`text-md text-white tracking-widest font-golos leading-0 font-bold flex`}>
-                                                <p className={`font-ibm-thai text-md ${index === currentPlayer && start ? "text-[#703a9a]":"text-white"} `}>
+                                                <p className={`font-ibm-thai text-md ${index === currentPlayer && start ? "text-[#703a9a]" : "text-white"} `}>
                                                     {scoreList[index]}
                                                 </p>
-                                                <p className={`font-ibm-thai ml-1 text-sm my-auto ${index === currentPlayer && start ? "text-[#703a9a]":"text-white"} `}>คะแนน</p>
+                                                <p className={`font-ibm-thai ml-1 text-sm my-auto ${index === currentPlayer && start ? "text-[#703a9a]" : "text-white"} `}>คะแนน</p>
                                             </p>}
                                         </div>
 
@@ -466,8 +482,13 @@ const DrawingGame = () => {
                     <img src="/assets/astranaunt-painting.png"
                         id="astranaunt-painting"
                         className="max-w-md absolute -z-10" />
-                    <div className="h-fit w-full max-w-[52rem] mx-auto grid grid-cols-12 z-10 mt-10 ">
-                        {userData && playerNames[currentPlayer] !== userData.username && <div clasName="col-span-1"></div>}
+                    <div className="h-fit w-full max-w-[52rem] mx-auto grid grid-cols-12 z-10 mt-10 relative">
+                            <div className="h-full flex absolute w-full">
+                                <p className="mx-auto z-[10000] mt-[20%] mb-auto text-[12rem] font-golos font-bold">
+                                    {timeLeft}
+                                </p>
+                            </div>
+                        {userData && playerNames[currentPlayer] !== userData.username && <div className="col-span-1"></div>}
                         <div className={`${userData && playerNames[currentPlayer] === userData.username ? "col-span-full" : "col-span-11"}`}>
                             {/* <p>ผู้เล่น: {playerNames[currentPlayer]}</p> */}
                             {userData && playerNames[currentPlayer] === userData.username && (
