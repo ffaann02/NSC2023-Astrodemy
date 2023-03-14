@@ -5,7 +5,7 @@ import {
   Route,
   Link
 } from "react-router-dom";
-import { createContext, useState ,useEffect} from "react";
+import { createContext, useState, useEffect } from "react";
 import Login from './components/Login';
 import Register from "./components/Register";
 import Footer from './components/Footer';
@@ -43,7 +43,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 function App() {
-  const [logged,setLogged] = useState(false);
+  const [logged, setLogged] = useState(false);
   const [userData, setUserData] = useState(null);
   const [userId, setUserId] = useState("");
   // Get userData from local storage on mount
@@ -55,27 +55,27 @@ function App() {
       setUserId(storedUserId);
       setUserData(JSON.parse(storedUserData));
     }
-    else{
+    else {
       setLogged(false);
     }
   }, [logged]);
-  
+
 
   // Save userData to local storage before unmount
   // Save userData to local storage before unmount
-useEffect(() => {
-  const handleBeforeUnload = () => {
-    if (userData && logged) {
-      localStorage.setItem('userData', JSON.stringify(userData));
-    } else {
-      localStorage.removeItem('userData');
-    }
-  };
-  window.addEventListener('beforeunload', handleBeforeUnload);
-  return () => {
-    window.removeEventListener('beforeunload', handleBeforeUnload);
-  };
-}, [userData, logged]);
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (userData && logged) {
+        localStorage.setItem('userData', JSON.stringify(userData));
+      } else {
+        localStorage.removeItem('userData');
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [userData, logged]);
 
 
   // Fetch userData from database if not in local storage
@@ -105,42 +105,59 @@ useEffect(() => {
   useEffect(() => {
     AOS.init();
   }, [])
-  
   return (
-    <UserContext.Provider value={{logged,setLogged,userData,setUserData,userId}}>
+    <UserContext.Provider value={{ logged, setLogged, userData, setUserData, userId }}>
       <Router>
-      <Navbar/>
-      <Routes>
-      <Route path="/" element={
-          <About/>
-        }/>
-        <Route path="/login" element={
-          <Login/>
-        }/>
-        <Route path="/register" element={
-          <Register/>
-        }/>
-        <Route path="/game" element={
-          <Game/>
-        }/>
-        <Route path="/game/drawing" element={
-          <DrawingGame/>
-        }/>
-        <Route path="/account" element={
-          <Account/>
-        }/>
-        <Route path="/simulate" element={
-          <Simulator/>
-        }/>
-        <Route path="/simulate/sun" element={
-          <Sun/>
-        }/>
-        <Route path="/simulate/earth" element={
-          <Earth/>
-        }/>
-      </Routes>
-      <Footer/>
-    </Router>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={
+            <About />
+          } />
+          <Route path="/login" element={
+            <Login />
+          } />
+          <Route path="/register" element={
+            <Register />
+          } />
+          <Route path="/game/drawing" element={
+            <DrawingGame />
+          } />
+          <Route path="/account" element={
+            <Account />
+          } />
+          <Route path="/simulate" element={
+            <Simulator />
+          } />
+          <Route path="/simulate/earth" element={
+            <Earth />
+          } />
+          <Route path="/simulate/jupiter" element={
+            <Jupiter />
+          } />
+          <Route path="/simulate/mars" element={
+            <Mars />
+          } />
+          <Route path="/simulate/mercury" element={
+            <Mercury />
+          } />
+          <Route path="/simulate/neptune" element={
+            <Neptune />
+          } />
+          <Route path="/simulate/saturn" element={
+            <Saturn />
+          } />
+          <Route path="/simulate/sun" element={
+            <Sun />
+          } />
+          <Route path="/simulate/uranus" element={
+            <Uranus />
+          } />
+          <Route path="/simulate/venus" element={
+            <Venus />
+          } />
+        </Routes>
+        <Footer />
+      </Router>
     </UserContext.Provider>
   );
 }
