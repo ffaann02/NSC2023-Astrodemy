@@ -29,6 +29,7 @@ import Venus from "./components/PlanetSimulator/Venus";
 import Game from "./components/Game";
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import Post from "./components/Post/Post";
 export const UserContext = createContext();
 
 const firebaseConfig = {
@@ -113,6 +114,9 @@ function App() {
           <Route path="/" element={
             <About />
           } />
+          <Route path="/game" element={
+            <Game/>
+          } />
           <Route path="/login" element={
             <Login />
           } />
@@ -124,6 +128,9 @@ function App() {
           } />
           <Route path="/account" element={
             <Account />
+          } />
+          <Route path="/post" element={
+            <Post/>
           } />
           <Route path="/simulate" element={
             <Simulator />
