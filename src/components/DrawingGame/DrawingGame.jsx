@@ -151,7 +151,7 @@ const DrawingGame = () => {
             socket.off("playerList");
         };
     }, [roomId]);
-    const TOTAL_ROUND_TIME = 10;
+    const TOTAL_ROUND_TIME = 90;
     const [copyLink, setCopyLink] = useState(false);
     const [currentRound, setCurrentRound] = useState(0);
     const [currentPlayer, setCurrentPlayer] = useState(0);

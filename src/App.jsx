@@ -27,7 +27,8 @@ import Sun from "./components/PlanetSimulator/Sun";
 import Uranus from "./components/PlanetSimulator/Uranus";
 import Venus from "./components/PlanetSimulator/Venus";
 import Game from "./components/Game";
-
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 export const UserContext = createContext();
 
 const firebaseConfig = {
@@ -101,6 +102,9 @@ useEffect(() => {
         });
     }
   }, [userData]);
+  useEffect(() => {
+    AOS.init();
+  }, [])
   
   return (
     <UserContext.Provider value={{logged,setLogged,userData,setUserData,userId}}>

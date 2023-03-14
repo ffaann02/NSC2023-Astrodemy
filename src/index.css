@@ -2,3 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 @import url('https://fonts.googleapis.com/css2?family=Golos+Text&family=IBM+Plex+Sans+Thai:wght@400;500&display=swap');
+
+#game-block{
+    animation: dribble_waiting 3s linear infinite;;
+  }
+  @keyframes dribble_waiting{
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
