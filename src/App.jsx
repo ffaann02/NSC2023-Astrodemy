@@ -119,6 +119,9 @@ function App() {
           <Route path="/register" element={
             <Register />
           } />
+          <Route path="/game" element={
+            <Game/>
+          } />
           <Route path="/game/drawing" element={
             <DrawingGame />
           } />
