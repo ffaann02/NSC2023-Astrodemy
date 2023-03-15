@@ -30,7 +30,7 @@ const Navbar = () => {
                     <div className="w-fit h-full flex mr-2 text-lg cursor-pointer text-gray-600 hover:text-gray-800">
                         {/* <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">เกี่ยวกับเรา</p> */}
                         <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">
-                        <Link to="/post">โพสต์</Link>
+                        <Link to="/post">บทความ</Link>
                         </p>
                         <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">
                             <Link to="/game">เกม</Link>

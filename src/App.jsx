@@ -30,6 +30,8 @@ import Game from "./components/Game";
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import Post from "./components/Post/Post";
+import Article from "./components/Post/Article";
+import ArticleCreate from "./components/Post/ArticleCreate";
 export const UserContext = createContext();
 
 const firebaseConfig = {
@@ -110,6 +112,7 @@ function App() {
     <UserContext.Provider value={{ logged, setLogged, userData, setUserData, userId }}>
       <Router>
         <Navbar />
+        <div className="w-full min-h-screen">
         <Routes>
           <Route path="/" element={
             <About />
@@ -131,6 +134,12 @@ function App() {
           } />
           <Route path="/post" element={
             <Post/>
+          } />
+          <Route path="/post/:title" element={
+            <Article/>
+          } />
+          <Route path="/post/create" element={
+            <ArticleCreate/>
           } />
           <Route path="/simulate" element={
             <Simulator />
@@ -163,6 +172,7 @@ function App() {
             <Venus />
           } />
         </Routes>
+        </div>
         <Footer />
       </Router>
     </UserContext.Provider>
