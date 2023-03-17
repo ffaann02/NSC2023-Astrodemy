@@ -32,6 +32,7 @@ import 'aos/dist/aos.css';
 import Post from "./components/Post/Post";
 import Article from "./components/Post/Article";
 import ArticleCreate from "./components/Post/ArticleCreate";
+import Calendar from "./components/Calendar";
 export const UserContext = createContext();
 
 const firebaseConfig = {
@@ -128,6 +129,9 @@ function App() {
           } />
           <Route path="/game" element={
             <Game/>
+          } />
+          <Route path="/calendar" element={
+            <Calendar/>
           } />
           <Route path="/game/drawing" element={
             <DrawingGame />

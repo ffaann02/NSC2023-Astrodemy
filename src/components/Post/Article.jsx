@@ -22,7 +22,7 @@ const Article = ({ match }) => {
   return (
     <>
       {article &&
-        <div className="w-full h-full">
+        <div className="w-full h-full pb-10">
           <div className='mx-auto w-full h-full max-w-5xl min-h-screen grid grid-cols-12 bg-white mt-6 shadow-lg pt-10 pb-5 px-10 border-gray-100 
         border-t-[0.5px] rounded-2xl'>
             <div className="col-span-full">
