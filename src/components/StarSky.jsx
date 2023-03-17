@@ -5,7 +5,6 @@ export function StarSky() {
   const [ctx, setCtx] = useState(null);
   const [width, setWidth] = useState(window.innerWidth);
   const [height, setHeight] = useState(window.innerHeight);
-  const [startTime, setStartTime] = useState(Date.now());
 
   useEffect(() => {
     // Get the canvas context and set the canvas size
@@ -47,10 +46,7 @@ export function StarSky() {
     let r = 2.5 * Math.random();
 
     // Check if elapsed time is greater than 20 seconds
-    const elapsedTime = Date.now() - startTime;
-    if (elapsedTime > 20000) {
-      r /= 2;
-    }
+    
 
     // Draw the stars
     ctx.beginPath();
@@ -59,7 +55,7 @@ export function StarSky() {
     ctx.fill();
 
     // Using setTimeout instead of window.requestAnimationFrame for slower speed
-    setTimeout(animate, 500);
+    setTimeout(animate, 200);
   }
 
   return (

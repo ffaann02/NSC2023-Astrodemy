@@ -35,7 +35,7 @@ const Game = () => {
               <div className="bg-white w-full h-fit rounded-3xl relative pt-5 py-5" data-aos="fade-up">
                 <div className="absolute top-4 right-4 cursor-pointer" onClick={() => { setPopupGame(false) }}>
                   <FaRegWindowClose className="text-4xl text-red-400" /></div>
-                <img src="/assets/drawing-game_page/AstroArcade.png" className="w-40 mx-auto pt-4" />
+                <img src="/assets/drawing-game_page/AstroQuiz.png" className="w-52 mx-auto pt-4" />
                 <div className="px-10 pt-10 font-ibm-thai grid grid-cols-6 relative h-full">
                   <div className="col-span-3 pr-10">
                     <p className="text-2xl font-bold">คำอธิบายเกม</p>
@@ -88,7 +88,7 @@ const Game = () => {
               <div className="bg-white w-full h-fit rounded-3xl relative pt-5 py-5" data-aos="fade-up">
                 <div className="absolute top-4 right-4 cursor-pointer" onClick={() => { setPopupGame(false) }}>
                   <FaRegWindowClose className="text-4xl text-red-400" /></div>
-                <img src="/assets/drawing-game_page/AstroArcade.png" className="w-40 mx-auto pt-4" />
+                <img src="/assets/drawing-game_page/AstroDraw.png" className="w-40 mx-auto pt-4" />
                 <div className="px-10 pt-10 font-ibm-thai grid grid-cols-6 relative h-full">
                   <div className="col-span-3 pr-10">
                     <p className="text-2xl font-bold">คำอธิบายเกม</p>
@@ -137,8 +137,8 @@ const Game = () => {
         </div>
       )}
       <div className="max-w-5xl m-auto h-fit my-auto grid grid-cols-12 z-[20] relative" id="game-block">
-        <div className="col-span-full text-center mt-16">
-          <img src="/assets/drawing-game_page/AstroArcade.png" className="w-40 mx-auto" data-aos="fade-down" data-aos-delay="200" />
+        <div className="col-span-full text-center mt-24">
+          <img src="/assets/drawing-game_page/AstroArcade.png" className="w-52 mx-auto" data-aos="fade-down" data-aos-delay="200" />
         </div>
         <div className={`col-span-6 px-5 opacity-80 hover:opacity-100 cursor-pointer mt-10 hover:mt-4 ease-in-out duration-300
         `}

@@ -3,6 +3,7 @@ import { useContext,useEffect, useState } from "react";
 import {UserContext} from "../App"
 import {FaAngleDown} from 'react-icons/fa'
 import { AiFillSetting } from "react-icons/ai";
+import {GiHamburgerMenu} from "react-icons/gi"
 const Navbar = () => {
     const {userData,logged,setLogged, setUserData,userId} = useContext(UserContext)
     const [toggleUserIcon,setToggleUserIcon] = useState(false);
@@ -19,19 +20,22 @@ const Navbar = () => {
     }
     return (
         <nav className="sticky w-full bg-white h-16 top-0 shadow-lg font-golos z-[500]">
-            <div className="max-w-6xl mx-auto h-full flex justify-between relative">
+            <div className="max-w-4xl lg:max-w-6xl mx-auto h-full flex justify-between relative xl:px-0 md:px-5 px-2">
                 <div className="py-2 flex cursor-pointer">
                     <Link to="/"><img src="/logoAS.png" className="w-full h-full py-1" /></Link>
                     <p className="my-auto ml-2 font-bold text-2xl tracking-wider text-[#852E97]"><Link to="/">Astrodemy</Link></p>
                 </div>
-                <div className="h-full flex w-fit font-ibm-thai">
+                <GiHamburgerMenu className="text-3xl my-auto text-violet-900 cursor-pointer block lg:hidden"/>
+                <div className="h-full w-fit font-ibm-thai lg:flex hidden">
                     <div className="w-fit h-full flex mr-2 text-lg cursor-pointer text-gray-600 hover:text-gray-800">
-                        <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">เกี่ยวกับเรา</p>
+                        {/* <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">เกี่ยวกับเรา</p> */}
+                        <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">
+                        <Link to="/post">บทความ</Link>
+                        </p>
                         <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">
                             <Link to="/game">เกม</Link>
                         </p>
-                        <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">บทความ</p>
-                        <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">คอร์สออนไลน์</p>
+                        <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">ปฏิทิน</p>
                         <p className="my-auto mx-2 text-gray-600 hover:text-gray-800"><Link to="/simulate">แบบจำลอง 3D</Link></p>
                     </div>
                     {!userData && logged===false ? <div className="flex">
