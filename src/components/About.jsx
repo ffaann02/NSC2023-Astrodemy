@@ -13,8 +13,7 @@ const About = () => {
         <>
             <div className="w-full h-full relative overflow-hidden" id="star">
                 <div className="h-screen w-full flex">
-                    <div className="text-5xl lg:text-6xl font-ibm-thai font-semibold mx-auto mt-[15%] lg:mt-24 px-5 leading-[60px]"
-                        data-aos="fade-down" data-aos-delay="300">
+                    <div className="text-5xl lg:text-6xl font-ibm-thai font-semibold mx-auto mt-[15%] lg:mt-24 px-5 leading-[60px]">
                         <p className="text-white">แพลตฟอร์มการเรียนรู้ยุคใหม่</p>
                         <p className="text-white mt-6">ที่ทำให้อวกาศอยู่ใกล้แค่หน้าจอ</p>
                         <div className="mt-6">

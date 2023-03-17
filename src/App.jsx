@@ -16,7 +16,6 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 import DrawingGame from "./components/DrawingGame/DrawingGame";
 import Simulator from "./components/Simulator";
-
 import Earth from "./components/PlanetSimulator/Earth";
 import Jupiter from "./components/PlanetSimulator/Jupiter";
 import Mars from "./components/PlanetSimulator/Mars";
