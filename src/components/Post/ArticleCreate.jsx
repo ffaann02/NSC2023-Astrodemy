@@ -10,7 +10,9 @@ import 'react-quill/dist/quill.snow.css';
 import axios from 'axios';
 import firebase from 'firebase/compat/app';
 import { UserContext } from '../../App';
+import { useNavigate } from 'react-router-dom';
 const ArticleCreate = () => {
+    const navigate = useNavigate();
     const { userData, logged, setLogged, setUserData } = useContext(UserContext)
     const firebaseConfig = {
         apiKey: process.env.REACT_APP_API_KEY,
@@ -70,6 +72,7 @@ const ArticleCreate = () => {
                     'กรุณาโปรดรอระบบตรวจสอบบทความเพื่อเผยแพร่',
                     'success'
                 )
+                 navigate("/post");
             }
         })
     }

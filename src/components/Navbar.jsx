@@ -35,7 +35,7 @@ const Navbar = () => {
                         <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">
                             <Link to="/game">เกม</Link>
                         </p>
-                        <p className="my-auto mx-2 text-gray-600 hover:text-gray-800">ปฏิทิน</p>
+                        <p className="my-auto mx-2 text-gray-600 hover:text-gray-800"><Link to="/calendar">ปฏิทิน</Link></p>
                         <p className="my-auto mx-2 text-gray-600 hover:text-gray-800"><Link to="/simulate">แบบจำลอง 3D</Link></p>
                     </div>
                     {!userData && logged===false ? <div className="flex">
