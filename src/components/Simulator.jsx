@@ -2,9 +2,30 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { Float32BufferAttribute } from 'three';
 // import { Line2, LineGeometry, LineMaterial } from 'three-fatline';
 
 const Simulator = () => {
+
+    const atmosphereVertex =
+    `
+    varying vec3 vertexNormal;
+    void main() {
+        vertexNormal = normalize(normalMatrix * normal);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+    `;
+
+    const atmosphereFragment =
+    `
+    uniform float intensityFactor;
+    varying vec3 vertexNormal;
+    void main() {
+        float intensity = pow(intensityFactor - dot(vertexNormal, vec3(0, 0, 1.0)), 2.0);
+        gl_FragColor = vec4(1.0, 0.25, 0.0, 1.0) * intensity;
+    }
+    `;
+
     const canvasRef = useRef(null);
     const cameraRef = useRef(null);
     const meshesRef = useRef([]);
@@ -13,6 +34,7 @@ const Simulator = () => {
     const hoveredObjectRef = useRef(null);
     const [hoverNow, setHoverNow] = useState(null);
     const [linkTo, setlinkTo] = useState(null);
+    const orbitSpeedRef = useRef(null);
 
     // Opacity value
     // Orbit
@@ -43,7 +65,16 @@ const Simulator = () => {
         scene.add(pointLight);
 
         // Background
-        scene.background = textureLoader.load('/assets/3d_page/texture/space.jpg')
+        scene.background = textureLoader.load('/assets/3d_page/texture/blackbg.jpg')
+
+        // Galaxy
+        const galaxyGeometry = new THREE.SphereGeometry(400, 32, 32);
+        const galaxyMaterial = new THREE.MeshBasicMaterial({
+            side: THREE.BackSide,
+            map: textureLoader.load('/assets/3d_page/texture/background.jpg')
+        });
+        const galaxy = new THREE.Mesh(galaxyGeometry, galaxyMaterial);
+        scene.add(galaxy);
 
         // Orbit controls
         const controls = new OrbitControls(camera, renderer.domElement);
@@ -69,10 +100,30 @@ const Simulator = () => {
         sunOrbit.add(sun); // add sun to parent object
         sun.name = "Sun";
         sun.navigatePath = "sun";
+        // meshes_planet.push(sun);
+
+        // Sun shader
+        sun.shader_intensity = 0.4;
+        const sunShader = new THREE.Mesh(
+            new THREE.SphereGeometry(16, 32, 32),
+            new THREE.ShaderMaterial({
+                vertexShader: atmosphereVertex,
+                fragmentShader: atmosphereFragment,
+                uniforms: {
+                    intensityFactor: { value: sun.shader_intensity }
+                },
+                blending: THREE.AdditiveBlending,
+                side: THREE.BackSide,
+                visible: true
+            })
+        );
+        sunShader.scale.set(1.2, 1.2, 1.2)
+        sun.add(sunShader);
         meshes_planet.push(sun);
 
         const createPlanet = function (name, navigatePath, radius, ellipseY, rotateSpeed, orbitSpeed, texture, colors, ring) {
             const ellipseX = ellipseY * 1.7;
+            orbitSpeedRef.current = 1;
             // Create mesh
             const mesh = new THREE.Mesh(
                 new THREE.SphereGeometry(radius, 32, 32),
@@ -109,7 +160,7 @@ const Simulator = () => {
             mesh.navigatePath = navigatePath;
 
             // Create orbit-line
-            let orbitAngle = 0;
+            let orbitAngle = Math.floor(Math.random() * 1000);
             let orbitPoint = [];
             const orbitMaterial = new THREE.LineBasicMaterial({
                 color: colors,
@@ -156,38 +207,38 @@ const Simulator = () => {
 
             // Self-rotation
             sun.rotateY(-0.004);
-            mercury.mesh.rotateY(mercury.rotateSpeed);
-            venus.mesh.rotateY(venus.rotateSpeed);
-            earth.mesh.rotateY(earth.rotateSpeed);
-            mars.mesh.rotateY(mars.rotateSpeed);
-            jupiter.mesh.rotateY(jupiter.rotateSpeed);
-            saturn.mesh.rotateY(saturn.rotateSpeed);
-            uranus.mesh.rotateY(uranus.rotateSpeed);
-            neptune.mesh.rotateY(neptune.rotateSpeed);
+            mercury.mesh.rotateY(mercury.rotateSpeed * orbitSpeedRef.current);
+            venus.mesh.rotateY(venus.rotateSpeed * orbitSpeedRef.current);
+            earth.mesh.rotateY(earth.rotateSpeed * orbitSpeedRef.current);
+            mars.mesh.rotateY(mars.rotateSpeed * orbitSpeedRef.current);
+            jupiter.mesh.rotateY(jupiter.rotateSpeed * orbitSpeedRef.current);
+            saturn.mesh.rotateY(saturn.rotateSpeed * orbitSpeedRef.current);
+            uranus.mesh.rotateY(uranus.rotateSpeed * orbitSpeedRef.current);
+            neptune.mesh.rotateY(neptune.rotateSpeed * orbitSpeedRef.current);
 
             // Around-sun-rotation
-            mercury.orbitAngle += mercury.orbitSpeed;
+            mercury.orbitAngle += mercury.orbitSpeed * orbitSpeedRef.current;
             mercury.mesh.position.set(mercury.ellipseX * Math.cos(mercury.orbitAngle), 0, mercury.ellipseY * Math.sin(mercury.orbitAngle));
 
-            venus.orbitAngle += venus.orbitSpeed;
+            venus.orbitAngle += venus.orbitSpeed * orbitSpeedRef.current;
             venus.mesh.position.set(venus.ellipseX * Math.cos(venus.orbitAngle), 0, venus.ellipseY * Math.sin(venus.orbitAngle));
 
-            earth.orbitAngle += earth.orbitSpeed;
+            earth.orbitAngle += earth.orbitSpeed * orbitSpeedRef.current;
             earth.mesh.position.set(earth.ellipseX * Math.cos(earth.orbitAngle), 0, earth.ellipseY * Math.sin(earth.orbitAngle));
 
-            mars.orbitAngle += mars.orbitSpeed;
+            mars.orbitAngle += mars.orbitSpeed * orbitSpeedRef.current;
             mars.mesh.position.set(mars.ellipseX * Math.cos(mars.orbitAngle), 0, mars.ellipseY * Math.sin(mars.orbitAngle));
 
-            jupiter.orbitAngle += jupiter.orbitSpeed;
+            jupiter.orbitAngle += jupiter.orbitSpeed * orbitSpeedRef.current;
             jupiter.mesh.position.set(jupiter.ellipseX * Math.cos(jupiter.orbitAngle), 0, jupiter.ellipseY * Math.sin(jupiter.orbitAngle));
 
-            saturn.orbitAngle += saturn.orbitSpeed;
+            saturn.orbitAngle += saturn.orbitSpeed * orbitSpeedRef.current;
             saturn.mesh.position.set(saturn.ellipseX * Math.cos(saturn.orbitAngle), 0, saturn.ellipseY * Math.sin(saturn.orbitAngle));
 
-            uranus.orbitAngle += uranus.orbitSpeed;
+            uranus.orbitAngle += uranus.orbitSpeed * orbitSpeedRef.current;
             uranus.mesh.position.set(uranus.ellipseX * Math.cos(uranus.orbitAngle), 0, uranus.ellipseY * Math.sin(uranus.orbitAngle));
 
-            neptune.orbitAngle += neptune.orbitSpeed;
+            neptune.orbitAngle += neptune.orbitSpeed * orbitSpeedRef.current;
             neptune.mesh.position.set(neptune.ellipseX * Math.cos(neptune.orbitAngle), 0, neptune.ellipseY * Math.sin(neptune.orbitAngle));
 
             cameraRef.current = camera;
@@ -208,6 +259,21 @@ const Simulator = () => {
         // Clean up the scene when the component is unmounted
         return () => {
             renderer.dispose();
+            for (let i = 0; i < meshesRef.current.length; i++) {
+                const mesh = meshesRef.current[i];
+                mesh.geometry.dispose();
+                mesh.material.dispose();
+            }
+            for (let i = 0; i < meshesRingRef.current.length; i++) {
+                const meshRing = meshesRingRef.current[i];
+                meshRing.geometry.dispose();
+                meshRing.material.dispose();
+            }
+            for (let i = 0; i < meshesOrbitLineRef.current.length; i++) {
+                const meshesOrbitLine = meshesOrbitLineRef.current[i];
+                meshesOrbitLine.geometry.dispose();
+                meshesOrbitLine.material.dispose();
+            }
         };
     }, []);
 
@@ -226,7 +292,9 @@ const Simulator = () => {
 
         // Create a raycaster object and set its origin and direction based on the mouse position
         const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(mouse, cameraRef.current);
+        if (cameraRef.current) {
+            raycaster.setFromCamera(mouse, cameraRef.current);
+        }
 
         // Find all the intersections between the raycaster and the meshes
         const intersects = raycaster.intersectObjects(meshesRef.current);
@@ -240,6 +308,14 @@ const Simulator = () => {
             setlinkTo(intersectedObject.navigatePath);
             hoveredObjectRef.current = intersectedObject;
 
+            
+            // Test Change Shader
+            if(hoveredObjectRef.current.children[0] !== null && hoveredObjectRef.current.children[0] !== undefined){
+                // console.log(hoveredObjectRef.current.children[0]);
+                // console.log("Intensity Value = " + hoveredObjectRef.current.children[0].material.uniforms.intensityFactor.value);
+                // hoveredObjectRef.current.children[0].material.visible = false;
+            }
+
             // Set the opacity of the previously hovered object back to its default value
             if (hoveredObjectRef.current && hoveredObjectRef.current !== intersectedObject) {
                 hoveredObjectRef.current.material.opacity = opacityDefault;
@@ -252,7 +328,6 @@ const Simulator = () => {
 
             // Planet Ring
             for (const child of intersects[0].object.children) {
-                console.log("This planet has ring");
                 child.material.opacity = opacityHover;
                 child.material.needsUpdate = true;
                 intersectedObject.material.opacity = opacityHover;
@@ -320,17 +395,24 @@ const Simulator = () => {
             const intersectedObject = intersects[0].object;
             setlinkTo(intersectedObject.navigatePath);
             navigate(`/simulate/${linkTo}`)
-            console.log("clicking " + linkTo);
         }
-        else{
+        else {
             setlinkTo(null);
         }
     }
+
+    const rangeValues = [0.25, 0.5, 1, 1.5, 3];
+    const handleRangeChange = (event) => {
+        const step = event.target.value;
+        orbitSpeedRef.current = rangeValues[step]; // Update the value using useRef
+    };
 
     return (
         <div className='relative flex justify-center overflow-hidden'>
             <canvas id="space" alt="space" ref={canvasRef} onMouseMove={handleMouseMove} onClick={handleMouseClick} />
             <p className="text-4xl font-ibm-thai font-bold text-white absolute top-auto mx-auto">{hoverNow}</p>
+            <input type="range" className="absolute right-0" min={0} max={rangeValues.length - 1} step={1} 
+                defaultValue={2} onChange={handleRangeChange}/>
         </div>
     )
 };

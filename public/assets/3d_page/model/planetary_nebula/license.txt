@@ -1,0 +1,11 @@
+Model Information:
+* title:	3D model of the planetary nebula NGC 6629
+* source:	https://sketchfab.com/3d-models/3d-model-of-the-planetary-nebula-ngc-6629-6c7604c6ee714e6ca4cee992d8e9e32d
+* author:	Ashkbiz (Ashton) Danehkar (https://sketchfab.com/danehkar)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "3D model of the planetary nebula NGC 6629" (https://sketchfab.com/3d-models/3d-model-of-the-planetary-nebula-ngc-6629-6c7604c6ee714e6ca4cee992d8e9e32d) by Ashkbiz (Ashton) Danehkar (https://sketchfab.com/danehkar) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

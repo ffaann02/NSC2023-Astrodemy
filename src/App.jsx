@@ -26,6 +26,8 @@ import Sun from "./components/PlanetSimulator/Sun";
 import Uranus from "./components/PlanetSimulator/Uranus";
 import Venus from "./components/PlanetSimulator/Venus";
 import Game from "./components/Game";
+import MoonCycle from "./components/MoonCycle";
+import LifeCycle from "./components/LifeCycle";
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import Post from "./components/Post/Post";
@@ -127,7 +129,7 @@ function App() {
             <Register />
           } />
           <Route path="/game" element={
-            <Game/>
+            <Game />
           } />
           <Route path="/calendar" element={
             <Calendar/>
@@ -176,6 +178,12 @@ function App() {
           } />
           <Route path="/simulate/venus" element={
             <Venus />
+          } />
+          <Route path="/moon-cycle" element={
+            <MoonCycle />
+          } />
+          <Route path="/life-cycle" element={
+            <LifeCycle />
           } />
         </Routes>
         </div>
