@@ -223,10 +223,13 @@ const Sun = () => {
     return (
         <div className="relative flex overflow-hidden w-full">
             <canvas id="space" alt="space" ref={canvasRef} />
-            <button className="py-2 px-4 rounded-xl absolute top-auto mt-20 mx-auto text-lg bg-gradient-to-r 
+            <div className='absolute w-full text-center mt-10 font-ibm-thai font-bold text-3xl'>
+                <p className='text-white'>ดวงอาทิตย์</p>
+            <button className="px-4 py-3 rounded-xl mt-2 mx-auto text-lg bg-gradient-to-r 
                 from-[#6e3f92] to-[#a94fa4]
                 hover:marker:from-[#754798] hover:to-[#a65ea3] text-white"
-                onClick={handleClick} >รายละเอียด</button>
+                onClick={handleClick}>รายละเอียด</button>
+            </div>
 
             {showDetail ?
             <div className="absolute text-2xl font-ibm-thai font-bold mx-auto text-white 

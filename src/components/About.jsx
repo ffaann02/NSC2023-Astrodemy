@@ -2,13 +2,13 @@ import "./HomeAssets/style.css"
 import React, { useEffect } from "react"
 import AboutUs from "./HomeAssets/AboutUs"
 const About = () => {
-    // useEffect(() => {
-    //     const body = document.getElementById("star");
-    //     let meteorNumber = 35;
-    //     for (let i = 1; i <= meteorNumber; i++) {
-    //         body.innerHTML += `<div class="meteor-${i}"></div>`;
-    //     }
-    // },[]);
+    useEffect(() => {
+        const body = document.getElementById("star");
+        let meteorNumber = 35;
+        for (let i = 1; i <= meteorNumber; i++) {
+            body.innerHTML += `<div class="meteor-${i}"></div>`;
+        }
+    },[]);
     return (
         <>
             <div className="w-full h-full relative overflow-hidden" id="star">
@@ -28,8 +28,7 @@ const About = () => {
             -z-10 -bottom-10"/>
                     <img src="/assets/about_page/hill.png" className="absolute w-full left-1/2 transform -translate-x-1/2 
             -bottom-16 -z-[12]" />
-                    <img src="/assets/about_page/pure_sky.png" className="absolute -z-[15] w-full top-0 h-full"
-                        data-aos="fade-up" data-aos-delay="300" />
+                    <img src="/assets/about_page/pure_sky.png" className="absolute -z-[15] w-full top-0 h-full"/>
                 </div>
             </div>
             {/* <AboutUs/> */}

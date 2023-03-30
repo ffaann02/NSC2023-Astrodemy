@@ -39,25 +39,27 @@ const Game = () => {
                 <div className="px-10 pt-10 font-ibm-thai grid grid-cols-6 relative h-full">
                   <div className="col-span-3 pr-10">
                     <p className="text-2xl font-bold">คำอธิบายเกม</p>
-                    <p className="text-md mt-2">เกมควิซคำถามเกี่ยวกับดาราศาสตร์ โดยคำถามจะอยู่ในระดับง่าย ปานกลางและยาก
-                      วิธีการเล่นคล้ายกับเกมควิซทั่วไป เพียงแต่รูปแบบเกมไม่น่าเบื่อ ไม่เน้นวิชาการ แต่เน้นความช่างสังเกตในตัวคุณ มาเริ่มเล่นกันเถอะ!</p>
-                    <p className="text-2xl font-bold mt-10">กฎและวิธีการเล่น</p>
+                    <p className="text-md mt-2">เกมปริศนาลับสมองในเรื่องของดาราศาสตร์ ดาราศาสตร์เป็นเรื่องที่กว้างขวาง หากจะไม่ให้เปิดอินเตอร์เน็ต
+                    ตอนเล่นคงจะยากหน่อย เกมนี้อนุญาตให้คุณเปิดอินเตอร์เน็ตเพื่อค้นหาข้อมูล แต่ค้นหาให้เร็วละ! เพราะเกมนี้คนที่ไวที่สุดเท่านั้นถึงจะชนะ</p>
+                    <p className="text-2xl font-bold mt-16">กฎและวิธีการเล่น</p>
                     <p className="text-md mt-2">
                       <ul className="list-outside text-lg">
                         <li className="flex"><BsFillRocketTakeoffFill className="my-auto text-violet-800" />
                           <p className="ml-2">รูปแบบเกม: Multiplayer</p>
                         </li>
                         <li className="flex mt-1"><BsFillRocketTakeoffFill className="my-auto text-violet-800" />
-                          <p className="ml-2">เวลา: 20 วินาที / 1 ข้อ</p>
+                          <p className="ml-2">เวลาไม่จำกัด แต่ผู้ชนะคือคนที่เร็วสุด</p>
                         </li>
                         <li className="flex mt-1"><BsFillRocketTakeoffFill className="my-auto text-violet-800" />
-                          <p className="ml-2">ใช้่ไหวพริบและความรู้รอบตัวเล็กน้อย</p>
+                          <p className="ml-2">ใช้่ไหวพริบ ความเร็วและความรู้รอบตัว</p>
                         </li>
                       </ul>
                     </p>
                   </div>
                   <div className="col-span-3">
-                    <p className="text-2xl font-bold mb-2">ทำไมต้องเล่น ?</p>
+                  <p className="text-2xl font-bold mb-2">ตัวอย่างเกมเพลย์</p>
+                  <img src="/assets/puzzle_game_page/puzzle-example.png" className="w-[80%] border-2 rounded-xl"/>
+                    <p className="text-2xl font-bold mb-2 mt-2">ทำไมต้องเล่น ?</p>
                     <ul className="list-outside text-lg">
                         <li className="flex"><MdStars className="my-auto text-yellow-600" />
                           <p className="ml-2 flex">ลุ้น AstroCoin<p className="ml-1">ในบางเกมโหมด</p>
@@ -73,7 +75,7 @@ const Game = () => {
                   <button className="py-3 rounded-xl mt-6 text-lg bg-gradient-to-r font-ibm-thai hover:px-5
                 ease-in-out duration-300 from-[#6e3f92] to-[#a94fa4] hover:text-xl
                         hover:marker:from-[#754798] hover:to-[#a65ea3] text-white px-4"
-                    onClick={() => { navitage("/game/quiz") }}>เล่นเกมเลย</button>
+                    onClick={() => { navitage("/game/puzzle") }}>เล่นเกมเลย</button>
                 </div>
                 </div>
               </div>

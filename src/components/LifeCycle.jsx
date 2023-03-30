@@ -312,8 +312,36 @@ const LifeCycle = (event) => {
     return (
         <div className="relative flex overflow-hidden w-full">
             <canvas id="space" alt="space" ref={canvasRef} />
-            <input type="range" className="absolute right-0" min={0} max={rangeValues.length - 1} step={1}
-                defaultValue={0} onChange={handleRangeChange} />
+            <div className='w-full absolute flex mt-6'>
+                <p className='mx-auto text-white font-ibm-thai text-2xl'>วัฎจักรดาวฤกษ์</p>
+            </div>
+            <div className="absolute w-full bottom-32">
+                <div className='max-w-4xl top-5 flex h-fit text-white mx-auto font-ibm-thai cursor-pointer'>
+                    <div className='w-full max-w-4xl absolute'>
+                        <div className='absolute -top-10 left-0'>
+                            <p>Stellar Nebula</p>
+                        </div>
+                        <div className='absolute -top-10 left-[16%] text-center'>
+                            <p>Average Star</p>
+                        </div>
+                        <div className='absolute -top-10 left-[36%]'>
+                            <p>Red Giant</p>
+                        </div>
+                        <div className='absolute -top-10 left-[54%]'>
+                            <p>Red SuperGiant</p>
+                        </div>
+                        <div className='absolute -top-10 right-[13.5%] text-center'>
+                            <p>Planetary Nebula
+                            </p>
+                        </div>
+                        <div className='absolute -top-10 right-0'>
+                            <p>White Dwarf</p>
+                        </div>
+                    </div>
+                    <input type="range" className="w-full h-4 appearance-none rounded-full bg-white outline-none mx-auto" min={0} max={rangeValues.length - 1} step={1}
+                        defaultValue={0} onChange={handleRangeChange} />
+                </div>
+            </div>
         </div>
     )
 }
