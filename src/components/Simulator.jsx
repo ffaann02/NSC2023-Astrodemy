@@ -279,6 +279,8 @@ const Simulator = () => {
 
     const navigate = useNavigate();
 
+    const [hoverIndex,setHoverIndex] = useState(-1);
+
     function handleMouseMove(event) {
         // Get the mouse position relative to the canvas element
         const rect = canvasRef.current.getBoundingClientRect();
@@ -400,19 +402,119 @@ const Simulator = () => {
             setlinkTo(null);
         }
     }
+    const [planetData,setPlanetData] = useState([
+        {
+            id: "sun",
+            name: "Sun",
+            name_th: "ดวงอาทิตย์",
+            imageUrl:
+              "https://www.freeiconspng.com/thumbs/sun/picture-of-real-sun-the-color-of-fire-red-21.png",
+          },
+          {
+            id: "mercury",
+            name: "Mercury",
+            name_th: "ดาวพุธ",
+            imageUrl: "/assets/puzzle_game_page/PlanetSort/mercury.jpeg",
+          },
+          {
+            id: "venus",
+            name: "Venus",
+            name_th: "ดาวศุกร์",
+            imageUrl: "/assets/puzzle_game_page/PlanetSort/venus.png",
+          },
+          {
+            id: "earth",
+            name: "Earth",
+            name_th: "ดาวโลก",
+            imageUrl: "/assets/puzzle_game_page/PlanetSort/earth.png",
+          },
+          {
+            id: "mars",
+            name: "Mars",
+            name_th: "ดาวอังคาร",
+            imageUrl: "/assets/puzzle_game_page/PlanetSort/mars.png",
+          },
+          {
+            id: "jupiter",
+            name: "Jupiter",
+            name_th: "ดาวพฤหัส",
+            imageUrl: "/assets/puzzle_game_page/PlanetSort/jupiter.png",
+          },
+          {
+            id: "saturn",
+            name: "Saturn",
+            name_th: "ดาวเสาร์",
+            imageUrl: "/assets/puzzle_game_page/PlanetSort/saturn.png",
+          },
+          {
+            id: "uranus",
+            name: "Uranus",
+            name_th: "ดาวยูเรนัส",
+            imageUrl: "/assets/puzzle_game_page/PlanetSort/uranus.png",
+          },{
+            id:"neptune",
+            name:"Neptune",
+            name_th:"ดาวเนปจูน",
+            imageUrl: "/assets/puzzle_game_page/PlanetSort/neptune.png"
+        }
+    ]
+    )
 
     const rangeValues = [0.25, 0.5, 1, 1.5, 3];
+    const slowerRangeValues = [0.1,0.2,0.5,0.75, 1, 1.5, 2, 3];
     const handleRangeChange = (event) => {
         const step = event.target.value;
-        orbitSpeedRef.current = rangeValues[step]; // Update the value using useRef
+        orbitSpeedRef.current = slowerRangeValues[step]; // Update the value using useRef
     };
-
+    useEffect(()=>{
+        orbitSpeedRef.current = 0.1;
+    },[])
+    const planets = [
+        { name: 'Mercury', orbitalPeriod: 88 },
+        { name: 'Venus', orbitalPeriod: 225 },
+        { name: 'Earth', orbitalPeriod: 365 },
+        { name: 'Mars', orbitalPeriod: 687 },
+        { name: 'Jupiter', orbitalPeriod: 4333 },
+        { name: 'Saturn', orbitalPeriod: 10759 },
+        { name: 'Uranus', orbitalPeriod: 30687 },
+        { name: 'Neptune', orbitalPeriod: 60190 },
+      ];
+      
+      
     return (
         <div className='relative flex justify-center overflow-hidden'>
+            <div className="h-fit absolute left-0 mb-10 pt-2 pb-20 top-0">
+               <div className="w-full h-full rounded-xl rounded-l-none py-4">
+               {planetData.map((planet,index)=>(
+                <div onClick={()=>{navigate("/simulate/"+planet.id)}}
+                className={`px-6 py-2 font-ibm-thai border-b-2 bg-white bg-opacity-50 hover:bg-opacity-70 cursor-pointer
+                ${index===planetData.length-1 && "border-none"} ${index===0 && "rounded-tr-xl"} ${index===planetData.length-1 && "rounded-br-xl"}`}>
+                    <img src={planet.imageUrl} className="w-12 mx-auto"/>
+                    <p className="text-center font-bold">{planet.name_th}</p>
+                </div>
+               ))}
+               </div>
+            </div>
+            {/* <div className='absolute'>
+    {planets.map((planet, i) => (
+      <div key={planet.name}>
+        <h1>{planet.name}</h1>
+        <p>Current Day: {currentDays[i]}</p>
+        <p>Orbital Period: {planet.orbitalPeriod} Earth days</p>
+      </div>
+    ))}
+  </div> */}
             <canvas id="space" alt="space" ref={canvasRef} onMouseMove={handleMouseMove} onClick={handleMouseClick} />
-            <p className="text-4xl font-ibm-thai font-bold text-white absolute top-auto mx-auto">{hoverNow}</p>
-            <input type="range" className="absolute right-0" min={0} max={rangeValues.length - 1} step={1} 
-                defaultValue={2} onChange={handleRangeChange}/>
+            <p className="text-4xl font-ibm-thai font-bold text-white absolute top-auto mx-auto mt-14 tracking-wider">
+                {hoverNow && planetData.find(p => p.name === hoverNow)?.name_th}
+            </p>
+            {hoverNow && <p className='absolute mt-24 font-ibm-thai text-white'>กดที่ดาวเพื่อดูข้อมูลเพิ่มเติม</p>}
+            <div className='absolute w-full max-w-4xl top-5 flex h-fit text-white mx-auto font-ibm-thai cursor-pointer'>
+                <p className='ml-auto text-xl'>ช้ามาก</p>
+            <input type="range" className="w-3/4 h-4 appearance-none rounded-full bg-white outline-none mx-auto" min={0} max={slowerRangeValues.length - 1} step={1} 
+                defaultValue={0.1} onChange={handleRangeChange}/>
+                <p className='mr-auto text-xl'>เร็วมาก</p>
+            </div>
         </div>
     )
 };

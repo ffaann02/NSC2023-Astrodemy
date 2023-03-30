@@ -8,12 +8,13 @@ import { RiBrushFill } from "react-icons/ri"
 import { BiUser } from "react-icons/bi"
 import { IoPlanetSharp } from "react-icons/io5"
 import { MdOutlineContentCopy, MdDone, MdAccessTimeFilled, MdColorLens } from "react-icons/md"
-import { AiOutlineLink } from "react-icons/ai"
+import { AiOutlineLink,AiFillMinusSquare,AiFillPlusSquare } from "react-icons/ai"
 import { FaCrown } from "react-icons/fa"
 import AOS from "aos"
 import 'aos/dist/aos.css';
 import axios from "axios"
 import io from "socket.io-client"
+import { StarSky } from "../StarSky"
 const socket = io.connect("http://localhost:3001")
 const DrawingGame = () => {
     useEffect(() => {
@@ -309,6 +310,12 @@ const DrawingGame = () => {
             }
         }
     };
+    function handleRoundChange(num) {
+        const newRound = playRound + num;
+        if (newRound >= 2 && newRound <= 6) {
+          setPlayRound(newRound);
+        }
+      }
     const [scoreList, setScoreList] = useState([]);
     const [answerList, setAnswerList] = useState([]);
     useEffect(() => {
@@ -361,7 +368,7 @@ const DrawingGame = () => {
             <div className="w-full h-screen flex">
                 {!isJoin && userData && (
                     <div className="w-full max-w-4xl h-full mx-auto p-4 relative">
-                        <div className="grid grid-cols-2 bg-white border-2 mt-10 rounded-2xl pt-10 pb-16
+                        <div className="grid grid-cols-2 bg-white border-2 mt-10 rounded-2xl pt-10 pb-14
                     drop-shadow-md">
                             <div className="col-span-2 mb-14 text-center mt-0 text-2xl w-fit mx-auto">
                                 <img src="/assets/drawing-game_page/AstroDraw.png" className="w-48" />
@@ -402,7 +409,14 @@ const DrawingGame = () => {
                                     hover:marker:from-[#754798] hover:to-[#a65ea3] text-white rounded-xl flex
                                     font-ibm-thai"><IoPlanetSharp className="text-xl my-auto" />
                                         <p className="ml-3" onClick={handleGenerateRoomID}>สร้างห้องใหม่</p></button></div>
-                                <p className="text-center mt-2 font-ibm-thai">จำนวนรอบที่เล่น</p>
+                                <p className="text-center mt-4 font-ibm-thai">จำนวนรอบที่เล่น</p>
+                                <div className="w-fit mx-auto font-ibm-thai flex">
+                                    <AiFillMinusSquare className="my-auto mr-3 text-xl cursor-pointer text-red-300 hover:text-red-600" 
+                                    onClick={() => handleRoundChange(-1)}/>
+                                    <p className="text-xl font-bold my-auto">{playRound}</p>
+                                    <AiFillPlusSquare className="my-auto ml-3 text-xl cursor-pointer text-green-300 hover:text-green-600"
+                                    onClick={() => handleRoundChange(+1)}/>
+                                </div>
                                 <div>
                                     <p>{ }</p>
                                 </div>
@@ -426,12 +440,12 @@ const DrawingGame = () => {
                                         setCopyLink(false)
                                     }, 1000);
                                 }}>
-                                <p className="font-ibm-thai text-xl mt-[6px] mr-2">ห้อง: </p>
-                                <p className="text-3xl font-golos font-bold text-violet-900 cursor-pointer">{roomId}</p>
-                                {!copyLink ? <MdOutlineContentCopy className="ml-1 text-2xl my-auto cursor-pointer text-violet-900" />
+                                <p className="font-ibm-thai text-xl mt-[6px] mr-2 text-white">ห้อง: </p>
+                                <p className="text-3xl font-golos font-bold text-violet-600 cursor-pointer">{roomId}</p>
+                                {!copyLink ? <MdOutlineContentCopy className="ml-1 text-2xl my-auto cursor-pointer text-violet-600" />
                                     : <MdDone className="ml-1 text-2xl my-auto cursor-pointer text-green-500" />}
                             </div>
-                            <p id="loading-text" className="font-ibm-thai font-bold text-xl text-center mt-4"
+                            <p id="loading-text" className="font-ibm-thai font-bold text-xl text-center mt-4 text-white"
                             >กำลังรอผู้เล่นคนอื่น<span id="dot-animation"></span></p>
                             <p className="text-center">
                                 {playerNames.length > 0 && playerNames[0] === userData.username &&
@@ -497,7 +511,7 @@ const DrawingGame = () => {
                 {isJoin && start && (<>
                     <img src="/assets/astranaunt-painting.png"
                         id="astranaunt-painting"
-                        className="max-w-md absolute -z-10" />
+                        className="max-w-md absolute -z-[10]" />
                     <div className="h-fit w-full max-w-[52rem] mx-auto grid grid-cols-12 z-10 mt-10 relative">
                             {start && waiting && <div className="h-full flex absolute w-full">
                                 <p className="mx-auto z-[10000] mt-[20%] mb-auto text-[12rem] font-golos font-bold
@@ -511,8 +525,8 @@ const DrawingGame = () => {
                             {userData && playerNames[currentPlayer] === userData.username && (
                                 <div className="text-3xl font-ibm-thai font-bold text-center flex w-full ">
                                     {quizData && !waiting && <div className="text-center mx-auto flex">
-                                        <p className="text-gray-800">โจทย์:</p>
-                                        <p className="ml-2 text-[#864db3]">{quizData[currentPlayer]}</p>
+                                        <p className="text-white">โจทย์:</p>
+                                        <p className="ml-2 text-violet-600">{quizData[currentPlayer]}</p>
                                     </div>}
                                 </div>
                             )}
@@ -520,7 +534,7 @@ const DrawingGame = () => {
                             <div className="w-full flex mb-1">
                                 <MdAccessTimeFilled className="text-2xl my-auto z-[10] text-violet-900" />
                                 <div className="w-full h-4  my-auto border-[2px] -ml-2 z-[2] rounded-r-md 
-                            border-violet-900">
+                            border-violet-900  bg-white">
                                     <div style={{ width: barWidth }}
                                         className={`h-full bg-gradient-to-r from-[#a279c2] to-[#a746a2] ease-linear duration-300`}></div>
                                 </div>
@@ -542,7 +556,7 @@ const DrawingGame = () => {
                                 roomId={roomId} />
                         </div>
                         {userData && playerNames[currentPlayer] === userData.username &&
-                            (<div className="col-span-1 rounded-r-lg border-2 border-l-[0px] bg-sky-500 relative h-full">
+                            (<div className="col-span-1 rounded-r-lg border-2 border-l-[0px] bg-sky-500 relative h-full rounded-br-none">
                                 <div className="grid grid-cols-3 h-fit">
                                     {pencil_color_list.map((item, index) => {
                                         let ml = '';
@@ -660,6 +674,9 @@ const DrawingGame = () => {
 
                         </div>
                     </div></>)}
+            </div>
+            <div className="absolute top-0 left-0 -z-[100] w-full h-full">
+                <StarSky/>
             </div>
         </>
     )

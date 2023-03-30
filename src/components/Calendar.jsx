@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import "../App.css"
 function CalendarPage() {
     const [currentMonth, setCurrentMonth] = useState();
-    const [calendarData, setCalendarData] = useState([]);
+    const [calendarData, setCalendarData] = useState(null);
     const icons = [
         {
             id: 0,
@@ -150,7 +150,10 @@ function CalendarPage() {
                             ))}
                         </div>
                     </div>
-                    <div className="col-span-9 mt-10">
+                    
+                    <div className="col-span-9">
+                        {calendarData && <p className='mb-10 font-ibm-thai text-3xl font-bold text-right'>{currentMonth && months[currentMonth].month_th}</p>
+}
                         {calendarData && calendarData
                             .filter(event => event.month === currentMonth) // Filter events by current month
                             .map(event => {

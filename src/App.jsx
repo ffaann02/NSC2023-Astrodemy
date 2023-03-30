@@ -34,6 +34,8 @@ import Post from "./components/Post/Post";
 import Article from "./components/Post/Article";
 import ArticleCreate from "./components/Post/ArticleCreate";
 import Calendar from "./components/Calendar";
+import PuzzleGame from "./components/PuzzleGame/PuzzleGame";
+import Select3D from "./Select3D";
 export const UserContext = createContext();
 
 const firebaseConfig = {
@@ -65,9 +67,6 @@ function App() {
     }
   }, [logged]);
 
-
-  // Save userData to local storage before unmount
-  // Save userData to local storage before unmount
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (userData && logged) {
@@ -83,7 +82,6 @@ function App() {
   }, [userData, logged]);
 
 
-  // Fetch userData from database if not in local storage
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
     if (storedUserId && !userData) {
@@ -114,7 +112,7 @@ function App() {
     <UserContext.Provider value={{ logged, setLogged, userData, setUserData, userId }}>
       <Router>
         <Navbar />
-        <div className="w-full min-h-screen">
+        <div className="w-full min-h-screen relative">
         <Routes>
           <Route path="/" element={
             <About />
@@ -134,8 +132,14 @@ function App() {
           <Route path="/calendar" element={
             <Calendar/>
           } />
+          <Route path="/select-simulate" element={
+            <Select3D/>
+          } />
           <Route path="/game/drawing" element={
-            <DrawingGame />
+            <DrawingGame/>
+          } />
+          <Route path="/game/puzzle" element={
+            <PuzzleGame/>
           } />
           <Route path="/account" element={
             <Account />

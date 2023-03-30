@@ -55,7 +55,7 @@ export function StarSky() {
     ctx.fill();
 
     // Using setTimeout instead of window.requestAnimationFrame for slower speed
-    setTimeout(animate, 200);
+    setTimeout(animate, 500);
   }
 
   return (
