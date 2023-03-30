@@ -83,6 +83,7 @@ const ArticleCreate = () => {
     const [hoverChange, setHoverChange] = useState(false);
     const [preview, setPreview] = useState(null);
     const [coverUpload, setCoverUpload] = useState(false);
+    const [comments,setComments] = useState([]);
     function handleImageChange(event) {
         const file = event.target.files[0];
         if (file) {
@@ -229,7 +230,7 @@ const ArticleCreate = () => {
                 </div>
             )}
             <div className="w-full h-full max-w-5xl mx-auto rounded-lg shadow-lg border-t-gray-100 border-t-[1px] relative top-10">
-                <div className="w-full h-fit flex font-ibm-thai flex-col pb-10">
+                <div className="w-full h-fit flex font-ibm-thai flex-col pb-10 mb-10">
                     <p className='text-center mt-6 text-xl text-gray-400'>หน้าปกบทความ</p>
                     <div className="w-1/2 h-[300px] mt-2 mx-auto">
                         <div className="relative w-full h-full bg-gray-100 rounded-2xl border-[1.5px] flex hover:opacity-60 cursor-pointer"

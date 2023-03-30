@@ -6,7 +6,7 @@ import { BsKeyboardFill } from "react-icons/bs"
 import { MdArticle } from "react-icons/md"
 import { FaRegWindowClose } from "react-icons/fa"
 import { BsImage } from "react-icons/bs"
-import {AiOutlineMessage} from "react-icons/ai"
+import { AiOutlineMessage } from "react-icons/ai"
 import { initializeApp } from "firebase/app";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import 'firebase/firestore';
@@ -16,9 +16,25 @@ const Post = () => {
     const navigate = useNavigate();
     const { userData, logged, setLogged, setUserData, userId } = useContext(UserContext)
     const [blogData, setBlogData] = useState([]);
+    const [boardData, setBoardData] = useState([]);
+    const [allComments, setAllComments] = useState([]);
+    const [hotBlog,setHotBlog] = useState([]);
     useEffect(() => {
         axios.get('http://localhost:3005/articles')
-            .then(res => setBlogData(res.data))
+            .then(res => {
+                setBlogData(res.data)
+                setHotBlog(res.data);
+            })
+            .catch(err => console.log(err));
+    }, []);
+    useEffect(() => {
+        axios.get('http://localhost:3005/boards')
+            .then(res => setBoardData(res.data))
+            .catch(err => console.log(err));
+    }, []);
+    useEffect(() => {
+        axios.get('http://localhost:3005/all_comments')
+            .then(res => setAllComments(res.data))
             .catch(err => console.log(err));
     }, []);
     const dummyBlogData = [
@@ -90,6 +106,7 @@ const Post = () => {
 
     const [createBoard, setCreateBoard] = useState(false);
     const [option, setOption] = useState(1);
+
     const createBoardRef = useRef(null);
     useEffect(() => {
         function handleClickOutside(event) {
@@ -97,7 +114,6 @@ const Post = () => {
                 setCreateBoard(false);
             }
         }
-
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
@@ -107,15 +123,48 @@ const Post = () => {
     const [preview, setPreview] = useState(null);
     const [coverUpload, setCoverUpload] = useState(false);
     const [coverUrl, setCoverUrl] = useState("");
-    const firebaseConfig = {
-        apiKey: process.env.REACT_APP_API_KEY,
-        authDomain: process.env.REACT_APP_AUTH_DOMAIN,
-        projectId: process.env.REACT_APP_PROJECT_ID,
-        storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
-        messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
-        appId: process.env.REACT_APP_APP_ID,
-        measurementId: process.env.REACT_APP_MEASUREMENT_ID
-    };
+    const [searchTitle, setSearchTitle] = useState("");
+    const handleSearch = async () => {
+        if (searchTitle === "") {
+            try {
+                const response = await axios.get(`http://localhost:3005/articles`);
+                setBlogData(response.data);
+            } catch (error) {
+                setBlogData([]);
+                console.error(error);
+            }
+            return;
+        }
+        try {
+            // const response = await axios.get(`http://localhost:3005/comments?title=${title}`);
+            const response = await axios.get(`http://localhost:3005/articles_search?title=${searchTitle}`);
+            setBlogData(response.data);
+        } catch (error) {
+            setBlogData([]);
+            console.error(error);
+        }
+    }
+    const [searchTitleBoard,setSearchTitleBoard] = useState("");
+    const handleSearchBoard = async () => {
+        if (searchTitleBoard === "") {
+            try {
+                const response = await axios.get(`http://localhost:3005/boards`);
+                setBoardData(response.data);
+            } catch (error) {
+                setBoardData([]);
+                console.error(error);
+            }
+            return;
+        }
+        try {
+            // const response = await axios.get(`http://localhost:3005/comments?title=${title}`);
+            const response = await axios.get(`http://localhost:3005/boards_search?title=${searchTitleBoard}`);
+            setBoardData(response.data);
+        } catch (error) {
+            setBoardData([]);
+            console.error(error);
+        }
+    }
     function handleImageChange(event) {
         const file = event.target.files[0];
         if (file) {
@@ -143,12 +192,24 @@ const Post = () => {
             });
         }
     }
-    const [boardTitle,setBoardTitle] = useState("");
-    const [boardContent,setBoardContent] = useState("");
+    const [boardTitle, setBoardTitle] = useState("");
+    const [boardContent, setBoardContent] = useState("");
     const handlePublishBoard = () => {
+        // [title, author, content, path, coverImage,  date, authorProfile]
+        const convertedStr = boardTitle.toLowerCase().replace(/[^a-z0-9ก-๙]+/g, "-");
+        const today = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDate = today.toLocaleDateString('th-TH', options);
         axios.post('http://localhost:3005/create_board', {
-                    
-                })
+            title: boardTitle,
+            author: userData.username,
+            content: boardContent,
+            path: convertedStr,
+            coverImage: coverUrl,
+            date: formattedDate,
+            authorProfile: userData.userProfile
+        })
+        setCreateBoard(false);
     }
     return (
         <>
@@ -181,15 +242,15 @@ const Post = () => {
                                         className="top-0 w-full h-full cursor-pointer absolute bg-blue-200 opacity-0 z-[120]" />
                                 </div>
                                 <input type="text" className="w-full border-none bg-transparent font-bold outline-none font-ibm-thai text-gray-800 
-                                mt-4 ml-10 text-2xl mb-2 leading-[0px]" placeholder="หัวเรื่อง" 
-                                onChange={(e) => { setBoardTitle(e.target.value) }} />
+                                mt-4 ml-10 text-2xl mb-2 leading-[0px]" placeholder="หัวเรื่อง"
+                                    onChange={(e) => { setBoardTitle(e.target.value) }} />
                                 <div className='px-10'>
-                                <textarea rows="5" className="w-full bg-transparent outline-none font-ibm-thai text-gray-600
-                                text-lg bg-gray-100 border-2 rounded-md px-2 py-2" placeholder="เนื้อหา" 
-                                onChange={(e) => { setBoardContent(e.target.value) }} />
-                                <button className="py-3 rounded-xl text-md bg-gradient-to-r font-ibm-thai
+                                    <textarea rows="5" className="w-full bg-transparent outline-none font-ibm-thai text-gray-600
+                                text-lg bg-gray-100 border-2 rounded-md px-2 py-2" placeholder="เนื้อหา"
+                                        onChange={(e) => { setBoardContent(e.target.value) }} />
+                                    <button className="py-3 rounded-xl text-md bg-gradient-to-r font-ibm-thai
                 ease-in-out duration-300 from-[#6e3f92] to-[#a94fa4] hover:marker:from-[#754798] hover:to-[#a65ea3] 
-                text-white px-4">เผยแพร่</button>
+                text-white px-4" onClick={handlePublishBoard}>โพสต์</button>
                                 </div>
                             </div>
                         </div>
@@ -220,15 +281,25 @@ const Post = () => {
                             <div className='w-full flex'>
                                 <div className='flex p-2 rounded-xl bg-gray-100 w-3/4'>
                                     <CiSearch className="text-xl my-auto" />
-                                    <input className="w-full border-none bg-transparent outline-none font-ibm-thai text-gray-600 px-2 pt-1"
-                                        placeholder="ค้นหาบทความดาราศาสตร์" />
+                                    <input
+                                        className="w-full border-none bg-transparent outline-none font-ibm-thai text-gray-600 px-2 pt-1"
+                                        placeholder="ค้นหาบทความดาราศาสตร์"
+                                        onChange={(event) => setSearchTitle(event.target.value)}
+                                        onKeyDown={(event) => {
+                                            if (event.key === 'Enter') {
+                                                handleSearch();
+                                            }
+                                        }}/>
+
                                 </div>
                             </div>
                             <div className="w-full pr-20">
                                 <div className='border-b-[1px] w-full p-2 pb-1 mt-4'>
                                     <p className='text-xl font-ibm-thai'>บทความ 💫</p>
                                 </div>
+
                                 <div id="blog-container">
+                                    {blogData.length<=0 &&<p className='text-center font-ibm-thai text-2xl my-auto mt-6'>ไม่พบบทความ</p>}
                                     {blogData && blogData.map((post) => (
                                         <div className="px-2 py-6 font-ibm-thai grid grid-cols-12 border-b-[1px] cursor-pointer" key={post.id}>
                                             <div className="col-span-9">
@@ -258,7 +329,7 @@ const Post = () => {
                         <div className="col-span-3 h-full font-ibm-thai">
                             <p>กำลังมาแรง 🚀</p>
                             <div className="">
-                                {blogData && blogData.slice(0, 3).map((post) => (
+                                {hotBlog && hotBlog.slice(0, 3).map((post) => (
                                     <div className='w-full mt-6 cursor-pointer'>
                                         <div className="flex my-2">
                                             <img src={post.authorProfile} className="w-8 rounded-full" />
@@ -278,15 +349,21 @@ const Post = () => {
                             </div>
                         </div>
                     </div>}
-                {option === 2 && userData && blogData &&
-                    <div className="w-full h-full max-w-4xl mx-auto mt-14 grid grid-cols-9">
+                {option === 2 && userData && boardData &&
+                    <div className="w-full h-full max-w-3xl mx-auto mt-14 grid grid-cols-9">
                         <div className="col-span-full h-full">
-                            <div className="w-full pr-20">
+                            <div className="w-full">
                                 <div className='w-full flex'>
                                     <div className='flex p-2 rounded-lg bg-gray-100 w-3/4 mx-auto'>
                                         <CiSearch className="text-xl my-auto" />
                                         <input className="w-full border-none bg-transparent outline-none font-ibm-thai text-gray-600 px-2 pt-1"
-                                            placeholder="ค้นหาการพูดคุยเกี่ยวกับดาราศาสตร์" />
+                                            placeholder="ค้นหาการพูดคุยเกี่ยวกับดาราศาสตร์" 
+                                            onChange={(event) => setSearchTitleBoard(event.target.value)}
+                                        onKeyDown={(event) => {
+                                            if (event.key === 'Enter') {
+                                                handleSearchBoard();
+                                            }
+                                        }}/>
                                     </div>
                                 </div>
 
@@ -300,9 +377,10 @@ const Post = () => {
                         font-ibm-thai text-gray-400 px-2 outline-none py-1 hover:outline-blue-200 focus:outline-blue-200'
                                             placeholder='สร้างกระดานใหม่' onClick={() => { setCreateBoard(true) }} />
                                     </div>
+                                    {boardData.length<=0 &&<p className='text-center font-ibm-thai text-2xl my-auto mt-6'>ไม่พบบทบอร์ด</p>}
 
-                                    {blogData && dummyBlogData.map((post) => (
-                                        <div className="border-gray-200 border-[1.5px] px-10 pt-10 pb-5 font-ibm-thai grid grid-cols-12 
+                                    {boardData && boardData.map((post) => (
+                                        <div className="border-gray-200 border-[1.5px] px-10 pt-6 pb-5 font-ibm-thai grid grid-cols-12 
                             cursor-pointer my-4 rounded-lg shadow-sm"
                                             key={post.id}>
                                             <div className="col-span-full">
@@ -311,8 +389,10 @@ const Post = () => {
                                                     <p className="my-auto ml-2 font-semibold">{post.author} </p>
                                                     <p className="my-auto ml-2 text-sm text-gray-400">{post.date}</p>
                                                 </div>
-                                                <p className="text-2xl my-1 font-bold" onClick={() => navigate("/post/" + post.path)}>{post.title}</p>
-                                                <p onClick={() => navigate("/post/" + post.path)}>{new DOMParser().parseFromString(post.content, 'text/html').body.innerText.substring(0, 150)}{post.content.length > 150 && "..."}</p>
+                                                <p className="text-2xl my-1 font-bold" onClick={() => navigate("/board/" + post.path)}>{post.title}</p>
+                                                <p onClick={() => navigate("/board/" + post.path)} className="mb-2 text-xl"
+                                                >{new DOMParser().parseFromString(post.content, 'text/html').body.innerText.substring(0, 150)}
+                                                    {post.content.length > 150 && "..."}</p>
                                                 {/* <div className='flex mt-3' id="tag-container">
                                         {post.tags.map((tag, index) => (
                                             <div className="px-2 py-1 bg-gray-200 rounded-full text-gray-600 text-sm mr-2" key={index}>
@@ -321,13 +401,13 @@ const Post = () => {
                                         ))}
                                     </div> */}
                                             </div>
-                                            <div onClick={() => navigate("/post/" + post.path)} className="col-span-full flex">
+                                            <div onClick={() => navigate("/board/" + post.path)} className="col-span-full flex">
                                                 <img src={post.coverImage} className="my-auto" />
                                             </div>
                                             <div className='col-span-full mt-4'>
                                                 <div className='text-gray-600 flex'>
-                                                    <AiOutlineMessage className='text-xl mr-2'/>
-                                                    <p>0 แสดงความคิดเห็น</p>
+                                                    <AiOutlineMessage className='text-xl mr-2' />
+                                                    <p>{allComments.filter((comment) => comment.title === post.title).length} ความคิดเห็น</p>
                                                 </div>
                                             </div>
                                         </div>
