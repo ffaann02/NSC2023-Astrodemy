@@ -51,8 +51,8 @@ const Navbar = () => {
                         <FaAngleDown className="absolute bg-white rounded-full
                         text-md p-[0.5px] bottom-0 right-9 border-gray-100 border-[2px]"
                         onClick={()=>setToggleUserIcon(prev=>!prev)}/>
-                        <div className="bg-red-500 w-5 h-5 rounded-full flex absolute -right-3 top-1">
-                            <p className="m-auto text-xs font-bold mt-[2.5px] text-white">1</p>
+                        <div className="bg-gray-400 w-5 h-5 rounded-full flex absolute -right-3 top-1">
+                            <p className="m-auto text-xs font-bold mt-[2.5px] text-white">0</p>
                         </div>
                         <div className="my-auto ml-3 bg-gray-100 p-1 rounded-full" onClick={()=>setToggleNotiIcon(prev=>!prev)}>
                         <IoMdNotificationsOutline className="text-xl text-black"/>
