@@ -8,8 +8,10 @@ import { RiBrushFill } from "react-icons/ri"
 import { BiUser } from "react-icons/bi"
 import { IoPlanetSharp } from "react-icons/io5"
 import { MdOutlineContentCopy, MdDone, MdAccessTimeFilled, MdColorLens } from "react-icons/md"
-import { AiOutlineLink,AiFillMinusSquare,AiFillPlusSquare } from "react-icons/ai"
+import { AiOutlineLink, AiFillMinusSquare, AiFillPlusSquare } from "react-icons/ai"
 import { FaCrown } from "react-icons/fa"
+import { FaRegWindowClose } from "react-icons/fa"
+
 import AOS from "aos"
 import 'aos/dist/aos.css';
 import axios from "axios"
@@ -95,7 +97,7 @@ const DrawingGame = () => {
             console.log(totalRounds);
             socket.emit("newPlayer", {
                 roomId: newRoomId, playerName: userData.username, playerProfile: userData.userProfile,
-                totalRound: totalRounds
+                totalRound: playRound
             });
             setIsJoin(true);
         }
@@ -111,7 +113,7 @@ const DrawingGame = () => {
             axios
                 .get('http://localhost:3005/quiz', {
                     params: {
-                        n: (playerNames.length)
+                        n: (playerNames.length)*playRound
                     }
                 })
                 .then((response) => {
@@ -152,21 +154,26 @@ const DrawingGame = () => {
             socket.off("playerList");
         };
     }, [roomId]);
-    const TOTAL_ROUND_TIME = 90;
+    const TOTAL_ROUND_TIME = 40;
     const [copyLink, setCopyLink] = useState(false);
     const [currentRound, setCurrentRound] = useState(0);
     const [currentPlayer, setCurrentPlayer] = useState(0);
     const [roundTime, setRoundTime] = useState(TOTAL_ROUND_TIME); // in seconds
     const [timeLeft, setTimeLeft] = useState(roundTime);
     const resetGame = () => {
+        setCorrectPlayerAmount(0);
+        setStatusList([]);
+        setCountdown(null);
         setSize(5);
         setColor("#000000")
         setCopyLink(false);
-        setTotalRounds(totalRounds);
+        setTotalRounds(playRound);
         setCurrentRound(0);
         setCurrentPlayer(0);
         setRoundTime(TOTAL_ROUND_TIME);
         setTimeLeft(TOTAL_ROUND_TIME);
+        setAnswerList([]);
+        setScoreList(Array(scoreList.length).fill(0));
     };
     const [waiting, setWaiting] = useState(false);
     useEffect(() => {
@@ -177,86 +184,113 @@ const DrawingGame = () => {
             }, 1000);
         } else if (start && !waiting) {
             setTimeLeft(roundTime);
-            if (currentPlayer === playerNames.length - 1 && currentRound === totalRounds - 1) {
+            if (currentPlayer === playerNames.length - 1 && currentRound === playRound - 1) {
                 // End of the game
                 setStart(false);
-                resetGame();
+                
+                setShowRank(true);
+                const combinedData = playerNames.map((name, index) => {
+                    return { name, profile:playerProfiles[index],score: scoreList[index] };
+                  }).sort((a, b) => b.score - a.score);
+              
+                  setPlayerScores(combinedData);
+                  console.log(combinedData)
+                  resetGame();
             } else if (currentPlayer === playerNames.length - 1) {
                 setWaiting(true);
-                axios
-                  .get('http://localhost:3005/quiz', {
-                    params: {
-                      n: playerNames.length
-                    }
-                  })
-                  .then((response) => {
-                    setQuizData(response.data);
-                    socket.emit('quizData', { roomId: roomId, quizData: response.data });
-                  })
-                  .catch((error) => {
-                    console.log(error);
-                  });
-                let countDown = 5;
+                // axios
+                //     .get('http://localhost:3005/quiz', {
+                //         params: {
+                //             n: playerNames.length
+                //         }
+                //     })
+                //     .then((response) => {
+                //         setQuizData(response.data);
+                //         socket.emit('quizData', { roomId: roomId, quizData: response.data });
+                //     })
+                //     .catch((error) => {
+                //         console.log(error);
+                //     });
+                let countDown = 7;
                 const intervalId = setInterval(() => {
                     setClear(Date.now());
-                  countDown--;
-                  setCountdown(countDown);
-                  if (countDown === 0) {
-                    clearInterval(intervalId);
-                    setRoundTime(TOTAL_ROUND_TIME);
-                    setTimeLeft(TOTAL_ROUND_TIME);
-                    setCurrentRound((currentRound) => currentRound + 1);
-                    setCurrentPlayer(0);
-                    setCorrect(false); // clear canvas for the next round
-                    setWaiting(false);
-                    setCountdown(null);
-                    socket.emit('resetScore', { roomId: roomId });
-                    socket.emit('sendStatus', {
-                      roomId: roomId,
-                      message: `🎨 ${playerNames[0]} กำลังวาดอยู่`,
-                    });
-                  }
+                    countDown--;
+                    setCountdown(countDown);
+                    if (countDown === 0) {
+                        setQuizData(quizData.slice(playerNames.length));
+                        clearInterval(intervalId);
+                        setRoundTime(TOTAL_ROUND_TIME);
+                        setTimeLeft(TOTAL_ROUND_TIME);
+                        setCurrentRound((currentRound) => currentRound + 1);
+                        setCurrentPlayer(0);
+                        setCorrect(false); // clear canvas for the next round
+                        setWaiting(false);
+                        setCountdown(null);
+                        socket.emit('resetScore', { roomId: roomId });
+                        
+                        // socket.emit('sendStatus', {
+                        //   roomId: roomId,
+                        //   message: `🎨 ${playerNames[0]} กำลังวาดอยู่`,
+                        // });
+                    }
                 }, 1000);
-              } else {
+            } else {
                 setWaiting(true);
                 setClear(Date.now());
-                let countDown = 5;
+                let countDown = 7;
                 const intervalId = setInterval(() => {
-                  countDown--;
-                  setCountdown(countDown);
-                  if (countDown === 0) {
-                    clearInterval(intervalId);
-                    setRoundTime(TOTAL_ROUND_TIME);
-                    setTimeLeft(TOTAL_ROUND_TIME);
-                    setCurrentPlayer((currentPlayer) => currentPlayer + 1);
-                    setSize(5);
-                    setColor("#000000");
-                    setCorrect(false);
-                    setClear(Date.now());
-                    setWaiting(false);
-                    setCountdown(null);
-                    socket.emit('resetScore', { roomId: roomId });
-                    if (playerNames[currentPlayer + 1] === userData.username) {
-                      socket.emit('sendStatus', {
-                        roomId: roomId,
-                        message: `🎨 ${playerNames[currentPlayer + 1]} กำลังวาดอยู่`,
-                      });
+                    countDown--;
+                    setCountdown(countDown);
+                    if (countDown === 0) {
+                        clearInterval(intervalId);
+                        setRoundTime(TOTAL_ROUND_TIME);
+                        setTimeLeft(TOTAL_ROUND_TIME);
+                        setCurrentPlayer((currentPlayer) => currentPlayer + 1);
+                        setSize(5);
+                        setColor("#000000");
+                        setCorrect(false);
+                        setClear(Date.now());
+                        setWaiting(false);
+                        setCountdown(null);
+                        socket.emit('resetScore', { roomId: roomId });
+                        if (playerNames[currentPlayer + 1] === userData.username) {
+                            socket.emit('sendStatus', {
+                                roomId: roomId,
+                                message: `🎨 ${playerNames[currentPlayer + 1]} กำลังวาดอยู่`,
+                            });
+                        }
                     }
-                  }
                 }, 1000);
-              }
+            }
+            const combinedData = playerNames.map((name, index) => {
+                return { name, profile:playerProfiles[index],score: scoreList[index] };
+              }).sort((a, b) => b.score - a.score);
+          
+              setPlayerScores(combinedData);
         }
 
         return () => {
             clearInterval(timerId);
         };
-    }, [start, timeLeft, currentPlayer, currentRound, totalRounds, roundTime, playerNames, waiting]);
+    }, [start, timeLeft, currentPlayer, currentRound, playRound, roundTime, playerNames, waiting]);
     const [timeShow, setTimeShow] = useState(0);
     const barWidth = `${((timeLeft / roundTime) * 100)}%`;
     const [answer, setAnswer] = useState("");
     const dummyQuestionList = ["นีล อาร์มสตรอง", "ดาวเสาร์", "ดวงอาทิตย์"]
     const [correctPlayerAmount, setCorrectPlayerAmount] = useState(0);
     const [countdown, setCountdown] = useState(null);
+    useEffect(() => {
+        if (correctPlayerAmount === playerNames.length - 1) {
+            console.log("all players answered");
+            socket.emit('allAnswered', {
+                roomId: roomId,
+                message: `ทุกคนวาดเสร็จแล้ว`,
+            });
+        }
+    }, [correctPlayerAmount])
+    const [showRank,setShowRank] = useState(false);
+    const [playerScoresList, setPlayerScores] = useState([]); 
+ 
     const handleKeyDown = (event) => {
         const index = playerNames.findIndex((name) => name === userData.username);
         const newScoreList = [...scoreList];
@@ -313,9 +347,9 @@ const DrawingGame = () => {
     function handleRoundChange(num) {
         const newRound = playRound + num;
         if (newRound >= 2 && newRound <= 6) {
-          setPlayRound(newRound);
+            setPlayRound(newRound);
         }
-      }
+    }
     const [scoreList, setScoreList] = useState([]);
     const [answerList, setAnswerList] = useState([]);
     useEffect(() => {
@@ -336,6 +370,9 @@ const DrawingGame = () => {
         })
         socket.on("globalCountdown", (timeLeft) => {
             setTimeShow(timeLeft);
+        })
+        socket.on("allAnswered", () => {
+            setTimeLeft(1);
         })
         return () => {
             socket.off('answer');
@@ -361,11 +398,13 @@ const DrawingGame = () => {
     const [statusList, setStatusList] = useState([]);
     return (
         <>
+
             {popupFade && (
-                <div className={`z-[200] font-ibm-thai ${popupColor} top-20 w-full text-center absolute`} id="popup-text">
+                <div className={`z-[200] font-ibm-thai ${popupColor} top-4 w-full text-center absolute`} id="popup-text">
                     <p>{popupText}</p>
                 </div>)}
-            <div className="w-full h-screen flex">
+            <div className="w-full h-screen flex relative">
+                
                 {!isJoin && userData && (
                     <div className="w-full max-w-4xl h-full mx-auto p-4 relative">
                         <div className="grid grid-cols-2 bg-white border-2 mt-10 rounded-2xl pt-10 pb-14
@@ -411,11 +450,11 @@ const DrawingGame = () => {
                                         <p className="ml-3" onClick={handleGenerateRoomID}>สร้างห้องใหม่</p></button></div>
                                 <p className="text-center mt-4 font-ibm-thai">จำนวนรอบที่เล่น</p>
                                 <div className="w-fit mx-auto font-ibm-thai flex">
-                                    <AiFillMinusSquare className="my-auto mr-3 text-xl cursor-pointer text-red-300 hover:text-red-600" 
-                                    onClick={() => handleRoundChange(-1)}/>
+                                    <AiFillMinusSquare className="my-auto mr-3 text-xl cursor-pointer text-red-300 hover:text-red-600"
+                                        onClick={() => handleRoundChange(-1)} />
                                     <p className="text-xl font-bold my-auto">{playRound}</p>
                                     <AiFillPlusSquare className="my-auto ml-3 text-xl cursor-pointer text-green-300 hover:text-green-600"
-                                    onClick={() => handleRoundChange(+1)}/>
+                                        onClick={() => handleRoundChange(+1)} />
                                 </div>
                                 <div>
                                     <p>{ }</p>
@@ -424,7 +463,41 @@ const DrawingGame = () => {
                         </div>
                     </div>
                 )}
-                {isJoin && !start && (
+                {showRank && playerScoresList && (
+                    <>
+                        <div className="w-full max-w-3xl h-full mx-auto p-4 relative mt-2 min-h-screen">
+                            <div className="w-full h-full bg-white rounded-2xl p-10 font-ibm-thai relative">
+                                <FaRegWindowClose className="text-4xl absolute right-4 top-4 text-red-400 cursor-pointer"
+                                onClick={()=>{
+                                    setStart(false);
+                                    setShowRank(false);
+                                }}/>
+                                <div className="w-full">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/3112/3112946.png" className="w-20 mx-auto mb-6"/>
+                                    <p className="text-3xl font-bold text-center">อันดับคะแนน</p>
+                                </div>
+                                <div className="mt-6">
+                                    {playerScoresList.map((player,index)=>(
+                                        <div className={`text-xl font-bold flex ${index===0?"bg-blue-400":"bg-blue-300"} 
+                                        py-4 px-4 rounded-lg justify-between
+                                         my-3`}>
+                                            <div className="flex my-auto text-white">
+                                                <p className="mr-4 my-auto">{index+1}</p>
+                                                <img src={player.profile} className="w-10 mr-2 rounded-md border-white border-[1.5px]"/>
+                                                <p className="mr-4 my-auto">{player.name}</p>
+                                            </div>
+                                            <div className="flex">
+                                                
+                                            <p className="text-2xl my-auto text-white">{player.score}</p>
+                                            {index===0 && <FaCrown className="text-3xl ml-2 text-orange-400"/>}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </>)}
+                {isJoin && !start && !showRank && (
                     <>
                         <div className="w-full max-w-4xl h-full mx-auto p-4 relative ">
                             <div className="flex w-fit mx-auto mt-6"
@@ -442,7 +515,7 @@ const DrawingGame = () => {
                                 }}>
                                 <p className="font-ibm-thai text-xl mt-[6px] mr-2 text-white">ห้อง: </p>
                                 <p className="text-3xl font-golos font-bold text-violet-600 cursor-pointer">{roomId}</p>
-                                {!copyLink ? <MdOutlineContentCopy className="ml-1 text-2xl my-auto cursor-pointer text-violet-600" />
+                                {!copyLink ? <MdOutlineContentCopy className="ml-1 text-2xl my-auto cursor-pointer text-white" />
                                     : <MdDone className="ml-1 text-2xl my-auto cursor-pointer text-green-500" />}
                             </div>
                             <p id="loading-text" className="font-ibm-thai font-bold text-xl text-center mt-4 text-white"
@@ -513,12 +586,7 @@ const DrawingGame = () => {
                         id="astranaunt-painting"
                         className="max-w-md absolute -z-[10]" />
                     <div className="h-fit w-full max-w-[52rem] mx-auto grid grid-cols-12 z-10 mt-10 relative">
-                            {start && waiting && <div className="h-full flex absolute w-full">
-                                <p className="mx-auto z-[10000] mt-[20%] mb-auto text-[12rem] font-golos font-bold
-                                text-violet-900">
-                                    {countdown}
-                                </p>
-                            </div>}
+                        
                         {userData && playerNames[currentPlayer] !== userData.username && <div className="col-span-1"></div>}
                         <div className={`${userData && playerNames[currentPlayer] === userData.username ? "col-span-full" : "col-span-11"}`}>
                             {/* <p>ผู้เล่น: {playerNames[currentPlayer]}</p> */}
@@ -526,11 +594,11 @@ const DrawingGame = () => {
                                 <div className="text-3xl font-ibm-thai font-bold text-center flex w-full ">
                                     {quizData && !waiting && <div className="text-center mx-auto flex">
                                         <p className="text-white">โจทย์:</p>
-                                        <p className="ml-2 text-violet-600">{quizData[currentPlayer]}</p>
+                                        <p className="ml-2 text-white">{quizData[currentPlayer]}</p>
                                     </div>}
                                 </div>
                             )}
-                            <p className="text-2xl font-ibm-thai font-bold">คนวาด: {playerNames[currentPlayer]}</p>
+                            <p className="text-2xl font-ibm-thai font-bold text-white">คนวาด: {playerNames[currentPlayer]}</p>
                             <div className="w-full flex mb-1">
                                 <MdAccessTimeFilled className="text-2xl my-auto z-[10] text-violet-900" />
                                 <div className="w-full h-4  my-auto border-[2px] -ml-2 z-[2] rounded-r-md 
@@ -540,11 +608,20 @@ const DrawingGame = () => {
                                 </div>
                             </div>
                         </div>
-                        {userData && playerNames[currentPlayer] !== userData.username && <div clasName="col-span-1"></div>}
-                        <div className={`w-full h-[55vh] mt-0 rounded-l-2xl bg-white border-2 rounded-bl-none rounded-br-none
+                        {userData && playerNames[currentPlayer] !== userData.username && <div className="col-span-1"></div>}
+                        <div className={`relative w-full h-[55vh] mt-0 rounded-l-2xl bg-white border-2 rounded-bl-none rounded-br-none
                     ${userData && playerNames[currentPlayer] === userData.username ? "rounded-r-none" : "rounded-r-2xl"}
                     ${userData && playerNames[currentPlayer] === userData.username ? "col-span-11" : "col-span-11"}`}
                             id="canvas-container">
+                                {waiting && start && countdown&& <div className="h-full flex absolute w-full">
+                    <div className="mx-auto z-[10000] mt-[16%] mb-auto font-ibm-thai font-bold
+                                text-violet-900 flex flex-col ">
+                        <p className="text-[12rem] leading-[10rem] text-center">{countdown}</p>
+                        <p className="text-center text-4xl">เฉลย: {quizData[currentPlayer]}</p>
+                        <p className="text-center text-2xl mt-3">คนวาดต่อไป: {currentPlayer+1===playerNames.length?playerNames[0]:
+                        playerNames[currentPlayer+1]}</p>
+                    </div>
+                </div>}
                             <Canvas
                                 currentPlayerName={playerNames[currentPlayer]}
                                 username={userData && (userData.username)}

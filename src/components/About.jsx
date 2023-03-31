@@ -1,7 +1,9 @@
 import "./HomeAssets/style.css"
 import React, { useEffect } from "react"
 import AboutUs from "./HomeAssets/AboutUs"
+import { useNavigate,Link } from "react-router-dom"
 const About = () => {
+    const navigate = useNavigate();
     useEffect(() => {
         const body = document.getElementById("star");
         let meteorNumber = 35;
@@ -20,9 +22,12 @@ const About = () => {
                             <p className="text-xl font-normal text-gray-200 leading-8">เรามุ่งเน้นที่จะสร้างประสบการณ์ใหม่แห่งการเรียนรู้ดาราศาสตร์แก่คนทุกคน
                                 มาเริ่มเรียนรู้กันเลยเถอะ</p>
                         </div>
+                        <Link to="/select-simulate">
                         <button className="rounded-3xl text-lg bg-gradient-to-r px-6 py-2
                         from-[#6e3f92] to-[#a94fa4]
-                        hover:marker:from-[#754798] hover:to-[#a65ea3] text-white hover:px-7 ease-in-out duration-300">เริ่มต้นใช้งาน</button>
+                        hover:marker:from-[#754798] hover:to-[#a65ea3] text-white hover:px-7 ease-in-out duration-300"
+                        >เริ่มต้นใช้งาน</button>
+                        </Link>
                     </div>
                     <img src="/assets/about_page/telescope_mountain.png" className="absolute w-full xl:w-3/4 left-1/2 transform -translate-x-1/2 
             -z-10 -bottom-10"/>

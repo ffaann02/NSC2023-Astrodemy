@@ -45,9 +45,11 @@ function MissionSort(props) {
         <div className="">
             <header className="App-header">
                 <p className="text-center font-ibm-thai text-3xl">จัดเรียงภาพภารกิจทางอวกาศให้ตรงกับข้อความ</p>
-                <div className="font-ibm-thai text-xl mb-10 mt-2 flex w-3/4 mx-auto">
+                <div className="font-ibm-thai text-xl mb-10 mt-2 px-2 mx-auto grid grid-cols-10">
                     {planetsData.map((item)=>(
-                        <p className="text-center mx-auto">{item.name}</p>
+                        <div className="col-span-2 ">
+                            <p className="text-center">{item.name}</p>
+                        </div>
                     ))}
                 </div>
                 <div className='w-fit mx-auto'>

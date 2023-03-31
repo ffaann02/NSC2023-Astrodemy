@@ -37,6 +37,7 @@ import Calendar from "./components/Calendar";
 import PuzzleGame from "./components/PuzzleGame/PuzzleGame";
 import Select3D from "./Select3D";
 import Board from "./components/Post/Board";
+import AccountSetting from "./AccountSetting";
 export const UserContext = createContext();
 
 const firebaseConfig = {
@@ -143,7 +144,8 @@ function App() {
             <PuzzleGame/>
           } />
           <Route path="/account" element={
-            <Account />
+            // <Account />
+            <AccountSetting/>
           } />
           <Route path="/post" element={
             <Post/>

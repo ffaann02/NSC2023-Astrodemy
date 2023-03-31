@@ -139,7 +139,7 @@ const Game = () => {
         </div>
       )}
       <div className="max-w-5xl m-auto h-fit my-auto grid grid-cols-12 z-[20] relative" id="game-block">
-        <div className="col-span-full text-center mt-24">
+        <div className="col-span-full text-center mt-16">
           <img src="/assets/drawing-game_page/AstroArcade.png" className="w-52 mx-auto" data-aos="fade-down" data-aos-delay="200" />
         </div>
         <div className={`col-span-6 px-5 opacity-80 hover:opacity-100 cursor-pointer mt-10 hover:mt-4 ease-in-out duration-300
