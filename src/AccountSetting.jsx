@@ -4,6 +4,8 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { UserContext } from "./App";
 import firebase from 'firebase/compat/app';
 import { AiFillEdit } from "react-icons/ai"
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content'
 import "./App.css"
 const AccountSetting = () => {
     const { userData, logged, setLogged, setUserData } = useContext(UserContext);
@@ -64,6 +66,19 @@ const AccountSetting = () => {
         reader.readAsDataURL(file);
     };
 
+    const sweetAlert = withReactContent(Swal)
+    const showAlert = (title, html, icon) => {
+        sweetAlert.fire({
+            title: <strong>{title}</strong>,
+            html: <i>{html}</i>,
+            icon: icon,
+            confirmButtonText: 'ตกลง'
+        })
+        .then(() => {
+            window.location.reload();
+        })
+    }
+
     const [toggleChangePass, setToggleChangePassword] = useState(false);
     const handleUpload = async () => {
         if (image) {
@@ -80,7 +95,8 @@ const AccountSetting = () => {
                 })
                     .then(() => {
                         // Reload the page after the profile image has been updated
-                        window.location.reload();
+                        // window.location.reload();
+                        showAlert('บันทึกข้อมูลสำเร็จ', 'ข้อมูลบัญชีของคุณอัปเดตแล้ว', 'success');
                     })
                     .catch((error) => {
                         console.error('Error updating profile image: ', error);

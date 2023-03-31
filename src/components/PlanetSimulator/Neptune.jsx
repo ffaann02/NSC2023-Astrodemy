@@ -286,7 +286,8 @@ const Neptune = (event) => {
 
             {showDetail ?
                 <div className="absolute font-ibm-thai text-white 
-               bg-gradient-to-b from-zinc-800 w-1/2 h-full right-0" >
+               bg-gradient-to-b from-zinc-800 w-1/2 h-full right-0
+               overflow-auto overflow-y-scroll scrollbar-thin scrollbar-thumb-transparent pb-14" >
                     <p className="text-4xl font-bold mx-14 mt-14" >ดาวเนปจูน (Neptune)</p>
                     <p className="mx-14 mt-2 text-2xl font-bold text-yellow-600" >ดาวเคราะห์แก๊ส</p>
                     <p className="mx-14 mt-4 text-xl">
