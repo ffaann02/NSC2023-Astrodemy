@@ -17,7 +17,7 @@ import 'aos/dist/aos.css';
 import axios from "axios"
 import io from "socket.io-client"
 import { StarSky } from "../StarSky"
-const socket = io.connect("http://localhost:3001")
+const socket = io.connect("http://localhost:3005")
 const DrawingGame = () => {
     useEffect(() => {
         AOS.init();
