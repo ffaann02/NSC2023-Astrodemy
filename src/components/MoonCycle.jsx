@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import gsap from 'gsap';
@@ -13,6 +13,9 @@ const MoonCycle = (event) => {
     const canvasEarthViewRef = useRef();
     const cameraEarthViewRef = useRef();
     const pointLightRef = useRef();
+
+    const [description, setDescription] = useState("ขึ้น 15 ค่ำ");
+    const [descriptionEng, setDescriptionEng] = useState("Full Moon");
 
     const atmosphereVertex =
         `
@@ -112,7 +115,7 @@ const MoonCycle = (event) => {
             color: 0xffffff,
             linewidth: 10,
             transparent: true,
-            opacity: 0.2
+            opacity: 1.0
         });
         for (let i = 0; i <= 100; i++) {
             const Angle = (i / 100) * Math.PI * 2;
@@ -194,6 +197,28 @@ const MoonCycle = (event) => {
         [50, 0, 4], // First Quarter
         [50, 0, 24], // Waxing Gibbous
     ];
+    const descriptionWord = [
+        "ขึ้น 15 ค่ำ",
+        "แรม 4-5 ค่ำ",
+        "แรม 8 ค่ำ",
+        "แรม 11-12 ค่ำ",
+        "แรม 15 ค่ำ",
+        "ขึ้น 4-5 ค่ำ",
+        "ขึ้น 8 ค่ำ",
+        "ขึ้น 11-12 ค่ำ",
+        "ขึ้น 15 ค่ำ"
+    ]
+    const descriptionEngWord = [
+        "Full moon",
+        "Waning Gibbous",
+        "Third Quarter",
+        "Waning Crescent",
+        "New moon",
+        "Waxing Crescent",
+        "First Quarter",
+        "Waxing Gibbous",
+        "Full moon"
+    ]
     const getLightPosition = (value) => {
         const index = rangeValues.indexOf(value);
         const [x, y, z] = lightPosValues[index];
@@ -203,6 +228,8 @@ const MoonCycle = (event) => {
     const handleRangeChange = (event) => {
         const step = event.target.value;
         moonOrbitAngleRef.current = rangeValues[step];
+        setDescription(descriptionWord[step]);
+        setDescriptionEng(descriptionEngWord[step]);
         gsap.to(moonRef.current.position, {
             duration: moveTime,
             x: moonRef.current.ellipseX * Math.cos(moonOrbitAngleRef.current),
@@ -222,12 +249,16 @@ const MoonCycle = (event) => {
     return (
         <div className="flex h-screen relative">
             <div className="w-2/3 relative flex justify-center overflow-hidden">
+            <p className="text-4xl font-ibm-thai font-bold text-white absolute top-auto mx-auto mt-14 tracking-wider">แบบจำลองการเปลี่ยนแปลงรูปร่างของดวงจันทร์</p>
                 <canvas id="spaceView" alt="spaceView" ref={canvasSpaceViewRef} />
             </div>
-            <div className="w-1/3 relative flex justify-center overflow-hidden">
-                <p className="text-4xl font-ibm-thai font-bold text-white absolute top-auto mx-auto">มุมมองจากโลก</p>
-                <canvas id="earthView" alt="earthView" ref={canvasEarthViewRef} />
-                <input type="range" className="absolute right-0" min={0} max={rangeValues.length - 1} step={1}
+            <div className="w-1/3 relative flex justify-center">
+                <p className="text-4xl font-ibm-thai text-white absolute top-20 mx-auto">{description}</p>
+                <p className="text-4xl font-ibm-thai text-white absolute top-32 mx-auto">{descriptionEng}</p>
+                <canvas id="earthView" alt="earthView" ref={canvasEarthViewRef} className="cursor-default"/>
+                <p className="text-xl font-ibm-thai text-white absolute bottom-28 mx-auto">ตำแหน่งดวงจันทร์</p>
+                <input type="range" className="absolute bottom-24 cursor-pointer w-3/4 bg-gray-200
+                dark:bg-gray-200  appearance-none range-lg rounded-lg" min={0} max={rangeValues.length - 1} step={1}
                     defaultValue={0} onChange={handleRangeChange} />
             </div>
         </div>

@@ -5,12 +5,14 @@ import { Float32BufferAttribute } from 'three';
 
 const Jupiter = (event) => {
 
+    const [isHover, setIsHover] = useState(false);
     const [showDetail, setShowDetail] = useState(false);
 
     const canvasRef = useRef();
     const cameraRef = useRef();
     const planetRef = useRef();
     const shaderRef = useRef();
+    const meshesRef = useRef([]);
 
     const vertex =
         `
@@ -83,6 +85,8 @@ const Jupiter = (event) => {
         const pointLight = new THREE.PointLight(0xffffff, 2, 1200)
         scene.add(pointLight);
 
+        const meshes_planet = [];
+
         // Jupiter mesh
         const jupiter = new THREE.Mesh(
             new THREE.SphereGeometry(6, 32, 32),
@@ -96,6 +100,7 @@ const Jupiter = (event) => {
                 }
             })
         );
+        meshes_planet.push(jupiter);
 
         // Shader
         const atmosphere = new THREE.Mesh(
@@ -143,6 +148,7 @@ const Jupiter = (event) => {
                 y: mouse.x * 0.5,
                 duration: 2
             })
+            meshesRef.current = meshes_planet;
         }
         animate();
 
@@ -157,7 +163,8 @@ const Jupiter = (event) => {
 
     const moveTime = 1.5;
     const reScale = moveTime - (moveTime/3);
-    const handleClick = (event) => {
+
+    const movePlanet = (event) => {
         if(!showDetail){
             gsap.to(cameraRef.current.position, {
                 duration: moveTime,
@@ -219,20 +226,91 @@ const Jupiter = (event) => {
         
     };
 
+    const handleMouseMove = (event) => {
+        // Get the mouse position relative to the canvas element
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the normalized device coordinates (NDC) from the mouse position
+        const mouse = new THREE.Vector2();
+        mouse.x = (x / canvasRef.current.clientWidth) * 2 - 1;
+        mouse.y = -(y / canvasRef.current.clientHeight) * 2 + 1;
+
+        // Create a raycaster object and set its origin and direction based on the mouse position
+        const raycaster = new THREE.Raycaster();
+        if (cameraRef.current) {
+            raycaster.setFromCamera(mouse, cameraRef.current);
+        }
+
+        // Find all the intersections between the raycaster and the meshes
+        const intersects = raycaster.intersectObjects(meshesRef.current);
+
+        if (intersects.length > 0) {
+            setIsHover(true);
+        }
+        else{
+            setIsHover(false);
+        }
+    }
+
+    const handleClick = (event) => {
+        // Get the mouse position relative to the canvas element
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the normalized device coordinates (NDC) from the mouse position
+        const mouse = new THREE.Vector2();
+        mouse.x = (x / canvasRef.current.clientWidth) * 2 - 1;
+        mouse.y = -(y / canvasRef.current.clientHeight) * 2 + 1;
+
+        // Create a raycaster object and set its origin and direction based on the mouse position
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, cameraRef.current);
+
+        // Find all the intersections between the raycaster and the meshes
+        const intersects = raycaster.intersectObjects(meshesRef.current);
+
+        if (intersects.length > 0) {
+            movePlanet();
+        }
+    };
 
     return (
-        <div className="relative flex overflow-hidden w-full">
-            <canvas id="space" alt="space" ref={canvasRef} />
-            <button className="py-2 px-4 rounded-xl absolute top-auto mt-20 mx-auto text-lg bg-gradient-to-r 
-                from-[#6e3f92] to-[#a94fa4]
-                hover:marker:from-[#754798] hover:to-[#a65ea3] text-white"
-                onClick={handleClick} >รายละเอียด</button>
+        <div className="relative flex overflow-hidden w-full justify-center">
+            <canvas id="space" alt="space" ref={canvasRef} onMouseMove={handleMouseMove} onClick={handleClick}/>
+            {(isHover && !showDetail) ?
+                <p className='absolute mt-14 font-ibm-thai text-4xl font-bold text-white'>คลิกที่ดาวเพื่อดูข้อมูลเพิ่มเติม</p> : null}
 
             {showDetail ?
-            <div className="absolute text-2xl font-ibm-thai font-bold mx-auto text-white 
-                bg-white bg-opacity-20 w-1/2 h-full right-0" >
-                <p>Content Here</p>
-            </div> : null}
+                <div className="absolute font-ibm-thai text-white 
+               bg-gradient-to-b from-zinc-800 w-1/2 h-full right-0" >
+                    <p className="text-4xl font-bold mx-14 mt-14" >ดาวพฤหัสบดี (Jupiter)</p>
+                    <p className="mx-14 mt-2 text-2xl font-bold text-yellow-600" >ดาวเคราะห์แก๊ส</p>
+                    <p className="mx-14 mt-4 text-xl">
+                    ดาวพฤหัสบดี (Jupiter) เป็นวัตถุท้องฟ้าที่มีความสว่างมากเป็นอันดับที่ 4 รองจากดวงอาทิตย์ ดวงจันทร์ และดาวศุกร์  
+                    และเป็นที่รู้จักกันมาตั้งแต่ยุคก่อนประวัติศาสตร์  ดาวพฤหัสบดีถูกสำรวจเป็นครั้งแรกโดยยานไพโอเนียร์ 10 ในปี พ.ศ.2516 
+                    ติดตามด้วย ไพโอเนียร์ 11, วอยเอเจอร์ 1, วอยเอเจอร์ 2, ยูลิซิส และกาลิเลโอ  </p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >องค์ประกอบหลักของบรรยากาศ</p>
+                    <p className="mx-14 mt-2 text-xl">ดาวพฤหัสบดีเป็นดาวเคราะห์แก๊สซึ่งบรรยากาศหนาแน่น 
+                    มีองค์ประกอบหลักเป็นไฮโดรเจน 90% และฮีเลียม 10% ปะปนด้วยมีเทน น้ำ และแอมโมเนียจำนวนเล็กน้อย 
+                    ลึกลงไปด้านล่างเป็นแมนเทิลชั้นนอกซึ่งประกอบไปด้วยไฮโดรเจนและฮีเลียมเหลว และแมนเทิลชั้นในที่ประกอบไปด้วยไฮโดรเจนซึ่งมีสมบัติเป็นโลหะ 
+                    และแก่นกลางที่เป็นหินแข็งมีขนาดเป็น 2 เท่าของโลก </p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >วงแหวน</p>
+                    <p className="mx-14 mt-2 text-xl"> ปี พ.ศ.2552 ยานวอยเอเจอร์พบว่า ดาวพฤหัสบดีมีวงแหวนเช่นเดียวกับดาวเสาร์ แต่มีขนาดเล็กและบางกว่ามาก วงแหวนเหล่านี้ประกอบไปด้วยเศษหินและฝุ่นที่มีขนาดเล็ก แต่ไม่มีน้ำแข็งเป็นองค์ประกอบ จึงทำให้วงแหวนไม่สว่างมาก (หินและฝุ่นสะท้อนแสงอาทิตย์ได้ไม่ดีเท่ากับน้ำแข็ง)</p>
+                    
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >ข้อมูลเชิงตัวเลข</p>
+                    <p className="mx-14 mt-2 text-xl">ระยะทางเฉลี่ยจากดวงอาทิตย์ 778.41 ล้านกิโลเมตร</p>
+                    <p className="mx-14 mt-2 text-xl">มวล 317.82 เท่าของมวลโลก </p>
+                    <p className="mx-14 mt-2 text-xl">แรงโน้มถ่วง 20.87 เมตร/วินาที2 </p>
+                    <p className="mx-14 mt-2 text-xl">เวลาในการหมุนรอบตัวเอง 9.92 ชั่วโมง </p>
+                    <p className="mx-14 mt-2 text-xl">คาบวงโคจร 11.86 วัน </p>
+                    <p className="mx-14 mt-2 text-xl">ดวงจันทร์ที่ค้นพบแล้ว 62 ดวง ​วงแหวน 3 วง </p>
+                </div> : null}
         </div>
     )
 }

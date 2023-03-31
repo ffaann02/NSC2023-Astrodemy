@@ -56,7 +56,8 @@ const Simulator = () => {
         const renderer = new THREE.WebGLRenderer({ canvas });
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
-        camera.position.setZ(30);
+        camera.position.setZ(180);
+        camera.position.setY(30);
 
         // Light
         const ambientLight = new THREE.AmbientLight(0x333333);
