@@ -58,7 +58,7 @@ function PlanetSortSize(props) {
                                             {(provided) => (
                                                 <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                                                     <div
-                                                        className={`${name === "Saturn" ? "w-44" : "w-32"} p-2 relative`}
+                                                        className={`${name === "Saturn" ? "w-32 2xl:w-40" : "w-24 2xl:w-28"} p-2 relative`}
                                                         onDragEnd={()=>{setSubmit(false)}}>
                                                         <img src={imageUrl} alt={`${name} Thumb`} className={`${submit ?
                                                             (planets[index].id === solutionOrder[index] ? "opacity-100" : "opacity-50")

@@ -27,7 +27,10 @@ function PlanetSort(props) {
         updatePlanets(items);
     }
     const [submit, setSubmit] = useState(false);
-
+    const [render,setRender] = useState("");
+    useEffect(()=>{
+        updatePlanets(shuffle(planetsData));
+    },[render])
     function checkOrder() {
         setSubmit(true);
         const playerOrder = planets.map((planet) => planet.id);
@@ -37,14 +40,16 @@ function PlanetSort(props) {
         setHoverList(playerOrder.map((id, index) => solutionOrder.indexOf(id) === index));
         if(isOrderCorrect){
             props.getNextQuestion();
-        }
+        }else if (!isOrderCorrect) {
+            setRender(Date.now());
+          }
     }
     useEffect(() => {
         updatePlanets(shuffle(planets)); // Shuffle the planets array when the component mounts
       }, []);
 
     return (
-        <div className="App">
+        <div className="">
             <header className="App-header">
                 <p className="text-center mb-10 font-ibm-thai text-3xl">จัดเรียงดาวเคราะห์จากวงในสุด - นอกสุด</p>
                 <DragDropContext onDragEnd={handleOnDragEnd}>
@@ -57,7 +62,7 @@ function PlanetSort(props) {
                                             {(provided) => (
                                                 <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                                                     <div
-                                                        className={`${name === "Saturn" ? "w-44" : "w-32"} p-2 relative`}
+                                                        className={`${name === "Saturn" ? "w-32 2xl:w-40" : "w-24 2xl:w-28"} p-2 relative`}
                                                     onDragEnd={()=>{setSubmit(false)}}>
                                                         <img src={imageUrl} alt={`${name} Thumb`} className={`${submit ?
                                                                 (planets[index].id === solutionOrder[index] ? "opacity-100" : "opacity-50")
