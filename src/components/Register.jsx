@@ -95,7 +95,7 @@ const Register = () => {
         }
         // pass every case
         else {
-            axios.post(process.env.ENDPOINT+'/register', {
+            axios.post('https://astrodemy-db.herokuapp.com/register', {
                 username: username,
                 email: email,
                 password: password,

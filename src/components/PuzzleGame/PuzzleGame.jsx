@@ -19,7 +19,7 @@ const GameComponents = {
   2: MissionSort,
   3: MoonJupiterSort,
 }
-const socket = io.connect(process.env.ENDPOINT)
+const socket = io.connect('https://astrodemy-db.herokuapp.com')
 
 const PuzzleGame = () => {
   const [roomId, setRoomId] = useState("");
