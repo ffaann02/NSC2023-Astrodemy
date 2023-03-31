@@ -285,7 +285,8 @@ const Earth = (event) => {
                 <p className='absolute mt-14 font-ibm-thai text-4xl font-bold text-white'>คลิกที่ดาวเพื่อดูข้อมูลเพิ่มเติม</p> : null}
             {showDetail ?
                 <div className="absolute font-ibm-thai text-white 
-               bg-gradient-to-b from-zinc-800 w-1/2 h-full right-0" >
+               bg-gradient-to-b from-zinc-800 w-1/2 h-full right-0
+               overflow-auto overflow-y-scroll scrollbar-thin scrollbar-thumb-transparent pb-14" >
                     <p className="text-4xl font-bold mx-14 mt-14" >ดาวโลก (The Earth)</p>
                     <p className="mx-14 mt-2 text-2xl font-bold text-yellow-600" >ดาวเคราะห์หิน</p>
                     <p className="mx-14 mt-4 text-xl">
