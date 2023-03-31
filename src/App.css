@@ -1,0 +1,36 @@
+
+#toggle-button input {
+    display: none;
+  }
+  
+  #toggle-button span {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #ccc;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  #toggle-button input:checked + span {
+    background-color: #a87aff;
+    transform: translateX(30px);
+  }
+
+  #toggle-button-2 input {
+    display: none;
+  }
+  
+  #toggle-button-2 span {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #ccc;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  #toggle-button-2 input:checked + span {
+    background-color: #a87aff;
+    transform: translateX(30px);
+  }
