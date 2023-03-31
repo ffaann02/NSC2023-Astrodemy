@@ -17,7 +17,7 @@ import 'aos/dist/aos.css';
 import axios from "axios"
 import io from "socket.io-client"
 import { StarSky } from "../StarSky"
-const socket = io.connect(process.env.ENDPOINT)
+const socket = io.connect('https://astrodemy-db.herokuapp.com')
 const DrawingGame = () => {
     useEffect(() => {
         AOS.init();
@@ -111,7 +111,7 @@ const DrawingGame = () => {
         }
         if (playerNames.length >= 1 && playerNames[0] === userData.username) {
             axios
-                .get(process.env.ENDPOINT+'/quiz', {
+                .get('https://astrodemy-db.herokuapp.com/quiz', {
                     params: {
                         n: (playerNames.length)*playRound
                     }

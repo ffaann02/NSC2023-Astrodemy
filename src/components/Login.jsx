@@ -41,7 +41,7 @@ const Login = () => {
   }
 
   const SubmitLogin = () => {
-    axios.post(process.env.ENDPOINT+'/login', {
+    axios.post('https://astrodemy-db.herokuapp.com/login', {
       username: username,
       password: password
     })

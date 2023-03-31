@@ -72,7 +72,7 @@ function CalendarPage() {
         setCurrentMonth(currentMonth);
     }, [])
     useEffect(() => {
-        axios.get(process.env.ENDPOINT+'/calendar')
+        axios.get('https://astrodemy-db.herokuapp.com/calendar')
             .then(res => setCalendarData(res.data))
             .catch(err => console.log(err));
     }, []);

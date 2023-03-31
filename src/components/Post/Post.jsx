@@ -20,7 +20,7 @@ const Post = () => {
     const [allComments, setAllComments] = useState([]);
     const [hotBlog,setHotBlog] = useState([]);
     useEffect(() => {
-        axios.get('http://localhost:3005/articles')
+        axios.get('https://astrodemy-db.herokuapp.com/articles')
             .then(res => {
                 setBlogData(res.data)
                 setHotBlog(res.data);
@@ -28,12 +28,12 @@ const Post = () => {
             .catch(err => console.log(err));
     }, []);
     useEffect(() => {
-        axios.get('http://localhost:3005/boards')
+        axios.get('https://astrodemy-db.herokuapp.com/boards')
             .then(res => setBoardData(res.data))
             .catch(err => console.log(err));
     }, []);
     useEffect(() => {
-        axios.get('http://localhost:3005/all_comments')
+        axios.get('https://astrodemy-db.herokuapp.com/all_comments')
             .then(res => setAllComments(res.data))
             .catch(err => console.log(err));
     }, []);
@@ -127,7 +127,7 @@ const Post = () => {
     const handleSearch = async () => {
         if (searchTitle === "") {
             try {
-                const response = await axios.get(`http://localhost:3005/articles`);
+                const response = await axios.get(`https://astrodemy-db.herokuapp.com/articles`);
                 setBlogData(response.data);
             } catch (error) {
                 setBlogData([]);
@@ -137,7 +137,7 @@ const Post = () => {
         }
         try {
             // const response = await axios.get(`http://localhost:3005/comments?title=${title}`);
-            const response = await axios.get(`http://localhost:3005/articles_search?title=${searchTitle}`);
+            const response = await axios.get(`https://astrodemy-db.herokuapp.com/articles_search?title=${searchTitle}`);
             setBlogData(response.data);
         } catch (error) {
             setBlogData([]);
@@ -148,7 +148,7 @@ const Post = () => {
     const handleSearchBoard = async () => {
         if (searchTitleBoard === "") {
             try {
-                const response = await axios.get(`http://localhost:3005/boards`);
+                const response = await axios.get(`https://astrodemy-db.herokuapp.com/boards`);
                 setBoardData(response.data);
             } catch (error) {
                 setBoardData([]);
@@ -158,7 +158,7 @@ const Post = () => {
         }
         try {
             // const response = await axios.get(`http://localhost:3005/comments?title=${title}`);
-            const response = await axios.get(`http://localhost:3005/boards_search?title=${searchTitleBoard}`);
+            const response = await axios.get(`https://astrodemy-db.herokuapp.com/boards_search?title=${searchTitleBoard}`);
             setBoardData(response.data);
         } catch (error) {
             setBoardData([]);
@@ -200,7 +200,7 @@ const Post = () => {
         const today = new Date();
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         const formattedDate = today.toLocaleDateString('th-TH', options);
-        axios.post('http://localhost:3005/create_board', {
+        axios.post('https://astrodemy-db.herokuapp.com/create_board', {
             title: boardTitle,
             author: userData.username,
             content: boardContent,

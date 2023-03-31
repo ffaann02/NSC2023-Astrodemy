@@ -57,7 +57,7 @@ const ArticleCreate = () => {
             const formattedDate = today.toLocaleDateString('th-TH', options);
             alert(formattedDate);
             if (result.isConfirmed) {
-                axios.post('http://localhost:3005/create_article', {
+                axios.post('https://astrodemy-db.herokuapp.com/create_article', {
                     author: userData.username,
                     authorProfile: userData.userProfile,
                     date:formattedDate,

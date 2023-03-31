@@ -15,7 +15,7 @@ const Board = ({ match }) => {
     console.log(title);
     const fetchBoard = async () => {
       try {
-        const response = await axios.get(`http://localhost:3005/board?title=${title}`);
+        const response = await axios.get(`https://astrodemy-db.herokuapp.com/board?title=${title}`);
         setBoard(response.data);
       } catch (error) {
         console.error(error);
@@ -23,7 +23,7 @@ const Board = ({ match }) => {
     }
     const fetchComments = async () => {
       try {
-        const response = await axios.get(`http://localhost:3005/comments?title=${title}`);
+        const response = await axios.get(`https://astrodemy-db.herokuapp.com/comments?title=${title}`);
         setComments(response.data);
       } catch (error) {
         console.error(error);
@@ -31,7 +31,7 @@ const Board = ({ match }) => {
     }
     const fetchAllComments = async () => {
       try {
-        const response = await axios.get(`http://localhost:3005/all_comments`);
+        const response = await axios.get(`https://astrodemy-db.herokuapp.com/all_comments`);
         setAllComments(response.data);
       } catch (error) {
         console.error(error);
@@ -43,7 +43,7 @@ const Board = ({ match }) => {
   }, []);
   const fetchComments = async () => {
     try {
-      const response = await axios.get(`http://localhost:3005/comments?title=${title}`);
+      const response = await axios.get(`https://astrodemy-db.herokuapp.com/comments?title=${title}`);
       setComments(response.data);
     } catch (error) {
       console.error(error);
@@ -54,7 +54,7 @@ const Board = ({ match }) => {
     const today = new Date();
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     const formattedDate = today.toLocaleDateString('th-TH', options);
-    axios.post('http://localhost:3005/post_comment', {
+    axios.post('https://astrodemy-db.herokuapp.com/post_comment', {
       title: title,
       content: postComment,
       author: userData.username,
