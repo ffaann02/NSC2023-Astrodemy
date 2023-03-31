@@ -17,7 +17,7 @@ import 'aos/dist/aos.css';
 import axios from "axios"
 import io from "socket.io-client"
 import { StarSky } from "../StarSky"
-const socket = io.connect("http://localhost:3005")
+const socket = io.connect(process.env.ENDPOINT)
 const DrawingGame = () => {
     useEffect(() => {
         AOS.init();
@@ -111,7 +111,7 @@ const DrawingGame = () => {
         }
         if (playerNames.length >= 1 && playerNames[0] === userData.username) {
             axios
-                .get('http://localhost:3005/quiz', {
+                .get(process.env.ENDPOINT+'/quiz', {
                     params: {
                         n: (playerNames.length)*playRound
                     }
@@ -483,7 +483,7 @@ const DrawingGame = () => {
                                          my-3`}>
                                             <div className="flex my-auto text-white">
                                                 <p className="mr-4 my-auto">{index+1}</p>
-                                                <img src={player.profile} className="w-10 mr-2 rounded-md border-white border-[1.5px]"/>
+                                                <img src={player.profile} className="w-10 mr-2 rounded-full border-white border-[1.5px]"/>
                                                 <p className="mr-4 my-auto">{player.name}</p>
                                             </div>
                                             <div className="flex">

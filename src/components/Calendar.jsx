@@ -72,7 +72,7 @@ function CalendarPage() {
         setCurrentMonth(currentMonth);
     }, [])
     useEffect(() => {
-        axios.get('http://localhost:3005/calendar')
+        axios.get(process.env.ENDPOINT+'/calendar')
             .then(res => setCalendarData(res.data))
             .catch(err => console.log(err));
     }, []);
