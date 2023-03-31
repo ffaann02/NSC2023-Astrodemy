@@ -19,7 +19,7 @@ const GameComponents = {
   2: MissionSort,
   3: MoonJupiterSort,
 }
-const socket = io.connect("http://localhost:3005")
+const socket = io.connect(process.env.ENDPOINT)
 
 const PuzzleGame = () => {
   const [roomId, setRoomId] = useState("");

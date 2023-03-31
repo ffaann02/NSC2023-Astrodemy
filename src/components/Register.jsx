@@ -95,7 +95,7 @@ const Register = () => {
         }
         // pass every case
         else {
-            axios.post('http://localhost:3005/register', {
+            axios.post(process.env.ENDPOINT+'/register', {
                 username: username,
                 email: email,
                 password: password,
