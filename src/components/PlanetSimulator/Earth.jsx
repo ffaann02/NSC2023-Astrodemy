@@ -5,12 +5,14 @@ import { Float32BufferAttribute } from 'three';
 
 const Earth = (event) => {
 
+    const [isHover, setIsHover] = useState(false);
     const [showDetail, setShowDetail] = useState(false);
 
     const canvasRef = useRef();
     const cameraRef = useRef();
     const planetRef = useRef();
     const shaderRef = useRef();
+    const meshesRef = useRef([]);
 
     const vertex =
         `
@@ -75,13 +77,15 @@ const Earth = (event) => {
         renderer.setSize(window.innerWidth, window.innerHeight);
         // camera.position.setZ(15);
         cameraRef.current.position.setZ(15);
-        cameraRef.current.lookAt(0,0,0);
+        cameraRef.current.lookAt(0, 0, 0);
 
         // Light
         const ambientLight = new THREE.AmbientLight(0x333333);
         scene.add(ambientLight);
         const pointLight = new THREE.PointLight(0xffffff, 2, 1200)
         scene.add(pointLight);
+
+        const meshes_planet = [];
 
         // Earth mesh
         const earth = new THREE.Mesh(
@@ -96,6 +100,7 @@ const Earth = (event) => {
                 }
             })
         );
+        meshes_planet.push(earth);
 
         // Shader
         const atmosphere = new THREE.Mesh(
@@ -143,6 +148,7 @@ const Earth = (event) => {
                 y: mouse.x * 0.5,
                 duration: 2
             })
+            meshesRef.current = meshes_planet;
         }
         animate();
 
@@ -155,10 +161,13 @@ const Earth = (event) => {
         mouse.y = -(clientHeight / window.innerHeight) * 2 + 1;
     });
 
+
+
     const moveTime = 1.5;
-    const reScale = moveTime - (moveTime/3);
-    const handleClick = (event) => {
-        if(!showDetail){
+    const reScale = moveTime - (moveTime / 3);
+
+    const movePlanet = () => {
+        if (!showDetail) {
             gsap.to(cameraRef.current.position, {
                 duration: moveTime,
                 x: 12.5,
@@ -187,7 +196,7 @@ const Earth = (event) => {
             })
             setShowDetail(true);
         }
-        else{
+        else {
             gsap.to(cameraRef.current.position, {
                 duration: moveTime,
                 x: 0,
@@ -213,25 +222,91 @@ const Earth = (event) => {
                         z: 1.2,
                     })
                 },
-                })
+            })
             setShowDetail(false);
         }
-        
+    }
+
+    const handleMouseMove = (event) => {
+        // Get the mouse position relative to the canvas element
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the normalized device coordinates (NDC) from the mouse position
+        const mouse = new THREE.Vector2();
+        mouse.x = (x / canvasRef.current.clientWidth) * 2 - 1;
+        mouse.y = -(y / canvasRef.current.clientHeight) * 2 + 1;
+
+        // Create a raycaster object and set its origin and direction based on the mouse position
+        const raycaster = new THREE.Raycaster();
+        if (cameraRef.current) {
+            raycaster.setFromCamera(mouse, cameraRef.current);
+        }
+
+        // Find all the intersections between the raycaster and the meshes
+        const intersects = raycaster.intersectObjects(meshesRef.current);
+
+        if (intersects.length > 0) {
+            setIsHover(true);
+        }
+        else{
+            setIsHover(false);
+        }
+    }
+
+    const handleClick = (event) => {
+        // Get the mouse position relative to the canvas element
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the normalized device coordinates (NDC) from the mouse position
+        const mouse = new THREE.Vector2();
+        mouse.x = (x / canvasRef.current.clientWidth) * 2 - 1;
+        mouse.y = -(y / canvasRef.current.clientHeight) * 2 + 1;
+
+        // Create a raycaster object and set its origin and direction based on the mouse position
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, cameraRef.current);
+
+        // Find all the intersections between the raycaster and the meshes
+        const intersects = raycaster.intersectObjects(meshesRef.current);
+
+        if (intersects.length > 0) {
+            movePlanet();
+        }
     };
 
     return (
-        <div className="relative flex overflow-hidden w-full">
-            <canvas id="space" alt="space" ref={canvasRef} />
-            <button className="py-2 px-4 rounded-xl absolute top-auto mt-20 mx-auto text-lg bg-gradient-to-r 
-                from-[#6e3f92] to-[#a94fa4]
-                hover:marker:from-[#754798] hover:to-[#a65ea3] text-white"
-                onClick={handleClick} >รายละเอียด</button>
-
+        <div className="relative flex overflow-hidden w-full justify-center">
+            <canvas id="space" alt="space" ref={canvasRef} onMouseMove={handleMouseMove} onClick={handleClick} />
+            {(isHover && !showDetail) ?
+                <p className='absolute mt-14 font-ibm-thai text-4xl font-bold text-white'>คลิกที่ดาวเพื่อดูข้อมูลเพิ่มเติม</p> : null}
             {showDetail ?
-            <div className="absolute text-2xl font-ibm-thai font-bold mx-auto text-white 
-                bg-white bg-opacity-20 w-1/2 h-full right-0" >
-                <p>Content Here</p>
-            </div> : null}
+                <div className="absolute font-ibm-thai text-white 
+               bg-gradient-to-b from-zinc-800 w-1/2 h-full right-0" >
+                    <p className="text-4xl font-bold mx-14 mt-14" >ดาวโลก (The Earth)</p>
+                    <p className="mx-14 mt-2 text-2xl font-bold text-yellow-600" >ดาวเคราะห์หิน</p>
+                    <p className="mx-14 mt-4 text-xl">
+                        โลก (The Earth) เป็นดาวเคราะห์ดวงเดียวในระบบสุริยะที่มีสภาวะแวดล้อมเอื้ออำนวยต่อการดำรงชีวิตของสิ่งมีชีวิต 
+                        โลกอยู่ห่างจากดวงอาทิตย์เป็นลำดับที่ 3 และมีขนาดใหญ่เป็นอันดับที่ 5 โลกมีสัณฐานเป็นทรงกลมแป้นมีรัศมีเฉลี่ย 6,371 กิโลเมตร 
+                        โครงสร้างภายในของโลกประกอบไปด้วยแก่นชั้นในที่เป็นเหล็ก มีรัศมีประมาณ 1,200 กิโลเมตร ห่อหุ้มด้วยแก่นชั้นนอกที่เป็นของเหลว (Liquid) 
+                        ประกอบด้วยเหล็กและนิเกิล มีความหนาประมาณ 2,200 กิโลเมตร ถัดขึ้นมาเป็นชั้นแมนเทิลซึ่งเป็นของแข็งเนื้ออ่อนที่ยืดหยุ่นได้ (Plastic) 
+                        ประกอบไปด้วย เหล็ก แมกนีเซียม ซิลิกอน และธาตุอื่นๆ มีความหนาประมาณ 3,000 กิโลเมตร เปลือกโลกเป็นของแข็ง (Solid) 
+                        มีองค์ประกอบส่วนใหญ่เป็นเฟลด์สปาร์ และควอตช์ (ซิลิกอนไดออกไซด์) </p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >องค์ประกอบหลักของบรรยากาศ</p>
+                    <p className="mx-14 mt-2 text-xl">ไนโตรเจน (ร้อยละ 78) ออกซิเจน (ร้อยละ 21) อาร์กอน (ร้อยละ 0.9) และธาตุอื่นๆ รวมถึงไอน้ำ (ร้อยละ 0.1)</p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >ข้อมูลเชิงตัวเลข</p>
+                    <p className="mx-14 mt-2 text-xl">ระยะทางเฉลี่ยจากดวงอาทิตย์ 149.60 ล้านกิโลเมตร</p>
+                    <p className="mx-14 mt-2 text-xl">มวล 5.97 x 1024 กิโลกรัม</p>
+                    <p className="mx-14 mt-2 text-xl">แรงโน้มถ่วง 9.807 ม./วินาที² </p>
+                    <p className="mx-14 mt-2 text-xl">เวลาในการหมุนรอบตัวเอง 23.93 ชั่วโมง</p>
+                    <p className="mx-14 mt-2 text-xl">คาบวงโคจร 365.26 วัน </p>
+                    <p className="mx-14 mt-2 text-xl">จำนวนดาวบริวาร 1 ดวง</p>
+                </div> : null}
         </div>
     )
 }

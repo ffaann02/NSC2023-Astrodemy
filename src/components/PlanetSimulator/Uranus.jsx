@@ -5,6 +5,7 @@ import { Float32BufferAttribute } from 'three';
 
 const Uranus = (event) => {
 
+    const [isHover, setIsHover] = useState(false);
     const [showDetail, setShowDetail] = useState(false);
 
     const canvasRef = useRef();
@@ -12,6 +13,7 @@ const Uranus = (event) => {
     const planetRef = useRef();
     const shaderRef = useRef();
     const ringRef = useRef();
+    const meshesRef = useRef([]);
 
     const vertex =
         `
@@ -140,6 +142,8 @@ const Uranus = (event) => {
         const pointLight = new THREE.PointLight(0xffffff, 2, 1200)
         scene.add(pointLight);
 
+        const meshes_planet = [];
+
         // Uranus mesh
         const uranus = new THREE.Mesh(
             new THREE.SphereGeometry(6, 32, 32),
@@ -154,6 +158,7 @@ const Uranus = (event) => {
                 transparent: true
             })
         );
+        meshes_planet.push(uranus);
 
         // Ring mesh
         const ring = new THREE.Mesh(
@@ -219,6 +224,7 @@ const Uranus = (event) => {
                 y: mouse.x * 0.5,
                 duration: 2
             })
+            meshesRef.current = meshes_planet;
         }
         animate();
 
@@ -232,9 +238,10 @@ const Uranus = (event) => {
     });
 
     const moveTime = 1.5;
-    const reScale = moveTime - (moveTime/3);
-    const handleClick = (event) => {
-        if(!showDetail){
+    const reScale = moveTime - (moveTime / 3);
+
+    const movePlanet = (event) => {
+        if (!showDetail) {
             gsap.to(cameraRef.current.position, {
                 duration: moveTime,
                 x: 12.5,
@@ -267,7 +274,7 @@ const Uranus = (event) => {
             })
             setShowDetail(true);
         }
-        else{
+        else {
             gsap.to(cameraRef.current.position, {
                 duration: moveTime,
                 x: 0,
@@ -297,24 +304,94 @@ const Uranus = (event) => {
                         x: 0,
                     })
                 },
-                })
+            })
             setShowDetail(false);
         }
-        
+    };
+
+    const handleMouseMove = (event) => {
+        // Get the mouse position relative to the canvas element
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the normalized device coordinates (NDC) from the mouse position
+        const mouse = new THREE.Vector2();
+        mouse.x = (x / canvasRef.current.clientWidth) * 2 - 1;
+        mouse.y = -(y / canvasRef.current.clientHeight) * 2 + 1;
+
+        // Create a raycaster object and set its origin and direction based on the mouse position
+        const raycaster = new THREE.Raycaster();
+        if (cameraRef.current) {
+            raycaster.setFromCamera(mouse, cameraRef.current);
+        }
+
+        // Find all the intersections between the raycaster and the meshes
+        const intersects = raycaster.intersectObjects(meshesRef.current);
+
+        if (intersects.length > 0) {
+            setIsHover(true);
+        }
+        else {
+            setIsHover(false);
+        }
+    }
+
+    const handleClick = (event) => {
+        // Get the mouse position relative to the canvas element
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the normalized device coordinates (NDC) from the mouse position
+        const mouse = new THREE.Vector2();
+        mouse.x = (x / canvasRef.current.clientWidth) * 2 - 1;
+        mouse.y = -(y / canvasRef.current.clientHeight) * 2 + 1;
+
+        // Create a raycaster object and set its origin and direction based on the mouse position
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, cameraRef.current);
+
+        // Find all the intersections between the raycaster and the meshes
+        const intersects = raycaster.intersectObjects(meshesRef.current);
+
+        if (intersects.length > 0) {
+            movePlanet();
+        }
     };
 
     return (
-        <div className="relative flex overflow-hidden w-full">
-            <canvas id="space" alt="space" ref={canvasRef} />
-            <button className="py-2 px-4 rounded-xl absolute top-auto mt-20 mx-auto text-lg bg-gradient-to-r 
-                from-[#6e3f92] to-[#a94fa4]
-                hover:marker:from-[#754798] hover:to-[#a65ea3] text-white"
-                onClick={handleClick} >รายละเอียด</button>
+        <div className="relative flex overflow-hidden w-full justify-center">
+            <canvas id="space" alt="space" ref={canvasRef} onMouseMove={handleMouseMove} onClick={handleClick} />
+            {(isHover && !showDetail) ?
+                <p className='absolute mt-14 font-ibm-thai text-4xl font-bold text-white'>คลิกที่ดาวเพื่อดูข้อมูลเพิ่มเติม</p> : null}
 
             {showDetail ?
-                <div className="absolute text-2xl font-ibm-thai font-bold mx-auto text-white 
-                bg-white bg-opacity-20 w-1/2 h-full right-0" >
-                    <p>Content Here</p>
+                <div className="absolute font-ibm-thai text-white 
+               bg-gradient-to-b from-zinc-800 w-1/2 h-full right-0" >
+                    <p className="text-4xl font-bold mx-14 mt-14" >ยูเรนัส (Uranus)</p>
+                    <p className="mx-14 mt-2 text-2xl font-bold text-yellow-600" >ดาวเคราะห์แก๊ส</p>
+                    <p className="mx-14 mt-4 text-xl">
+                    ยูเรนัส (Uranus) ถูกค้นพบครั้งแรกโดย วิลเลี่ยม เฮอส์เชล ในปี พ.ศ.2534  สองร้อยปีต่อมา ยานวอยเอเจอร์ 2 
+                    ทำการสำรวจดาวยูเรนัสในปี พ.ศ. 2529 พบว่า
+                    ดาวยูเรนัสมีสีฟ้าเนื่องจากแก๊สมีเทนดูดกลืนสีแดงและสะท้อนสีน้ำเงิน บรรยากาศมีลมพัดแรงมาก ลึกลงไปที่แก่นของดาวห่อหุ้มด้วยโลหะไฮโดรเจนเหลว  
+                    ขณะที่ดาวเคราะห์ส่วนใหญ่มีแกนหมุนรอบตัวเองเกือบตั้งฉากกับระนาบสุริยวิถี แต่แกนของดาวยูเรนัสวางตัวเกือบขนานกับสุริยวิถี 
+                    ดังนั้นอุณหภูมิบริเวณขั้วดาวจึงสูงกว่าบริเวณเส้นศูนย์สูตร</p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >องค์ประกอบหลักของบรรยากาศ</p>
+                    <p className="mx-14 mt-2 text-xl">บรรยากาศของดาวยูเรนัสประกอบด้วยไฮโดรเจน 83%, ฮีเลียม 15% และมีเทน 2% ดาวยูเรนัสมีสีฟ้าเนื่องจากแก๊สมีเทนดูดกลืนสีแดงและสะท้อนสีน้ำเงิน บรรยากาศมีลมพัดแรงมาก ลึกลงไปที่แก่นของดาวห่อหุ้มด้วยโลหะไฮโดรเจนเหลว</p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >วงแหวนและดวงจันทร์บริวาร</p>
+                    <p className="mx-14 mt-2 text-xl">ดาวยูเรนัสมีวงแหวนเช่นเดียวกับดาวเคราะห์ชั้นนอกดวงอื่นๆ วงแหวนของดาวยูเรนัสมีความสว่างไม่มาก เนื่องจากประกอบด้วยอนุภาคขนาดเล็ก มีขนาดตั้งแต่ฝุ่นผงจนถึง 10 เมตร  ดาวยูเรนัสมีดวงจันทร์บริวารอย่างน้อย 27 ดวง ดวงจันทร์ขนาดใหญ่ที่มีรูปร่างเป็นทรงกลม ได้แก่ มิรันดา แอเรียล อัมเบรียล ไททาเนีย และ โอเบรอน</p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >ข้อมูลเชิงตัวเลข</p>
+                    <p className="mx-14 mt-2 text-xl">ระยะทางเฉลี่ยจากดวงอาทิตย์ 2,870 ล้านกิโลเมตร</p>
+                    <p className="mx-14 mt-2 text-xl">มวล 14.536 เท่าของมวลโลก </p>
+                    <p className="mx-14 mt-2 text-xl">แรงโน้มถ่วง 8.43 เมตร/วินาที² </p>
+                    <p className="mx-14 mt-2 text-xl">เวลาในการหมุนรอบตัวเอง 17.24 ชั่วโมง</p>
+                    <p className="mx-14 mt-2 text-xl">คาบวงโคจร 80 ปี</p>
+                    <p className="mx-14 mt-2 text-xl">ดวงจันทร์ที่ค้นพบแล้ว 27 ดวง</p>
+                    <p className="mx-14 mt-2 text-xl">วงแหวนที่ค้นพบแล้ว 13 วง</p>
                 </div> : null}
         </div>
     )

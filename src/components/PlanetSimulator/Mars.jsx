@@ -5,12 +5,14 @@ import { Float32BufferAttribute } from 'three';
 
 const Mars = (event) => {
 
+    const [isHover, setIsHover] = useState(false);
     const [showDetail, setShowDetail] = useState(false);
 
     const canvasRef = useRef();
     const cameraRef = useRef();
     const planetRef = useRef();
     const shaderRef = useRef();
+    const meshesRef = useRef([]);
 
     const vertex =
         `
@@ -83,6 +85,8 @@ const Mars = (event) => {
         const pointLight = new THREE.PointLight(0xffffff, 2, 1200)
         scene.add(pointLight);
 
+        const meshes_planet = [];
+
         // Mars mesh
         const mars = new THREE.Mesh(
             new THREE.SphereGeometry(6, 32, 32),
@@ -96,6 +100,7 @@ const Mars = (event) => {
                 }
             })
         );
+        meshes_planet.push(mars);
 
         // Shader
         const atmosphere = new THREE.Mesh(
@@ -143,6 +148,7 @@ const Mars = (event) => {
                 y: mouse.x * 0.5,
                 duration: 2
             })
+            meshesRef.current = meshes_planet;
         }
         animate();
 
@@ -156,9 +162,10 @@ const Mars = (event) => {
     });
 
     const moveTime = 1.5;
-    const reScale = moveTime - (moveTime/3);
-    const handleClick = (event) => {
-        if(!showDetail){
+    const reScale = moveTime - (moveTime / 3);
+
+    const movePlanet = (event) => {
+        if (!showDetail) {
             gsap.to(cameraRef.current.position, {
                 duration: moveTime,
                 x: 12.5,
@@ -187,7 +194,7 @@ const Mars = (event) => {
             })
             setShowDetail(true);
         }
-        else{
+        else {
             gsap.to(cameraRef.current.position, {
                 duration: moveTime,
                 x: 0,
@@ -213,26 +220,97 @@ const Mars = (event) => {
                         z: 1.2,
                     })
                 },
-                })
+            })
             setShowDetail(false);
         }
-        
+
     };
 
+    const handleMouseMove = (event) => {
+        // Get the mouse position relative to the canvas element
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the normalized device coordinates (NDC) from the mouse position
+        const mouse = new THREE.Vector2();
+        mouse.x = (x / canvasRef.current.clientWidth) * 2 - 1;
+        mouse.y = -(y / canvasRef.current.clientHeight) * 2 + 1;
+
+        // Create a raycaster object and set its origin and direction based on the mouse position
+        const raycaster = new THREE.Raycaster();
+        if (cameraRef.current) {
+            raycaster.setFromCamera(mouse, cameraRef.current);
+        }
+
+        // Find all the intersections between the raycaster and the meshes
+        const intersects = raycaster.intersectObjects(meshesRef.current);
+
+        if (intersects.length > 0) {
+            setIsHover(true);
+        }
+        else {
+            setIsHover(false);
+        }
+    }
+
+    const handleClick = (event) => {
+        // Get the mouse position relative to the canvas element
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the normalized device coordinates (NDC) from the mouse position
+        const mouse = new THREE.Vector2();
+        mouse.x = (x / canvasRef.current.clientWidth) * 2 - 1;
+        mouse.y = -(y / canvasRef.current.clientHeight) * 2 + 1;
+
+        // Create a raycaster object and set its origin and direction based on the mouse position
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, cameraRef.current);
+
+        // Find all the intersections between the raycaster and the meshes
+        const intersects = raycaster.intersectObjects(meshesRef.current);
+
+        if (intersects.length > 0) {
+            movePlanet();
+        }
+    };
 
     return (
-        <div className="relative flex overflow-hidden w-full">
-            <canvas id="space" alt="space" ref={canvasRef} />
-            <button className="py-2 px-4 rounded-xl absolute top-auto mt-20 mx-auto text-lg bg-gradient-to-r 
-                from-[#6e3f92] to-[#a94fa4]
-                hover:marker:from-[#754798] hover:to-[#a65ea3] text-white"
-                onClick={handleClick} >รายละเอียด</button>
+        <div className="relative flex overflow-hidden w-full justify-center">
+            <canvas id="space" alt="space" ref={canvasRef} onMouseMove={handleMouseMove} onClick={handleClick} />
+            {(isHover && !showDetail) ?
+                <p className='absolute mt-14 font-ibm-thai text-4xl font-bold text-white'>คลิกที่ดาวเพื่อดูข้อมูลเพิ่มเติม</p> : null}
 
             {showDetail ?
-            <div className="absolute text-2xl font-ibm-thai font-bold mx-auto text-white 
-                bg-white bg-opacity-20 w-1/2 h-full right-0" >
-                <p>Content Here</p>
-            </div> : null}
+                <div className="absolute font-ibm-thai text-white 
+               bg-gradient-to-b from-zinc-800 w-1/2 h-full right-0" >
+                    <p className="text-4xl font-bold mx-14 mt-14" >ดาวอังคาร (Mars)</p>
+                    <p className="mx-14 mt-2 text-2xl font-bold text-yellow-600" >ดาวเคราะห์หิน</p>
+                    <p className="mx-14 mt-4 text-xl">
+                    ดาวอังคาร(Mars) เป็นดาวเคราะห์ที่อยู่ห่างจากดวงอาทิตย์เป็นอันดับที่ 4 ในบรรดาดาวเคราะห์ทั้งหมด 
+                    ดาวอังคารมีขนาดเส้นผ่านศูนย์กลางประมาณ 0.5 เท่าของโลก  ดาวอังคารมีโครงสร้างภายในประกอบด้วยแก่นของแข็งมีรัศมีประมาณ 
+                    1,700 กิโลเมตร ห่อหุ้มด้วยชั้นแมนเทิลที่เป็นหินหนืดหนาประมาณ 1,600 กิโลเมตร และมีเปลือกแข็งเช่นเดียวกับโลก   
+                    ดาวอังคารมีสีแดงเนื่องจากพื้นผิวประกอบด้วยออกไซด์ของเหล็ก (สนิมเหล็ก)  พื้นผิวของดาวอังคารเต็มไปด้วยหุบเหวต่างๆ มากมาย 
+                    หุบเหวขนาดใหญ่ชื่อ หุบเหวมาริเนอริส (Valles Marineris) มีความยาว 4,000 กิโลเมตร กว้าง 600 กิโลเมตร ลึก 8 กิโลเมตร  
+                    นอกจากนี้ดาวอังคารยังมีภูเขาไฟที่สูงที่สุดในระบบสุริยะชื่อ ภูเขาไฟโอลิมปัส (Mount Olympus) สูง 25 กิโลเมตร  
+                    ฐานที่แผ่ออกไปมีรัศมี 300 กิโลเมตร </p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >องค์ประกอบหลักของบรรยากาศ</p>
+                    <p className="mx-14 mt-2 text-xl">ดาวอังคารมีบรรยากาศเบาบางมาก ประกอบด้วยคาร์บอนไดออกไซด์เป็นส่วนใหญ่ซึ่งเกิดจากการระเหิดของน้ำแข็งแห้ง (คาร์บอนไดออกไซด์แข็ง) ปกคลุมอยู่ทั่วไปบนพื้นผิวดาวอังคาร  ที่บริเวณขั้วเหนือและขั้วใต้ของดาวมีน้ำแข็ง (Ice water) ปกคลุมอยู่ตลอดเวลา</p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >ดวงจันทร์บริวาร</p>
+                    <p className="mx-14 mt-2 text-xl"> ดาวอังคารมีดวงจันทร์บริวารขนาดเล็ก 2 ดวง คือ โฟบัสและดีมอส ดวงจันทร์ทั้งสองดวงมีรูปร่างไม่สมมาตร และมีขนาดเล็กกว่า 25 กิโลเมตร  สันนิษฐานว่าเป็นดาวเคราะห์น้อยที่ถูกแรงโน้มถ่วงของดาวอังคารดูดจับมาเป็นบริวาร ภายหลังการก่อตัวของระบบสุริยะ</p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >ข้อมูลเชิงตัวเลข</p>
+                    <p className="mx-14 mt-2 text-xl">ระยะทางเฉลี่ยจากดวงอาทิตย์ 227.94 ล้านกิโลเมตร</p>
+                    <p className="mx-14 mt-2 text-xl">มวล 0.107 เท่าของมวลโลก</p>
+                    <p className="mx-14 mt-2 text-xl">แรงโน้มถ่วง 3.721 ม./วินาที²</p>
+                    <p className="mx-14 mt-2 text-xl">เวลาในการหมุนรอบตัวเอง 24.62 วัน</p>
+                    <p className="mx-14 mt-2 text-xl">คาบวงโคจร 1.88 ปี (687 วัน) </p>
+                    <p className="mx-14 mt-2 text-xl">มีดวงจันทร์ 2 ดวง ​ ไม่มีวงแหวน </p>
+                </div> : null}
         </div>
     )
 }

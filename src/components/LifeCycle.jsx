@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -8,6 +8,10 @@ const LifeCycle = (event) => {
 
     const canvasRef = useRef();
     const cameraRef = useRef();
+
+    const [nameTH, setNameTH] = useState("เนบิวลา");
+    const [nameENG, setNameENG] = useState("Stellar Nebula");
+    const [info, setInfo] = useState(" ดาวเกิดจากการรวมตัวของแก๊สและฝุ่นในอวกาศ (Interstellar medium)  เมื่อมีมวล มวลมีแรงดึงดูดซึ่งกันและกันตามกฎความโน้มถ่วงแห่งเอกภพ (The Law of Universal) ของนิวตันที่มีสูตรว่า F = G (m1m2/r2) แรงดึงดูดแปรผันตามมวล มวลยิ่งมากแรงดึงดูดยิ่งมาก เราเรียกกลุ่มแก๊สและฝุ่นซึ่งรวมตัวกันในอวกาศว่า “เนบิวลา” (Nebula) หรือ “หมอกเพลิง” เนบิวลาเป็นกลุ่มแก๊สที่ขนาดใหญ่หลายปีแสง แต่เบาบางมีความหนาแน่นต่ำมาก องค์ประกอบหลักของเนบิวลาคือแก๊สไฮโดรเจน เนื่องจากไฮโดรเจนเป็นธาตุที่มีโครงสร้างพื้นฐาน ซึ่งเป็นธาตุตั้งต้นของทุกสรรพสิ่งในจักรวาล");
 
     const atmosphereVertex =
         `
@@ -78,12 +82,13 @@ const LifeCycle = (event) => {
 
         // Create sun function
         const createSun = function (radius, texture, posX, posY, posZ, shaderScale, shaderIntensity, color_R, color_G, color_B) {
-            const mesh = new THREE.Mesh(
-                new THREE.SphereGeometry(radius, 32, 32),
-                new THREE.MeshBasicMaterial({
-                    map: textureLoader.load(texture),
-                })
-            );
+            
+            const meshGeometry = new THREE.SphereGeometry(radius, 32, 32);
+            const meshMaterial = new THREE.MeshBasicMaterial({
+                map: textureLoader.load(texture),
+            })
+            
+            const mesh = new THREE.Mesh(meshGeometry,meshMaterial);
             mesh.position.set(posX, posY, posZ);
 
             const shader = new THREE.Mesh(
@@ -106,7 +111,7 @@ const LifeCycle = (event) => {
             mesh.add(shader);
             scene.add(mesh);
 
-            return mesh;
+            return {mesh, meshGeometry, meshMaterial};
         }
 
         const averageStar = createSun(12, '/assets/3d_page/texture/sun.jpg', -350, 0, 0, 1.2, 0.6, 1.0, 0.25, 0);
@@ -116,7 +121,7 @@ const LifeCycle = (event) => {
 
         //Stellar Nebula
         let cloundParticles = [];
-        for (let p = 0; p < 50; p++) {
+        for (let p = 0; p < 30; p++) {
             let cloud = new THREE.Mesh(
                 new THREE.PlaneGeometry(50, 32, 32),
                 new THREE.MeshLambertMaterial({
@@ -126,7 +131,7 @@ const LifeCycle = (event) => {
             cloud.position.set(
                 -2000,
                 0,
-                Math.random() * 500 - 500
+                Math.random() * 100 - 100
             );
             cloud.rotation.z = Math.random() * 2 * Math.PI;
             cloud.scale.set(1.8, 1.8, 1.8);
@@ -235,25 +240,25 @@ const LifeCycle = (event) => {
         const animate = function () {
             requestAnimationFrame(animate);
 
-            gsap.to(averageStar.rotation, {
+            gsap.to(averageStar.mesh.rotation, {
                 x: -mouse.y * 0.3,
                 y: mouse.x * 0.5,
                 duration: 2
             })
 
-            gsap.to(redGiant.rotation, {
+            gsap.to(redGiant.mesh.rotation, {
                 x: -mouse.y * 0.3,
                 y: mouse.x * 0.5,
                 duration: 2
             })
 
-            gsap.to(redSuperGiant.rotation, {
+            gsap.to(redSuperGiant.mesh.rotation, {
                 x: -mouse.y * 0.3,
                 y: mouse.x * 0.5,
                 duration: 2
             })
 
-            gsap.to(whiteDwarf.rotation, {
+            gsap.to(whiteDwarf.mesh.rotation, {
                 x: -mouse.y * 0.3,
                 y: mouse.x * 0.5,
                 duration: 2
@@ -266,6 +271,18 @@ const LifeCycle = (event) => {
             renderer.render(scene, cameraRef.current);
         }
         animate();
+
+        return () => {
+            averageStar.meshGeometry.dispose();
+            averageStar.meshMaterial.dispose();
+            redGiant.meshGeometry.dispose()
+            redGiant.meshMaterial.dispose()
+            redSuperGiant.meshGeometry.dispose()
+            redSuperGiant.meshMaterial.dispose()
+            whiteDwarf.meshGeometry.dispose()
+            whiteDwarf.meshMaterial.dispose()
+            console.log("Dispose work!");
+        }
 
     }, []);
 
@@ -284,9 +301,36 @@ const LifeCycle = (event) => {
         const [x, y, z] = cameraPosValue[index];
         return { x, y, z };
     };
+    const array_nameTH = [
+        "เนบิวลา",
+        "ดาวฤกษ์มวลปานกลาง",
+        "ดาวยักษ์แดง",
+        "ดาวยักษ์ใหญ่สีแดง",
+        "เนบิวลาดาวเคราะห์",
+        "ดาวเคระขาว"
+    ]
+    const array_nameENG = [
+        "Steller Nebula",
+        "Average Star",
+        "Red Giant",
+        "Red Supergiant",
+        "Planetary Nebula",
+        "White Dwarf"
+    ]
+    const array_info = [
+        " ดาวเกิดจากการรวมตัวของแก๊สและฝุ่นในอวกาศ (Interstellar medium)  เมื่อมีมวล มวลมีแรงดึงดูดซึ่งกันและกันตามกฎความโน้มถ่วงแห่งเอกภพ (The Law of Universal) ของนิวตันที่มีสูตรว่า F = G (m1m2/r2) แรงดึงดูดแปรผันตามมวล มวลยิ่งมากแรงดึงดูดยิ่งมาก เราเรียกกลุ่มแก๊สและฝุ่นซึ่งรวมตัวกันในอวกาศว่า “เนบิวลา” (Nebula) หรือ “หมอกเพลิง” เนบิวลาเป็นกลุ่มแก๊สที่ขนาดใหญ่หลายปีแสง แต่เบาบางมีความหนาแน่นต่ำมาก องค์ประกอบหลักของเนบิวลาคือแก๊สไฮโดรเจน เนื่องจากไฮโดรเจนเป็นธาตุที่มีโครงสร้างพื้นฐาน ซึ่งเป็นธาตุตั้งต้นของทุกสรรพสิ่งในจักรวาล",
+        "",
+        "เมื่อไฮโดรเจนที่แก่นของดาวหลอมรวมเป็นฮีเลียมหมด ปฏิกิริยาฟิวชันที่แก่นดาวจะหยุด และเปลือกไฮโดรเจนที่ห่อหุ้มแก่นฮีเลียมจะจุดฟิวชันแทน ดาวจะขยายตัวออก ณ จุดนี้ดาวจะพ้นจากลำดับหลักกลายเป็นดาวยักษ์แดง เปลือกไฮโดรเจนที่หลอมรวมเป็นฮีเลียมจมลงสะสมตัว ทำให้เกิดแรงกดดันให้แก่นฮีเลียมร้อนขึ้นจนกระทั่งอุณหภูมิสูงถึง 100 ล้านเคลวิน ฮีเลียมก็จะจุดฟิวชันหลอมรวมเป็นธาตุหนักอื่นๆ ต่อไป ได้แก่ คาร์บอน และออกซิเจน ",
+        "",
+        "",
+        ""
+    ]
     const moveTime = 2;
     const handleRangeChange = (event) => {
         const step = event.target.value;
+        setNameTH(array_nameTH[step]);
+        setNameENG(array_nameENG[step]);
+        setInfo(array_info[step]);
         gsap.to(cameraRef.current.position, {
             duration: moveTime,
             ease: "power3.inOut",
@@ -313,8 +357,15 @@ const LifeCycle = (event) => {
         <div className="relative flex overflow-hidden w-full">
             <canvas id="space" alt="space" ref={canvasRef} />
             <div className='w-full absolute flex mt-6'>
-                <p className='mx-auto text-white font-ibm-thai text-2xl'>วัฎจักรดาวฤกษ์</p>
+                <p className='mx-auto text-white font-ibm-thai text-2xl'>วัฎจักรดวงอาทิตย์</p>
             </div>
+            <div className="absolute font-ibm-thai text-white 
+               bg-gray-800 bg-opacity-20 w-1/5 h-3/4 left-0 mt-14 ml-14 mr-14" >
+                <p className="text-4xl font-bold mx-10 mt-10" >{nameTH}</p>
+                <p className="text-2xl font-bold mx-10 mt-2" >{nameENG}</p>
+                <p className="mx-10 mt-4 text-xl">{info}</p>
+            </div>
+
             <div className="absolute w-full bottom-32">
                 <div className='max-w-4xl top-5 flex h-fit text-white mx-auto font-ibm-thai cursor-pointer'>
                     <div className='w-full max-w-4xl absolute'>
@@ -328,7 +379,7 @@ const LifeCycle = (event) => {
                             <p>Red Giant</p>
                         </div>
                         <div className='absolute -top-10 left-[54%]'>
-                            <p>Red SuperGiant</p>
+                            <p>Red Supergiant</p>
                         </div>
                         <div className='absolute -top-10 right-[13.5%] text-center'>
                             <p>Planetary Nebula

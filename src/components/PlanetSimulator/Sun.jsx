@@ -5,12 +5,14 @@ import { Float32BufferAttribute } from 'three';
 
 const Sun = () => {
 
+    const [isHover, setIsHover] = useState(false);
     const [showDetail, setShowDetail] = useState(false);
 
     const canvasRef = useRef();
     const cameraRef = useRef();
     const planetRef = useRef();
     const shaderRef = useRef();
+    const meshesRef = useRef([]);
 
     const vertex =
         `
@@ -83,6 +85,8 @@ const Sun = () => {
         const pointLight = new THREE.PointLight(0xffffff, 2, 1200)
         scene.add(pointLight);
 
+        const meshes_planet = [];
+
         // Sun mesh
         const sun = new THREE.Mesh(
             new THREE.SphereGeometry(6, 32, 32),
@@ -96,6 +100,7 @@ const Sun = () => {
                 }
             })
         );
+        meshes_planet.push(sun);
 
         // Shader
         const atmosphere = new THREE.Mesh(
@@ -143,6 +148,7 @@ const Sun = () => {
                 y: mouse.x * 0.5,
                 duration: 2
             })
+            meshesRef.current = meshes_planet;
         }
         animate();
 
@@ -156,9 +162,10 @@ const Sun = () => {
     });
 
     const moveTime = 1.5;
-    const reScale = moveTime - (moveTime/3);
-    const handleClick = (event) => {
-        if(!showDetail){
+    const reScale = moveTime - (moveTime / 3);
+
+    const movePlanet = (event) => {
+        if (!showDetail) {
             gsap.to(cameraRef.current.position, {
                 duration: moveTime,
                 x: 12.5,
@@ -187,7 +194,7 @@ const Sun = () => {
             })
             setShowDetail(true);
         }
-        else{
+        else {
             gsap.to(cameraRef.current.position, {
                 duration: moveTime,
                 x: 0,
@@ -213,29 +220,100 @@ const Sun = () => {
                         z: 1.2,
                     })
                 },
-                })
+            })
             setShowDetail(false);
         }
-        
+
+    };
+
+    const handleMouseMove = (event) => {
+        // Get the mouse position relative to the canvas element
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the normalized device coordinates (NDC) from the mouse position
+        const mouse = new THREE.Vector2();
+        mouse.x = (x / canvasRef.current.clientWidth) * 2 - 1;
+        mouse.y = -(y / canvasRef.current.clientHeight) * 2 + 1;
+
+        // Create a raycaster object and set its origin and direction based on the mouse position
+        const raycaster = new THREE.Raycaster();
+        if (cameraRef.current) {
+            raycaster.setFromCamera(mouse, cameraRef.current);
+        }
+
+        // Find all the intersections between the raycaster and the meshes
+        const intersects = raycaster.intersectObjects(meshesRef.current);
+
+        if (intersects.length > 0) {
+            setIsHover(true);
+        }
+        else {
+            setIsHover(false);
+        }
+    }
+
+    const handleClick = (event) => {
+        // Get the mouse position relative to the canvas element
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the normalized device coordinates (NDC) from the mouse position
+        const mouse = new THREE.Vector2();
+        mouse.x = (x / canvasRef.current.clientWidth) * 2 - 1;
+        mouse.y = -(y / canvasRef.current.clientHeight) * 2 + 1;
+
+        // Create a raycaster object and set its origin and direction based on the mouse position
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, cameraRef.current);
+
+        // Find all the intersections between the raycaster and the meshes
+        const intersects = raycaster.intersectObjects(meshesRef.current);
+
+        if (intersects.length > 0) {
+            movePlanet();
+        }
     };
 
 
     return (
-        <div className="relative flex overflow-hidden w-full">
-            <canvas id="space" alt="space" ref={canvasRef} />
-            <div className='absolute w-full text-center mt-10 font-ibm-thai font-bold text-3xl'>
-                <p className='text-white'>ดวงอาทิตย์</p>
-            <button className="px-4 py-3 rounded-xl mt-2 mx-auto text-lg bg-gradient-to-r 
-                from-[#6e3f92] to-[#a94fa4]
-                hover:marker:from-[#754798] hover:to-[#a65ea3] text-white"
-                onClick={handleClick}>รายละเอียด</button>
-            </div>
+        <div className="relative flex overflow-hidden w-full justify-center">
+            <canvas id="space" alt="space" ref={canvasRef} onMouseMove={handleMouseMove} onClick={handleClick} />
+            {(isHover && !showDetail) ?
+                <p className='absolute mt-14 font-ibm-thai text-4xl font-bold text-white'>คลิกที่ดาวเพื่อดูข้อมูลเพิ่มเติม</p> : null}
 
             {showDetail ?
-            <div className="absolute text-2xl font-ibm-thai font-bold mx-auto text-white 
-                bg-white bg-opacity-20 w-1/2 h-full right-0" >
-                <p>Content Here</p>
-            </div> : null}
+                <div className="absolute font-ibm-thai text-white 
+               bg-gradient-to-b from-zinc-800 w-1/2 h-full right-0" >
+                    <p className="text-4xl font-bold mx-14 mt-14" >ดวงอาทิตย์ (The Sun)</p>
+                    <p className="mx-14 mt-2 text-2xl font-bold text-yellow-600" >ดาวฤกษ์</p>
+                    <p className="mx-14 mt-4 text-xl">
+                        ดวงอาทิตย์ (The Sun) คือดาวฤกษ์ที่อยู่ตรงศูนย์กลางของระบบสุริยะ มีขนาดเส้นผ่านศูนย์กลาง 1.4 ล้านกิโลเมตร 
+                        หรือ 109 เท่าของเส้นผ่านศูนย์กลางโลก อยู่ห่างจากโลก 149,600,000 กิโลเมตร หรือ 1 หน่วยดาราศาสตร์ (AU)  
+                        ดวงอาทิตย์มีมวลมากกว่าโลก 333,000 เท่า แต่มีความหนาแน่นเพียง 0.25 เท่าของโลก เนื่องจากมีองค์ประกอบเป็นไฮโดรเจน 74% 
+                        ฮีเลียม 25% และธาตุชนิดอื่น 1%"</p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >พื้นผิวของดวงอาทิตย์</p>
+                    <p className="mx-14 mt-2 text-xl">พื้นผิวของดวงอาทิตย์เต็มไปด้วยแก๊สร้อนซึ่งประทุอยู่ตลอดเวลา เมื่อแก๊สร้อนบนดวงอาทิตย์พุ่งตัวสูงเหนือชั้นโครโมสเฟียร์ขึ้นมาหลายหมื่นกิโลเมตร  "พวยแก๊ส" (Prominences) จะเคลื่อนที่เข้าสู่อวกาศด้วยความเร็ว 1,000 กิโลเมตร/วินาที หรือ 3.6 ล้านกิโลเมตรต่อชั่วโมง  ในบางครั้งมีการระเบิดใหญ่กว่าเรียกว่า การลุกจ้า (Solar flare) ทำให้เกิดกลุ่มอนุภาคพลังงานสูงเรียกว่า "พายุสุริยะ" (Solar storm) ซึ่งสามารถสร้างความเสียหายให้แก่ดาวเทียมและยานอวกาศ</p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >โครงสร้างภายในของดวงอาทิตย์</p>
+                    <ul>
+                        <li className="mx-14 mt-2 text-xl"><b>แก่นปฏิกรณ์นิวเคลียร์ (Fusion core) </b>
+                        อยู่ที่ใจกลางของดวงอาทิตย์ถึงระยะ 25% ของรัศมี แรงโน้มถ่วงของดวงอาทิตย์ทำให้มวลสารของดาวกดทับกันจนอุณหภูมิที่ใจกลางสูงถึง 15 ล้านเคลวิน จุดปฏิกิริยานิวเคลียร์ฟิวชันหลอมอะตอมของไฮโดรเจนให้กลายเป็นฮีเลียม และปลดปล่อยพลังงานออกมา </li>
+                        <li className="mx-14 mt-2 text-xl"><b>โซนการแผ่รังสี (Radiative zone) </b>
+                        อยู่ที่ระยะ 25 - 70% ของรัศมี พลังงานที่เกิดขึ้นจากแก่นปฏิกรณ์นิวเคลียร์ถูกนำขึ้นสู่ชั้นบนโดยการแผ่รังสีด้วยอนุภาคโฟตอน  </li>
+                        <li className="mx-14 mt-2 text-xl"><b>โซนการพาความร้อน (Convection zone) </b>
+                        อยู่ที่ระยะ 70 - 100% ของรัศมี พลังงานที่เกิดขึ้นไม่สามารถแผ่สู่อวกาศได้โดยตรง เนื่องจากมวลของดวงอาทิตย์เต็มไปด้วยแก๊สไฮโดรเจนซึ่งเคลื่อนที่หมุนวนด้วยกระบวนการพาความร้อน  </li>
+                    </ul>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >ข้อมูลเชิงตัวเลข</p>
+                    <p className="mx-14 mt-2 text-xl">ขนาดของเส้นรอบวง 4,379,000 กม.</p>
+                    <p className="mx-14 mt-2 text-xl">ปริมาตรของดาว 1,300,000 เท่าของโลก</p>
+                    <p className="mx-14 mt-2 text-xl">มวลของดาว 333,000 เท่าของโลก</p>
+                    <p className="mx-14 mt-2 text-xl">ค่าแรงโน้มถ่วงบนดาว 274 ม./วินาที² </p>
+                </div> : null}
         </div>
     )
 }

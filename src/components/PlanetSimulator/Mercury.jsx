@@ -5,12 +5,14 @@ import { Float32BufferAttribute } from 'three';
 
 const Mercury = (event) => {
 
+    const [isHover, setIsHover] = useState(false);
     const [showDetail, setShowDetail] = useState(false);
 
     const canvasRef = useRef();
     const cameraRef = useRef();
     const planetRef = useRef();
     const shaderRef = useRef();
+    const meshesRef = useRef([]);
 
     const vertex =
         `
@@ -83,6 +85,8 @@ const Mercury = (event) => {
         const pointLight = new THREE.PointLight(0xffffff, 2, 1200)
         scene.add(pointLight);
 
+        const meshes_planet = [];
+
         // Mercury mesh
         const mercury = new THREE.Mesh(
             new THREE.SphereGeometry(6, 32, 32),
@@ -96,6 +100,7 @@ const Mercury = (event) => {
                 }
             })
         );
+        meshes_planet.push(mercury);
 
         // Shader
         const atmosphere = new THREE.Mesh(
@@ -143,6 +148,7 @@ const Mercury = (event) => {
                 y: mouse.x * 0.5,
                 duration: 2
             })
+            meshesRef.current = meshes_planet;
         }
         animate();
 
@@ -156,9 +162,10 @@ const Mercury = (event) => {
     });
 
     const moveTime = 1.5;
-    const reScale = moveTime - (moveTime/3);
-    const handleClick = (event) => {
-        if(!showDetail){
+    const reScale = moveTime - (moveTime / 3);
+
+    const movePlanet = (event) => {
+        if (!showDetail) {
             gsap.to(cameraRef.current.position, {
                 duration: moveTime,
                 x: 12.5,
@@ -187,7 +194,7 @@ const Mercury = (event) => {
             })
             setShowDetail(true);
         }
-        else{
+        else {
             gsap.to(cameraRef.current.position, {
                 duration: moveTime,
                 x: 0,
@@ -213,26 +220,94 @@ const Mercury = (event) => {
                         z: 1.2,
                     })
                 },
-                })
+            })
             setShowDetail(false);
         }
-        
+
     };
 
+    const handleMouseMove = (event) => {
+        // Get the mouse position relative to the canvas element
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the normalized device coordinates (NDC) from the mouse position
+        const mouse = new THREE.Vector2();
+        mouse.x = (x / canvasRef.current.clientWidth) * 2 - 1;
+        mouse.y = -(y / canvasRef.current.clientHeight) * 2 + 1;
+
+        // Create a raycaster object and set its origin and direction based on the mouse position
+        const raycaster = new THREE.Raycaster();
+        if (cameraRef.current) {
+            raycaster.setFromCamera(mouse, cameraRef.current);
+        }
+
+        // Find all the intersections between the raycaster and the meshes
+        const intersects = raycaster.intersectObjects(meshesRef.current);
+
+        if (intersects.length > 0) {
+            setIsHover(true);
+        }
+        else {
+            setIsHover(false);
+        }
+    }
+
+    const handleClick = (event) => {
+        // Get the mouse position relative to the canvas element
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the normalized device coordinates (NDC) from the mouse position
+        const mouse = new THREE.Vector2();
+        mouse.x = (x / canvasRef.current.clientWidth) * 2 - 1;
+        mouse.y = -(y / canvasRef.current.clientHeight) * 2 + 1;
+
+        // Create a raycaster object and set its origin and direction based on the mouse position
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, cameraRef.current);
+
+        // Find all the intersections between the raycaster and the meshes
+        const intersects = raycaster.intersectObjects(meshesRef.current);
+
+        if (intersects.length > 0) {
+            movePlanet();
+        }
+    };
 
     return (
-        <div className="relative flex overflow-hidden w-full">
-            <canvas id="space" alt="space" ref={canvasRef} />
-            <button className="py-2 px-4 rounded-xl absolute top-auto mt-20 mx-auto text-lg bg-gradient-to-r 
-                from-[#6e3f92] to-[#a94fa4]
-                hover:marker:from-[#754798] hover:to-[#a65ea3] text-white"
-                onClick={handleClick} >รายละเอียด</button>
+        <div className="relative flex overflow-hidden w-full justify-center">
+            <canvas id="space" alt="space" ref={canvasRef} onMouseMove={handleMouseMove} onClick={handleClick} />
+            {(isHover && !showDetail) ?
+                <p className='absolute mt-14 font-ibm-thai text-4xl font-bold text-white'>คลิกที่ดาวเพื่อดูข้อมูลเพิ่มเติม</p> : null}
 
             {showDetail ?
-            <div className="absolute text-2xl font-ibm-thai font-bold mx-auto text-white 
-                bg-white bg-opacity-20 w-1/2 h-full right-0" >
-                <p>Content Here</p>
-            </div> : null}
+                <div className="absolute font-ibm-thai text-white 
+               bg-gradient-to-b from-zinc-800 w-1/2 h-full right-0" >
+                    <p className="text-4xl font-bold mx-14 mt-14" >ดาวพุธ (Mercury)</p>
+                    <p className="mx-14 mt-2 text-2xl font-bold text-yellow-600" >ดาวเคราะห์หิน</p>
+                    <p className="mx-14 mt-4 text-xl">
+                    ดาวพุธ (Mercury) เป็นดาวเคราะห์ซึ่งอยู่ใกล้กับดวงอาทิตย์มากที่สุด เป็นดาวเคราะห์ขนาดเล็ก และไม่มีดวงจันทร์เป็นบริวาร 
+                    โครงสร้างภายในของดาวพุธประกอบไปด้วยแกนเหล็กขนาดใหญ่มีรัศมีประมาณ 1,800 ถึง 1,900 กิโลเมตร ล้อมรอบด้วยชั้นที่เป็นซิลิเกต 
+                    (ในทำนองเดียวกับที่แกนของโลกถูกห่อหุ้มด้วยแมนเทิลและเปลือก) ซึ่งหนาเพียง 500 ถึง 600 กิโลเมตร 
+                    บางส่วนของแกนอาจจะยังหลอมละลายอยู่ </p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >องค์ประกอบหลักของบรรยากาศ</p>
+                    <p className="mx-14 mt-2 text-xl">องค์ประกอบของบรรยากาศที่เบาบางมากประกอบด้วย ไฮโดรเจน, ฮีเลียม, โซเเดียม, โปแตสเซียม, แคลเซียมและแมกนีเซียม ดาวพุธไม่มีชั้นบรรยากาศห่อหุ้ม ดาวพุธอยู่ใกล้ดวงอาทิตย์มาก กลางวันจึงมีอุณหภูมิสูงถึง 430 °C  แต่กลางคืนอุณหภูมิลดเหลือเพียง -180°C อุณหภูมิกลางวันกลางคืนแตกต่างกันถึง 610°C</p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >พื้นผิวดาว</p>
+                    <p className="mx-14 mt-2 text-xl">ในปี พ.ศ.2517 สหรัฐอเมริกาได้ส่งยานมารีเนอร์ 10 ไปสำรวจและทำแผนที่พื้นผิวดาวพุธเป็นครั้งแรก แต่เนื่องจากดาวพุธอยู่ใกล้ดวงอาทิตย์มาก จึงสามารถทำแผนที่ได้เพียงร้อยละ 45 ของพื้นที่ทั้งหมด  พื้นผิวดาวพุธเต็มไปด้วยหลุมบ่อมากมายคล้ายกับพื้นผิวดวงจันทร์ มีเทือกเขาสูงใหญ่และแอ่งที่ราบขนาดใหญ่อยู่ทั่วไป แอ่งที่ราบแคลอริสมีขนาดเส้นผ่านศูนย์กลางประมาณ 1,300 กิโลเมตร นักดาราศาสตร์สันนิษฐานว่า แอ่งที่ราบขนาดใหญ่เช่นนี้เกิดจากการพุ่งชนของอุกกาบาตในยุคเริ่มแรกของระบบสุริยะ</p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >ข้อมูลเชิงตัวเลข</p>
+                    <p className="mx-14 mt-2 text-xl">ระยะทางเฉลี่ยจากดวงอาทิตย์ 57.91 ล้านกิโลเมตร</p>
+                    <p className="mx-14 mt-2 text-xl">มวล 0.055 เท่าของมวลโลก</p>
+                    <p className="mx-14 mt-2 text-xl">แรงโน้มถ่วง 3.7 ม./วินาที²</p>
+                    <p className="mx-14 mt-2 text-xl">เวลาในการหมุนรอบตัวเอง 58.65 วัน </p>
+                    <p className="mx-14 mt-2 text-xl">คาบวงโคจร 87.97 วัน  </p>
+                    <p className="mx-14 mt-2 text-xl">ไม่มีดวงจันทร์​และไม่มีวงแหวน</p>
+                </div> : null}
         </div>
     )
 }

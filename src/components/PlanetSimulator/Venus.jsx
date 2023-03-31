@@ -5,12 +5,14 @@ import { Float32BufferAttribute } from 'three';
 
 const Venus = (event) => {
 
+    const [isHover, setIsHover] = useState(false);
     const [showDetail, setShowDetail] = useState(false);
 
     const canvasRef = useRef();
     const cameraRef = useRef();
     const planetRef = useRef();
     const shaderRef = useRef();
+    const meshesRef = useRef([]);
 
     const vertex =
         `
@@ -75,13 +77,15 @@ const Venus = (event) => {
         renderer.setSize(window.innerWidth, window.innerHeight);
         // camera.position.setZ(15);
         cameraRef.current.position.setZ(15);
-        cameraRef.current.lookAt(0,0,0);
+        cameraRef.current.lookAt(0, 0, 0);
 
         // Light
         const ambientLight = new THREE.AmbientLight(0x333333);
         scene.add(ambientLight);
         const pointLight = new THREE.PointLight(0xffffff, 2, 1200)
         scene.add(pointLight);
+
+        const meshes_planet = [];
 
         // Venus mesh
         const venus = new THREE.Mesh(
@@ -96,6 +100,7 @@ const Venus = (event) => {
                 }
             })
         );
+        meshes_planet.push(venus);
 
         // Shader
         const atmosphere = new THREE.Mesh(
@@ -143,6 +148,7 @@ const Venus = (event) => {
                 y: mouse.x * 0.5,
                 duration: 2
             })
+            meshesRef.current = meshes_planet;
         }
         animate();
 
@@ -156,9 +162,10 @@ const Venus = (event) => {
     });
 
     const moveTime = 1.5;
-    const reScale = moveTime - (moveTime/3);
-    const handleClick = (event) => {
-        if(!showDetail){
+    const reScale = moveTime - (moveTime / 3);
+
+    const movePlanet = (event) => {
+        if (!showDetail) {
             gsap.to(cameraRef.current.position, {
                 duration: moveTime,
                 x: 12.5,
@@ -187,7 +194,7 @@ const Venus = (event) => {
             })
             setShowDetail(true);
         }
-        else{
+        else {
             gsap.to(cameraRef.current.position, {
                 duration: moveTime,
                 x: 0,
@@ -213,26 +220,91 @@ const Venus = (event) => {
                         z: 1.2,
                     })
                 },
-                })
+            })
             setShowDetail(false);
         }
-        
+
     };
 
+    const handleMouseMove = (event) => {
+        // Get the mouse position relative to the canvas element
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the normalized device coordinates (NDC) from the mouse position
+        const mouse = new THREE.Vector2();
+        mouse.x = (x / canvasRef.current.clientWidth) * 2 - 1;
+        mouse.y = -(y / canvasRef.current.clientHeight) * 2 + 1;
+
+        // Create a raycaster object and set its origin and direction based on the mouse position
+        const raycaster = new THREE.Raycaster();
+        if (cameraRef.current) {
+            raycaster.setFromCamera(mouse, cameraRef.current);
+        }
+
+        // Find all the intersections between the raycaster and the meshes
+        const intersects = raycaster.intersectObjects(meshesRef.current);
+
+        if (intersects.length > 0) {
+            setIsHover(true);
+        }
+        else {
+            setIsHover(false);
+        }
+    }
+
+    const handleClick = (event) => {
+        // Get the mouse position relative to the canvas element
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the normalized device coordinates (NDC) from the mouse position
+        const mouse = new THREE.Vector2();
+        mouse.x = (x / canvasRef.current.clientWidth) * 2 - 1;
+        mouse.y = -(y / canvasRef.current.clientHeight) * 2 + 1;
+
+        // Create a raycaster object and set its origin and direction based on the mouse position
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, cameraRef.current);
+
+        // Find all the intersections between the raycaster and the meshes
+        const intersects = raycaster.intersectObjects(meshesRef.current);
+
+        if (intersects.length > 0) {
+            movePlanet();
+        }
+    };
 
     return (
-        <div className="relative flex overflow-hidden w-full">
-            <canvas id="space" alt="space" ref={canvasRef} />
-            <button className="py-2 px-4 rounded-xl absolute top-auto mt-20 mx-auto text-lg bg-gradient-to-r 
-                from-[#6e3f92] to-[#a94fa4]
-                hover:marker:from-[#754798] hover:to-[#a65ea3] text-white"
-                onClick={handleClick} >รายละเอียด</button>
+        <div className="relative flex overflow-hidden w-full justify-center">
+            <canvas id="space" alt="space" ref={canvasRef} onMouseMove={handleMouseMove} onClick={handleClick} />
+            {(isHover && !showDetail) ?
+                <p className='absolute mt-14 font-ibm-thai text-4xl font-bold text-white'>คลิกที่ดาวเพื่อดูข้อมูลเพิ่มเติม</p> : null}
 
             {showDetail ?
-            <div className="absolute text-2xl font-ibm-thai font-bold mx-auto text-white 
-                bg-white bg-opacity-20 w-1/2 h-full right-0" >
-                <p>Content Here</p>
-            </div> : null}
+                <div className="absolute font-ibm-thai text-white 
+               bg-gradient-to-b from-zinc-800 w-1/2 h-full right-0" >
+                    <p className="text-4xl font-bold mx-14 mt-14" >ดาวศุกร์ (Venus)</p>
+                    <p className="mx-14 mt-2 text-2xl font-bold text-yellow-600" >ดาวเคราะห์หิน</p>
+                    <p className="mx-14 mt-4 text-xl">
+                    ดาวศุกร์ (Venus) อยู่ห่างจากดวงอาทิตย์เป็นลำดับที่ 2 เป็นดาวเคราะห์ที่มีขนาดใหญ่เป็นอันดับที่ 6 ไม่มีดวงจันทร์บริวาร 
+                    ดาวศุกร์มีลักษณะที่คล้ายคลึงกับโลก จนได้ชื่อว่าเป็นดาวเคราะห์ฝาแฝดกับโลกของเรา โครงสร้างภายในของดาวศุกร์ ประกอบด้วย 
+                    แกนกลางที่เป็นเหล็กมีรัศมีประมาณ 3,000 กิโลเมตร ห่อหุ้มด้วยชั้นแมนเทิลที่มีความหนาประมาณ 3,000 กิโลเมตร 
+                    และเปลือกแข็งที่ประกอบด้วยหินซิลิเกต </p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >ชั้นบรรยากาศ</p>
+                    <p className="mx-14 mt-2 text-xl">ชั้นบรรยากาศของดาวศุกร์นั้นมีความหนาแน่นมาก ความกดอากาศบนพื้นผิวดาวศุกร์สูงกว่าความกดอากาศบนพื้นผิวโลก 90 เท่า หรือมีค่าเท่ากับความดันที่ใต้ทะเลลึก 1 กิโลเมตร  บรรยากาศของดาวศุกร์ประกอบไปด้วยแก๊สคาร์บอนไดออกไซด์เป็นส่วนใหญ่ และมีชั้นเมฆอยู่หลายชั้นที่ประกอบไปด้วยแก๊สซัลเฟอร์ไดออกไซด์ (กรดกำมะถัน) ซึ่งมีความหนาหลายกิโลเมตร ทำให้เราไม่สามารถมองเห็นพื้นผิวดาวศุกร์ ชั้นบรรยากาศที่หนาทึบทำให้เกิดสภาวะเรือนกระจกกักเก็บความร้อนไว้ ทำให้อุณหภูมิพื้นผิวสูงถึง 470°C  จะเห็นได้ว่าพื้นผิวดาวศุกร์ร้อนกว่าพื้นผิวดาวพุธมาก ทั้งๆ ที่อยู่ไกลจากดวงอาทิตย์กว่าดาวพุธถึงสองเท่าก็ตาม </p>
+
+                    <p className="mx-14 mt-4 text-2xl font-bold text-yellow-600" >ข้อมูลเชิงตัวเลข</p>
+                    <p className="mx-14 mt-2 text-xl">ระยะทางเฉลี่ยจากดวงอาทิตย์ 108.21 ล้านกิโลเมตร</p>
+                    <p className="mx-14 mt-2 text-xl">มวล 0.815 เท่าของมวลโลก</p>
+                    <p className="mx-14 mt-2 text-xl">แรงโน้มถ่วง 8.87 ม./วินาที² </p>
+                    <p className="mx-14 mt-2 text-xl">เวลาในการหมุนรอบตัวเอง 243.02 วัน</p>
+                    <p className="mx-14 mt-2 text-xl">คาบวงโคจร 224.70 วัน</p>
+                    <p className="mx-14 mt-2 text-xl">ไม่มีดวงจันทร์​ ไม่มีวงแหวน </p>
+                </div> : null}
         </div>
     )
 }
