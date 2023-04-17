@@ -48,7 +48,7 @@ function CalendarPage() {
         },
         {
             id: 8,
-            name: "",
+            name: "season",
             url: "https://cdn-icons-png.flaticon.com/512/3751/3751403.png"
         }
     ]
@@ -72,14 +72,16 @@ function CalendarPage() {
         setCurrentMonth(currentMonth);
     }, [])
     useEffect(() => {
-        axios.get('https://astrodemy-db.herokuapp.com/calendar')
-            .then(res => setCalendarData(res.data))
+        axios.get('http://localhost:3005/calendar')
+            .then(res => {
+                setCalendarData(res.data);
+            })
             .catch(err => console.log(err));
     }, []);
     const [isOn, setIsOn] = useState(false);
 
     const handleClick = () => {
-        if(!isOn){
+        if (!isOn) {
             Swal.fire({
                 title: 'เปิดรับการแจ้งเตือน',
                 text: "คุณต้องการเปิดรับการแจ้งเตือนเกี่ยวกับวันพิเศษทางดาราศาสตร์ใช่ไหม",
@@ -88,17 +90,17 @@ function CalendarPage() {
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'ใช่ เปิดรับการแจ้งเตือน',
-                cancelButtonText:"ยกเลิก"
-              }).then((result) => {
+                cancelButtonText: "ยกเลิก"
+            }).then((result) => {
                 if (result.isConfirmed) {
-                  setIsOn(true)
+                    setIsOn(true)
                 }
-                else{
+                else {
                     setIsOn(false);
                 }
-              })
+            })
         }
-        else{
+        else {
             Swal.fire({
                 title: 'ปิดรับการแจ้งเตือน',
                 text: "คุณต้องการปิดรับการแจ้งเตือนเกี่ยวกับวันพิเศษทางดาราศาสตร์ใช่ไหม",
@@ -107,15 +109,15 @@ function CalendarPage() {
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'ใช่ ปิดรับการแจ้งเตือน',
-                cancelButtonText:"ยกเลิก"
-              }).then((result) => {
+                cancelButtonText: "ยกเลิก"
+            }).then((result) => {
                 if (result.isConfirmed) {
-                  setIsOn(false)
+                    setIsOn(false)
                 }
-                else{
+                else {
                     setIsOn(true);
                 }
-              })
+            })
         }
     };
 
@@ -126,12 +128,12 @@ function CalendarPage() {
          py-6 border-gray-100 border-t-[1px] rounded-2xl relative">
                 <div className="absolute right-5 ">
                     <p className="text-md font-ibm-thai text-gray-400">รับการแจ้งเตือน</p>
-                <div className="w-[60px] bg-gray-200 flex rounded-3xl ml-auto mt-1">
-                <label id="toggle-button" className='mt-1 ml-1 w-full cursor-pointer'>
-                    <input type="checkbox" checked={isOn} onChange={handleClick} />
-                    <span className="toggle-button-slider"></span>
-                </label>
-                </div>
+                    <div className="w-[60px] bg-gray-200 flex rounded-3xl ml-auto mt-1">
+                        <label id="toggle-button" className='mt-1 ml-1 w-full cursor-pointer'>
+                            <input type="checkbox" checked={isOn} onChange={handleClick} />
+                            <span className="toggle-button-slider"></span>
+                        </label>
+                    </div>
                 </div>
                 <div className="col-span-full h-fit flex mt-2">
                     <img src="/assets/AstroCalendar.png" className="w-56 mx-auto" />
@@ -144,16 +146,19 @@ function CalendarPage() {
                                 <div className={`${index === currentMonth ? "bg-violet-100 border-[2px] border-violet-200 hover:border-violet-300"
                                     : "bg-gray-50 border-[1px] border-gray-50 hover:bg-gray-100 hover:border-[1px] hover:border-gray-300"} 
                             py-3 px-10 my-2 cursor-pointer rounded-md relative transition ease-in-out duration-100 text-lg`}
-                                    onClick={() => { setCurrentMonth(index) }}>
+                                    onClick={() => { setCurrentMonth(index)
+                                   }}>
                                     <p className="ml-2">{month.month_th}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
-                    
+
                     <div className="col-span-9">
-                        {calendarData && <p className='mb-10 font-ibm-thai text-3xl font-bold text-right'>{currentMonth && months[currentMonth].month_th}</p>
-}
+                        {calendarData && currentMonth!==0 && <p className='mb-10 font-ibm-thai text-3xl font-bold text-right'>
+                            {currentMonth && months[currentMonth].month_th}</p>}
+                        {calendarData && currentMonth===0 && <p className='mb-10 font-ibm-thai text-3xl font-bold text-right'>
+                            มกราคม</p>}
                         {calendarData && calendarData
                             .filter(event => event.month === currentMonth) // Filter events by current month
                             .map(event => {

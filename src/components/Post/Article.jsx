@@ -10,7 +10,7 @@ const Article = ({ match }) => {
   useEffect(() => {
     const fetchArticle = async () => {
       try {
-        const response = await axios.get(`https://astrodemy-db.herokuapp.com/article?title=${title}`);
+        const response = await axios.get(`http://localhost:3005/article?title=${title}`);
         setArticle(response.data);
       } catch (error) {
         console.error(error);

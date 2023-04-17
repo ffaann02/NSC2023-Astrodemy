@@ -20,7 +20,7 @@ const Post = () => {
     const [allComments, setAllComments] = useState([]);
     const [hotBlog,setHotBlog] = useState([]);
     useEffect(() => {
-        axios.get('https://astrodemy-db.herokuapp.com/articles')
+        axios.get('http://localhost:3005/articles')
             .then(res => {
                 setBlogData(res.data)
                 setHotBlog(res.data);
@@ -28,81 +28,16 @@ const Post = () => {
             .catch(err => console.log(err));
     }, []);
     useEffect(() => {
-        axios.get('https://astrodemy-db.herokuapp.com/boards')
+        axios.get('http://localhost:3005/boards')
             .then(res => setBoardData(res.data))
             .catch(err => console.log(err));
     }, []);
     useEffect(() => {
-        axios.get('https://astrodemy-db.herokuapp.com/all_comments')
+        axios.get('http://localhost:3005/all_comments')
             .then(res => setAllComments(res.data))
             .catch(err => console.log(err));
     }, []);
-    const dummyBlogData = [
-        {
-            id: 1,
-            author: "Divinezing",
-            authorProfile: "https://play-lh.googleusercontent.com/nfIdgkZjC76XpbLvqcSSe15QtKCIEacTBijH_bQdTuJDX0ogBe-iB-MopQVTDBTWTrjB=w750-h750",
-            date: "12 มกราคม 2566",
-            title: "ทำไมอวกาศถึงต้องเงียบหรอครับ เห็นในหนังก็มีเสียง หรือจริง ๆ แล้วอวกาศมีเสียง",
-            content: `ตามหัวข้อเลยครับผมสงสัยมากทำไมหนังในอวกาศบางเรื่องถึงมีเสียง บางเรื่องก็ไม่มีเสียง หรือเพราะว่าอยากให้มีดูแฟนตาซีเลยต้องให้มีเสียงพวกยิงเลเซอร์
-            ระเบิด แล้วถ้าเอาตามหลักความเป็นจริง หนังไซไฟมันจะไปสนุกอะไรหรอครับ`,
-            tags: ["Astrophysics", "High School", "NASA"],
-            coverImage: "https://www.kidjarak.com/wp-content/uploads/2022/09/interstellar-03.jpg",
-            url: "astronomy-eiei-haha-wakuwu"
-        },
-        {
-            id: 2,
-            authorProfile: "https://thypix.com/wp-content/uploads/2021/11/sponge-bob-profile-picture-thypix-m.jpg",
-            author: "Mass Mutock",
-            date: "12 พฤษภา 2566",
-            title: "I don't like Saturn because Satun hate me",
-            content: `Contrary to popular belief, Lorem Ipsum is not simply random 
-            text. It has roots in a piece of classical Latin literature from 45 BC, 
-            making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia`,
-            tags: ["NASA", "Planet"],
-            coverImage: "https://www.infoquest.co.th/wp-content/uploads/2022/05/20220522_Canva_%E0%B8%8A%E0%B8%B1%E0%B8%8A%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4.png",
-            url: "/post/i-dont-like-saturn-because-satun-hate-me"
-        },
-        {
-            id: 2,
-            authorProfile: "https://thypix.com/wp-content/uploads/2021/11/sponge-bob-profile-picture-thypix-m.jpg",
-            author: "Mass Mutock",
-            date: "12 พฤษภา 2566",
-            title: "I don't like Saturn because Satun hate me",
-            content: `Contrary to popular belief, Lorem Ipsum is not simply random 
-            text. It has roots in a piece of classical Latin literature from 45 BC, 
-            making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia`,
-            tags: ["NASA", "Planet"],
-            coverImage: "https://www.infoquest.co.th/wp-content/uploads/2022/05/20220522_Canva_%E0%B8%8A%E0%B8%B1%E0%B8%8A%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4.png",
-            url: "/post/astronomy-eiei-haha-wakuwu"
-        },
-        {
-            id: 2,
-            authorProfile: "https://thypix.com/wp-content/uploads/2021/11/sponge-bob-profile-picture-thypix-m.jpg",
-            author: "Mass Mutock",
-            date: "12 พฤษภา 2566",
-            title: "I don't like Saturn because Satun hate me",
-            content: `Contrary to popular belief, Lorem Ipsum is not simply random 
-            text. It has roots in a piece of classical Latin literature from 45 BC, 
-            making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia`,
-            tags: ["NASA", "Planet"],
-            coverImage: "https://www.infoquest.co.th/wp-content/uploads/2022/05/20220522_Canva_%E0%B8%8A%E0%B8%B1%E0%B8%8A%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4.png",
-            url: "/post/astronomy-eiei-haha-wakuwu"
-        },
-        {
-            id: 2,
-            authorProfile: "https://thypix.com/wp-content/uploads/2021/11/sponge-bob-profile-picture-thypix-m.jpg",
-            author: "Mass Mutock",
-            date: "12 พฤษภา 2566",
-            title: "I don't like Saturn because Satun hate me",
-            content: `Contrary to popular belief, Lorem Ipsum is not simply random 
-            text. It has roots in a piece of classical Latin literature from 45 BC, 
-            making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia`,
-            tags: ["NASA", "Planet"],
-            coverImage: "https://www.infoquest.co.th/wp-content/uploads/2022/05/20220522_Canva_%E0%B8%8A%E0%B8%B1%E0%B8%8A%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4.png",
-            url: "/post/astronomy-eiei-haha-wakuwu"
-        },
-    ]
+    
 
     const [createBoard, setCreateBoard] = useState(false);
     const [option, setOption] = useState(1);
@@ -127,7 +62,7 @@ const Post = () => {
     const handleSearch = async () => {
         if (searchTitle === "") {
             try {
-                const response = await axios.get(`https://astrodemy-db.herokuapp.com/articles`);
+                const response = await axios.get(`http://localhost:3005/articles`);
                 setBlogData(response.data);
             } catch (error) {
                 setBlogData([]);
@@ -137,7 +72,7 @@ const Post = () => {
         }
         try {
             // const response = await axios.get(`http://localhost:3005/comments?title=${title}`);
-            const response = await axios.get(`https://astrodemy-db.herokuapp.com/articles_search?title=${searchTitle}`);
+            const response = await axios.get(`http://localhost:3005/articles_search?title=${searchTitle}`);
             setBlogData(response.data);
         } catch (error) {
             setBlogData([]);
@@ -148,7 +83,7 @@ const Post = () => {
     const handleSearchBoard = async () => {
         if (searchTitleBoard === "") {
             try {
-                const response = await axios.get(`https://astrodemy-db.herokuapp.com/boards`);
+                const response = await axios.get(`http://localhost:3005/boards`);
                 setBoardData(response.data);
             } catch (error) {
                 setBoardData([]);
@@ -158,7 +93,7 @@ const Post = () => {
         }
         try {
             // const response = await axios.get(`http://localhost:3005/comments?title=${title}`);
-            const response = await axios.get(`https://astrodemy-db.herokuapp.com/boards_search?title=${searchTitleBoard}`);
+            const response = await axios.get(`http://localhost:3005/boards_search?title=${searchTitleBoard}`);
             setBoardData(response.data);
         } catch (error) {
             setBoardData([]);
@@ -200,7 +135,7 @@ const Post = () => {
         const today = new Date();
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         const formattedDate = today.toLocaleDateString('th-TH', options);
-        axios.post('https://astrodemy-db.herokuapp.com/create_board', {
+        axios.post('http://localhost:3005/create_board', {
             title: boardTitle,
             author: userData.username,
             content: boardContent,
