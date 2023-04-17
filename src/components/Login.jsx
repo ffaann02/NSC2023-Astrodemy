@@ -41,7 +41,7 @@ const Login = () => {
   }
 
   const SubmitLogin = () => {
-    axios.post(process.env.ENDPOINT+'/login', {
+    axios.post('http://localhost:3005/login', {
       username: username,
       password: password
     })

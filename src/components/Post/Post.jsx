@@ -37,72 +37,7 @@ const Post = () => {
             .then(res => setAllComments(res.data))
             .catch(err => console.log(err));
     }, []);
-    const dummyBlogData = [
-        {
-            id: 1,
-            author: "Divinezing",
-            authorProfile: "https://play-lh.googleusercontent.com/nfIdgkZjC76XpbLvqcSSe15QtKCIEacTBijH_bQdTuJDX0ogBe-iB-MopQVTDBTWTrjB=w750-h750",
-            date: "12 มกราคม 2566",
-            title: "ทำไมอวกาศถึงต้องเงียบหรอครับ เห็นในหนังก็มีเสียง หรือจริง ๆ แล้วอวกาศมีเสียง",
-            content: `ตามหัวข้อเลยครับผมสงสัยมากทำไมหนังในอวกาศบางเรื่องถึงมีเสียง บางเรื่องก็ไม่มีเสียง หรือเพราะว่าอยากให้มีดูแฟนตาซีเลยต้องให้มีเสียงพวกยิงเลเซอร์
-            ระเบิด แล้วถ้าเอาตามหลักความเป็นจริง หนังไซไฟมันจะไปสนุกอะไรหรอครับ`,
-            tags: ["Astrophysics", "High School", "NASA"],
-            coverImage: "https://www.kidjarak.com/wp-content/uploads/2022/09/interstellar-03.jpg",
-            url: "astronomy-eiei-haha-wakuwu"
-        },
-        {
-            id: 2,
-            authorProfile: "https://thypix.com/wp-content/uploads/2021/11/sponge-bob-profile-picture-thypix-m.jpg",
-            author: "Mass Mutock",
-            date: "12 พฤษภา 2566",
-            title: "I don't like Saturn because Satun hate me",
-            content: `Contrary to popular belief, Lorem Ipsum is not simply random 
-            text. It has roots in a piece of classical Latin literature from 45 BC, 
-            making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia`,
-            tags: ["NASA", "Planet"],
-            coverImage: "https://www.infoquest.co.th/wp-content/uploads/2022/05/20220522_Canva_%E0%B8%8A%E0%B8%B1%E0%B8%8A%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4.png",
-            url: "/post/i-dont-like-saturn-because-satun-hate-me"
-        },
-        {
-            id: 2,
-            authorProfile: "https://thypix.com/wp-content/uploads/2021/11/sponge-bob-profile-picture-thypix-m.jpg",
-            author: "Mass Mutock",
-            date: "12 พฤษภา 2566",
-            title: "I don't like Saturn because Satun hate me",
-            content: `Contrary to popular belief, Lorem Ipsum is not simply random 
-            text. It has roots in a piece of classical Latin literature from 45 BC, 
-            making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia`,
-            tags: ["NASA", "Planet"],
-            coverImage: "https://www.infoquest.co.th/wp-content/uploads/2022/05/20220522_Canva_%E0%B8%8A%E0%B8%B1%E0%B8%8A%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4.png",
-            url: "/post/astronomy-eiei-haha-wakuwu"
-        },
-        {
-            id: 2,
-            authorProfile: "https://thypix.com/wp-content/uploads/2021/11/sponge-bob-profile-picture-thypix-m.jpg",
-            author: "Mass Mutock",
-            date: "12 พฤษภา 2566",
-            title: "I don't like Saturn because Satun hate me",
-            content: `Contrary to popular belief, Lorem Ipsum is not simply random 
-            text. It has roots in a piece of classical Latin literature from 45 BC, 
-            making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia`,
-            tags: ["NASA", "Planet"],
-            coverImage: "https://www.infoquest.co.th/wp-content/uploads/2022/05/20220522_Canva_%E0%B8%8A%E0%B8%B1%E0%B8%8A%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4.png",
-            url: "/post/astronomy-eiei-haha-wakuwu"
-        },
-        {
-            id: 2,
-            authorProfile: "https://thypix.com/wp-content/uploads/2021/11/sponge-bob-profile-picture-thypix-m.jpg",
-            author: "Mass Mutock",
-            date: "12 พฤษภา 2566",
-            title: "I don't like Saturn because Satun hate me",
-            content: `Contrary to popular belief, Lorem Ipsum is not simply random 
-            text. It has roots in a piece of classical Latin literature from 45 BC, 
-            making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia`,
-            tags: ["NASA", "Planet"],
-            coverImage: "https://www.infoquest.co.th/wp-content/uploads/2022/05/20220522_Canva_%E0%B8%8A%E0%B8%B1%E0%B8%8A%E0%B8%8A%E0%B8%B2%E0%B8%95%E0%B8%B4.png",
-            url: "/post/astronomy-eiei-haha-wakuwu"
-        },
-    ]
+    
 
     const [createBoard, setCreateBoard] = useState(false);
     const [option, setOption] = useState(1);
