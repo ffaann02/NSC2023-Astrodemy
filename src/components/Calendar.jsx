@@ -1,10 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useContext } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { UserContext } from '../App';
+import firebase from 'firebase/compat/app';
+import withReactContent from 'sweetalert2-react-content'
+import { initializeApp } from "firebase/app";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "../App.css"
 function CalendarPage() {
+    const { userData, logged, setLogged, setUserData,role,setRole,calendarNoti,setCalendarNoti  } = useContext(UserContext);
     const [currentMonth, setCurrentMonth] = useState();
     const [calendarData, setCalendarData] = useState(null);
+    const firebaseConfig = {
+        apiKey: process.env.REACT_APP_API_KEY,
+        authDomain: process.env.REACT_APP_AUTH_DOMAIN,
+        projectId: process.env.REACT_APP_PROJECT_ID,
+        storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
+        messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
+        appId: process.env.REACT_APP_APP_ID,
+        measurementId: process.env.REACT_APP_MEASUREMENT_ID
+    };
     const icons = [
         {
             id: 0,
@@ -79,7 +94,22 @@ function CalendarPage() {
             .catch(err => console.log(err));
     }, []);
     const [isOn, setIsOn] = useState(false);
-
+    useEffect(()=>{
+        const storedUserId = localStorage.getItem('userId');
+        const firestore = firebase.firestore();
+        firestore.collection('users').doc(storedUserId).get()
+        .then(doc => {
+          if (doc.exists) {
+            setCalendarNoti(doc.data().notification);
+            setIsOn(doc.data().notification);
+        } else {
+            console.log('No user data found');
+          }
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    },[])
     const handleClick = () => {
         if (!isOn) {
             Swal.fire({
@@ -93,6 +123,7 @@ function CalendarPage() {
                 cancelButtonText: "ยกเลิก"
             }).then((result) => {
                 if (result.isConfirmed) {
+                    handleNotification(true);
                     setIsOn(true)
                 }
                 else {
@@ -112,6 +143,7 @@ function CalendarPage() {
                 cancelButtonText: "ยกเลิก"
             }).then((result) => {
                 if (result.isConfirmed) {
+                    handleNotification(false);
                     setIsOn(false)
                 }
                 else {
@@ -120,10 +152,29 @@ function CalendarPage() {
             })
         }
     };
+    const sweetAlert = withReactContent(Swal)
+    const showAlert = (title, html, icon) => {
+        sweetAlert.fire({
+            title: <strong>{title}</strong>,
+            html: <i>{html}</i>,
+            icon: icon,
+            confirmButtonText: 'ตกลง'
+        })
+            .then(() => {
+                window.location.reload();
+            })
+    }
 
-
+    const handleNotification = async(bool) => {
+        const userId = userData.userId;
+        const userRef = firebase.firestore().collection('users').doc(userId);
+        userRef.update({
+            notification:bool
+        })
+    }
     return (
-        <div className='w-full h-full '>
+        <>
+        {userData && <div className='w-full h-full '>
             <div className="w-full h-full min-h-screen bg-white max-w-6xl mx-auto shadow-xl mt-10 px-10
          py-6 border-gray-100 border-t-[1px] rounded-2xl relative">
                 <div className="absolute right-5 ">
@@ -178,7 +229,8 @@ function CalendarPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div>}
+        </>
     );
 }
 

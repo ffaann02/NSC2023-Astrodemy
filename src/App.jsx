@@ -55,6 +55,8 @@ function App() {
   const [logged, setLogged] = useState(false);
   const [userData, setUserData] = useState(null);
   const [userId, setUserId] = useState("");
+  const [role,setRole] = useState("");
+  const [calendarNoti,setCalendarNoti] = useState(false);
   // Get userData from local storage on mount
   useEffect(() => {
     const storedUserData = localStorage.getItem('userData');
@@ -91,6 +93,8 @@ function App() {
       firestore.collection('users').doc(storedUserId).get()
         .then(doc => {
           if (doc.exists) {
+            setRole(doc.data().role);
+            setCalendarNoti(doc.data().notification);
             const userDataFetched = {
               userId: storedUserId,
               username: doc.data().username,
@@ -111,7 +115,7 @@ function App() {
     AOS.init();
   }, [])
   return (
-    <UserContext.Provider value={{ logged, setLogged, userData, setUserData, userId }}>
+    <UserContext.Provider value={{ logged, setLogged, userData, setUserData, userId ,role,setRole,calendarNoti,setCalendarNoti}}>
       <Router>
         <Navbar />
         <div className="w-full min-h-screen relative">

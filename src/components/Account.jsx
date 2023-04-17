@@ -158,8 +158,8 @@ const Account = () => {
     return (
         <>
             {userData && (
-                <div className="w-full h-[96vh] text-center">
-                    <div className="h-full max-w-xl mx-auto flex">
+                <div className="w-full text-center">
+                    <div className="h-full min-h-screen max-w-xl mx-auto flex">
                         <div className="w-full h-fit my-auto relative">
                             <p className="text-2xl font-ibm-thai font-bold">ตั้งค่าบัญชี</p>
                             <div className="font-ibm-thai  w-full flex flex-col  px-4 py-4 shadow-none sm:shadow-md 
