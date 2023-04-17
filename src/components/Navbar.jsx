@@ -115,8 +115,8 @@ const Navbar = () => {
                             </div>
                         </div> : null}
                     </div>
-                    {toggleUserIcon ? <div className="w-fit bg-white absolute pt-2 h-fit right-0 top-[4.25rem]
-                rounded-md shadow-md shadow-white z-[501]">
+                    {toggleUserIcon ? <div className="w-fit bg-white absolute pt-2 h-fit right-0 top-[4.25rem] border-[1px] border-t-0
+                rounded-md shadow-md shadow-white z-[501]" onMouseLeave={()=>{setToggleUserIcon(false)}}>
                         <div className="py-2 px-4 font-ibm-thai text-lg flex"><AiFillSetting className="my-auto text-xl mr-2" />
                             <p onClick={() => { setToggleUserIcon(false) }}><Link to="/account">ตั้งค่าบัญชี</Link></p></div>
                         <p className="px-2"><button className="rounded-xl text-lg bg-gradient-to-r px-6 my-2 py-2 font-ibm-thai
@@ -126,7 +126,8 @@ const Navbar = () => {
                     </div> : null}
                     {toggleNotiIcon ?
                         <div className="w-fit bg-white absolute pt-2 h-fit right-0 top-[4.25rem]
-                rounded-md shadow-md s z-[501]">
+                rounded-md shadow-md s z-[501]" onMouseLeave={()=>{setToggleNotiIcon(false)}} 
+                onMouseOut={()=>{setToggleNotiIcon(false)}}>
                             <div className="py-2 px-4 font-ibm-thai text-lg flex">
                                 <div className="py-2 border-[1px] border-r-[0px] border-l-[0px] px-2">
                                     {/* <p className="text-lg">วันวสันตวิษุวัต</p> */}
