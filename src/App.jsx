@@ -38,6 +38,7 @@ import PuzzleGame from "./components/PuzzleGame/PuzzleGame";
 import Select3D from "./Select3D";
 import Board from "./components/Post/Board";
 import AccountSetting from "./AccountSetting";
+import Create3D from "./components/Create3D/Create3D";
 export const UserContext = createContext();
 
 const firebaseConfig = {
@@ -198,6 +199,9 @@ function App() {
           } />
           <Route path="/life-cycle" element={
             <LifeCycle />
+          } />
+          <Route path="/create-3d" element={
+            <Create3D />
           } />
         </Routes>
         </div>
