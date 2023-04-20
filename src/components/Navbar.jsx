@@ -107,8 +107,8 @@ const Navbar = () => {
                             <FaAngleDown className="absolute bg-white rounded-full
                         text-md p-[0.5px] bottom-0 right-9 border-gray-100 border-[2px]"
                                 onClick={() => setToggleUserIcon(prev => !prev)} />
-                            <div className="bg-gray-400 w-5 h-5 rounded-full flex absolute -right-3 top-1">
-                                <p className="m-auto text-xs font-bold mt-[2.5px] text-white">0</p>
+                            <div className="bg-red-600 w-5 h-5 rounded-full flex absolute -right-3 top-1">
+                                <p className="m-auto text-xs font-bold mt-[2.5px] text-white">2</p>
                             </div>
                             <div className="my-auto ml-3 bg-gray-100 p-1 rounded-full" onClick={() => setToggleNotiIcon(prev => !prev)}>
                                 <IoMdNotificationsOutline className="text-xl text-black" />
@@ -128,10 +128,15 @@ const Navbar = () => {
                         <div className="w-fit bg-white absolute pt-2 h-fit right-0 top-[4.25rem]
                 rounded-md shadow-md s z-[501]" onMouseLeave={()=>{setToggleNotiIcon(false)}} 
                 onMouseOut={()=>{setToggleNotiIcon(false)}}>
-                            <div className="py-2 px-4 font-ibm-thai text-lg flex">
+                            <div className="py-2 px-4 font-ibm-thai text-lg flex flex-col">
+                                <p className="text-center mb-2">แจ้งเตือนวันนี้</p>
                                 <div className="py-2 border-[1px] border-r-[0px] border-l-[0px] px-2">
-                                    {/* <p className="text-lg">วันวสันตวิษุวัต</p> */}
-                                    <p className="text-sm">ไม่พบการแจ้งเตือน</p>
+                                    <p className="text-lg">วันแรม 15 ค่ำ</p>
+                                    {/* <p className="text-sm">ไม่พบการแจ้งเตือน</p> */}
+                                </div>
+                                <div className="py-2 border-[1px] border-r-[0px] border-l-[0px] px-2">
+                                    <p className="text-lg">สุริยุปราคาแบบผสม</p>
+                                    {/* <p className="text-sm">ไม่พบการแจ้งเตือน</p> */}
                                 </div>
                                 {/* <p onClick={()=>{setToggleUserIcon(false)}}><Link to="/account">ตั้งค่าบัญชี</Link></p> */}
                             </div>
