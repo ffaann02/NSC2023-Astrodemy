@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect } from "react"
+import { useNavigate } from "react-router-dom";
 import { AiFillMinusSquare, AiFillPlusSquare } from "react-icons/ai"
 import * as THREE from 'three';
 import { HuePicker } from 'react-color';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content'
 
 const Create3D = (event) => {
 
@@ -53,6 +56,24 @@ const Create3D = (event) => {
 
     // useEffect focus on model index that updated value
     const [focusOnRefIndex, setFocusOnRefIndex] = useState(0);
+
+    // Preview Cover Image
+    const [previewImage, setPreviewImage] = useState("");
+    const [hover, setHover] = useState(false);
+
+    const navigate = useNavigate();
+    const sweetAlert = withReactContent(Swal)
+    const showAlert = (title, html, icon, path) => {
+        sweetAlert.fire({
+            title: <strong>{title}</strong>,
+            html: <i>{html}</i>,
+            icon: icon,
+            confirmButtonText: 'ตกลง'
+        })
+            .then(() => {
+                navigate(path);
+            });
+    }
 
     useEffect(() => {
         const canvas = canvasRef.current[focusOnRefIndex];
@@ -118,10 +139,6 @@ const Create3D = (event) => {
             // Remove Original Light
             scene.remove(ambientLight);
             // Light color for Nebula
-            const directionalLight = new THREE.DirectionalLight(0xff8c19, 1, 1000);
-            directionalLight.position.set(-0, 0, 40);
-            scene.add(directionalLight);
-
             const redLight = new THREE.PointLight(convertColor(modelNebula_Color1_Ref.current[focusOnRefIndex]), 2, 1000);
             // const redLight = new THREE.PointLight(0xd8547e, 2, 1000);
             redLight.position.set(-0, 0, 40);
@@ -167,6 +184,27 @@ const Create3D = (event) => {
         animate();
 
     }, [shape, size, texture, rotateSpeed, hadRing, ringInnerRadius, ringOuterRadius, ringTexture, color_1, color_2, color_3, canvasRef.current])
+
+    const handleCoverImageUpload = (event) => {
+        const file = event.target.files[0];
+
+        // Create a new FileReader instance
+        const reader = new FileReader();
+
+        // Set up the onload event for the FileReader
+        reader.onload = () => {
+            const img = new Image();
+
+            // Set the src of the Image to the data URL of the uploaded file
+            img.src = reader.result;
+
+            // Set the preview image and the image state
+            setPreviewImage(reader.result);
+        };
+
+        // Read the uploaded file as a data URL
+        reader.readAsDataURL(file);
+    }
 
     function handleModelAmount(num) {
         const newAmount = modelAmount + num;
@@ -295,13 +333,13 @@ const Create3D = (event) => {
             newArray[modelNum - 1] = false;
             status = false;
         }
-        if(arrayRef && arrayType && arrayType === 'boolean'){
+        if (arrayRef && arrayType && arrayType === 'boolean') {
             arrayRef.current[focusOnRefIndex] = status;
         }
-        else if(arrayRef && arrayType && arrayType === 'integer' && status === false){
+        else if (arrayRef && arrayType && arrayType === 'integer' && status === false) {
             arrayRef.current[focusOnRefIndex] = 0;
         }
-        else if(arrayRef && arrayType && arrayType === 'integer' && status === true){
+        else if (arrayRef && arrayType && arrayType === 'integer' && status === true) {
             arrayRef.current[focusOnRefIndex] = rangeValues[0];
         }
         setState(newArray);
@@ -349,12 +387,12 @@ const Create3D = (event) => {
     const convertColor = (color) => {
         // Remove '#' from the color string
         const colorWithoutHash = color.replace("#", "");
-        
+
         // Add '0x' prefix to the color string
         const convertedColor = parseInt("0x" + colorWithoutHash);
-        
+
         return convertedColor;
-      };
+    };
 
     const handleDetail = (event, modelNum) => {
         setFocusOnRefIndex(modelNum - 1);
@@ -385,6 +423,7 @@ const Create3D = (event) => {
                 light_color_3: color_3[i]
             });
         }
+        showAlert('สร้างแบบจำลองสำเร็จ', 'เข้าชมแบบจำลองได้เลย', 'success', '/display-3d');
         console.log(modelData);
     }
 
@@ -394,7 +433,35 @@ const Create3D = (event) => {
                 <p className='text-center mt-10 text-2xl font-bold text-gray-600'>สร้างแบบจำลองสามมิติ</p>
             </div>
 
-            <p className="text-center mt-4 font-ibm-thai">จำนวนโมเดลที่ต้องการสร้าง</p>
+            <div className="w-full mx-auto flex  max-w-5xl mt-10">
+                <div className="w-1/2 flex  mx-auto">
+                    <label className="font-ibm-thai text-lg mr-4 my-auto">ชื่อแบบจำลอง</label>
+                    <input type="text" name="modelName" id="modelName"
+                        className="w-[70%] border-[1.5px] rounded-md px-3 py-2 h-8 text-gray-500  text-lg focus:outline-gray-300 " />
+                </div>
+            </div>
+
+            <p className="text-center font-ibm-thai text-lg mt-6">รูปหน้าปกแบบจำลอง</p>
+            <div className="w-full mt-0 relative">
+                <label htmlFor="file-upload">
+                    <img
+                        src = {previewImage ? previewImage : "/assets/3d-cover-default.png"}
+                        className={`mx-auto max-w-64 max-h-64 ${hover ? "opacity-70" : "opacity-90"} cursor-pointer p-1`}
+                    />
+
+                </label>
+                <input
+                    id="file-upload"
+                    className="bg-red-200 mx-auto absolute top-0 max-w-44 h-full opacity-0 cursor-pointer w-full"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCoverImageUpload}
+                    onMouseEnter={() => { setHover(true) }}
+                    onMouseLeave={() => { setHover(false) }}
+                />
+            </div>
+
+            <p className="text-center mt-6 font-ibm-thai">จำนวนโมเดลที่ต้องการสร้าง</p>
             <div className="w-fit mx-auto font-ibm-thai flex">
                 <AiFillMinusSquare className="my-auto mr-3 text-xl cursor-pointer text-red-300 hover:text-red-600"
                     onClick={() => handleModelAmount(-1)} />
@@ -487,23 +554,23 @@ const Create3D = (event) => {
                                     </div>
                                     : null}
                             </div>
-                            :   <div>
-                                    <div className="w-fit font-ibm-thai mt-4 flex">
-                                        <p className="text-center font-ibm-thai mr-4 text-lg my-auto text-gray-800">สีที่ 1</p>
-                                        <HuePicker color={color_1[modelNumber - 1]} 
-                                            onChangeComplete={(e) => handleColorChange(e, modelNumber, setColor_1, modelNebula_Color1_Ref)} className="my-auto"/>
-                                    </div>
-                                    <div className="w-fit font-ibm-thai mt-4 flex">
-                                        <p className="text-center font-ibm-thai mr-4 text-lg my-auto text-gray-800">สีที่ 2</p>
-                                        <HuePicker color={color_2[modelNumber - 1]} 
-                                            onChangeComplete={(e) => handleColorChange(e, modelNumber, setColor_2, modelNebula_Color2_Ref)} className="my-auto"/>
-                                    </div>
-                                    <div className="w-fit font-ibm-thai mt-4 flex">
-                                        <p className="text-center font-ibm-thai mr-4 text-lg my-auto text-gray-800">สีที่ 2</p>
-                                        <HuePicker color={color_3[modelNumber - 1]} 
-                                            onChangeComplete={(e) => handleColorChange(e, modelNumber, setColor_3, modelNebula_Color3_Ref)} className="my-auto"/>
-                                    </div>
+                            : <div>
+                                <div className="w-fit font-ibm-thai mt-4 flex">
+                                    <p className="text-center font-ibm-thai mr-4 text-lg my-auto text-gray-800">สีที่ 1</p>
+                                    <HuePicker color={color_1[modelNumber - 1]}
+                                        onChangeComplete={(e) => handleColorChange(e, modelNumber, setColor_1, modelNebula_Color1_Ref)} className="my-auto" />
                                 </div>
+                                <div className="w-fit font-ibm-thai mt-4 flex">
+                                    <p className="text-center font-ibm-thai mr-4 text-lg my-auto text-gray-800">สีที่ 2</p>
+                                    <HuePicker color={color_2[modelNumber - 1]}
+                                        onChangeComplete={(e) => handleColorChange(e, modelNumber, setColor_2, modelNebula_Color2_Ref)} className="my-auto" />
+                                </div>
+                                <div className="w-fit font-ibm-thai mt-4 flex">
+                                    <p className="text-center font-ibm-thai mr-4 text-lg my-auto text-gray-800">สีที่ 2</p>
+                                    <HuePicker color={color_3[modelNumber - 1]}
+                                        onChangeComplete={(e) => handleColorChange(e, modelNumber, setColor_3, modelNebula_Color3_Ref)} className="my-auto" />
+                                </div>
+                            </div>
                         }
 
                         <div className="w-fit my-auto font-ibm-thai flex mt-4 text-lg">

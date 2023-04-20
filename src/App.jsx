@@ -39,6 +39,7 @@ import Select3D from "./Select3D";
 import Board from "./components/Post/Board";
 import AccountSetting from "./AccountSetting";
 import Create3D from "./components/Create3D/Create3D";
+import Display3D from "./components/Create3D/Display3D";
 export const UserContext = createContext();
 
 const firebaseConfig = {
@@ -202,6 +203,9 @@ function App() {
           } />
           <Route path="/create-3d" element={
             <Create3D />
+          } />
+          <Route path="/display-3d" element={
+            <Display3D />
           } />
         </Routes>
         </div>
