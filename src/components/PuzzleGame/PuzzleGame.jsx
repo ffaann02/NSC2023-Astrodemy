@@ -176,7 +176,7 @@ const PuzzleGame = () => {
             <div className="grid grid-cols-2 bg-white border-2 mt-10 rounded-2xl pt-10 pb-16
     drop-shadow-md">
               <div className="col-span-2 mb-14 text-center mt-0 text-2xl w-fit mx-auto">
-                <img src="/assets/puzzle_game_page/AstroQuiz.png" className="w-52" />
+                <img src="/assets/AstroPuzzle.png" className="w-52" />
               </div>
               <div className="">
                 <p className="font-ibm-thai text-2xl font-bold text-center">ผู้เล่น</p>

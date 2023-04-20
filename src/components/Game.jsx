@@ -35,7 +35,7 @@ const Game = () => {
               <div className="bg-white w-full h-fit rounded-3xl relative pt-5 py-5" data-aos="fade-up">
                 <div className="absolute top-4 right-4 cursor-pointer" onClick={() => { setPopupGame(false) }}>
                   <FaRegWindowClose className="text-4xl text-red-400" /></div>
-                <img src="/assets/drawing-game_page/AstroQuiz.png" className="w-52 mx-auto pt-4" />
+                <img src="/assets/AstroPuzzle.png" className="w-52 mx-auto pt-4" />
                 <div className="px-10 pt-10 font-ibm-thai grid grid-cols-6 relative h-full">
                   <div className="col-span-3 pr-10">
                     <p className="text-2xl font-bold">คำอธิบายเกม</p>

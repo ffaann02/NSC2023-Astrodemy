@@ -236,7 +236,7 @@ const Post = () => {
                                 <div id="blog-container">
                                     {blogData.length<=0 &&<p className='text-center font-ibm-thai text-2xl my-auto mt-6'>ไม่พบบทความ</p>}
                                     {blogData && blogData.map((post) => (
-                                        <div className="px-2 py-6 font-ibm-thai grid grid-cols-12 border-b-[1px] cursor-pointer" key={post.id}>
+                                        <div className="px-2 py-6 pb-2 font-ibm-thai grid grid-cols-12 border-b-[1px] cursor-pointer" key={post.id}>
                                             <div className="col-span-9">
                                                 <div className="flex">
                                                     <img src={post.authorProfile} alt="Author profile" className="w-8 rounded-full" />
@@ -245,6 +245,7 @@ const Post = () => {
                                                 </div>
                                                 <p className="text-2xl my-1 font-bold" onClick={() => navigate("/post/" + post.path)}>{post.title}</p>
                                                 <p onClick={() => navigate("/post/" + post.path)}>{new DOMParser().parseFromString(post.content, 'text/html').body.innerText.substring(0, 150)}{post.content.length > 150 && "..."}</p>
+                                                <p className='text-blue-700 mt-2'>{post.teacher===1 && "เขียนโดยคุณครู"}</p>
                                                 {/* <div className='flex mt-3' id="tag-container">
                                         {post.tags.map((tag, index) => (
                                             <div className="px-2 py-1 bg-gray-200 rounded-full text-gray-600 text-sm mr-2" key={index}>
