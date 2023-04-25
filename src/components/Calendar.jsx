@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useContext } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { UserContext } from '../App';
@@ -8,7 +8,7 @@ import { initializeApp } from "firebase/app";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "../App.css"
 function CalendarPage() {
-    const { userData, logged, setLogged, setUserData,role,setRole,calendarNoti,setCalendarNoti  } = useContext(UserContext);
+    const { userData, logged, setLogged, setUserData, role, setRole, calendarNoti, setCalendarNoti } = useContext(UserContext);
     const [currentMonth, setCurrentMonth] = useState();
     const [calendarData, setCalendarData] = useState(null);
     const firebaseConfig = {
@@ -94,22 +94,22 @@ function CalendarPage() {
             .catch(err => console.log(err));
     }, []);
     const [isOn, setIsOn] = useState(false);
-    useEffect(()=>{
+    useEffect(() => {
         const storedUserId = localStorage.getItem('userId');
         const firestore = firebase.firestore();
         firestore.collection('users').doc(storedUserId).get()
-        .then(doc => {
-          if (doc.exists) {
-            setCalendarNoti(doc.data().notification);
-            setIsOn(doc.data().notification);
-        } else {
-            console.log('No user data found');
-          }
-        })
-        .catch(error => {
-          console.error(error);
-        });
-    },[])
+            .then(doc => {
+                if (doc.exists) {
+                    setCalendarNoti(doc.data().notification);
+                    setIsOn(doc.data().notification);
+                } else {
+                    console.log('No user data found');
+                }
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }, [])
     const handleClick = () => {
         if (!isOn) {
             Swal.fire({
@@ -152,6 +152,9 @@ function CalendarPage() {
             })
         }
     };
+    const handleMonthChange = (event) => {
+        setCurrentMonth(parseInt(event.target.value));
+    };
     const sweetAlert = withReactContent(Swal)
     const showAlert = (title, html, icon) => {
         sweetAlert.fire({
@@ -165,71 +168,83 @@ function CalendarPage() {
             })
     }
 
-    const handleNotification = async(bool) => {
+    const handleNotification = async (bool) => {
         const userId = userData.userId;
         const userRef = firebase.firestore().collection('users').doc(userId);
         userRef.update({
-            notification:bool
+            notification: bool
         })
     }
     return (
         <>
-        {userData && <div className='w-full h-full '>
-            <div className="w-full h-full min-h-screen bg-white max-w-6xl mx-auto shadow-xl mt-10 px-10
+            {userData && <div className='w-full h-full px-6'>
+                <div className="w-full h-full min-h-screen bg-white max-w-6xl mx-auto shadow-xl mt-10  pl-4 lg:pl-10  pr-6 lg:pr-10
          py-6 border-gray-100 border-t-[1px] rounded-2xl relative">
-                <div className="absolute right-5 ">
-                    <p className="text-md font-ibm-thai text-gray-400">รับการแจ้งเตือน</p>
-                    <div className="w-[60px] bg-gray-200 flex rounded-3xl ml-auto mt-1">
-                        <label id="toggle-button" className='mt-1 ml-1 w-full cursor-pointer'>
-                            <input type="checkbox" checked={isOn} onChange={handleClick} />
-                            <span className="toggle-button-slider"></span>
-                        </label>
-                    </div>
-                </div>
-                <div className="col-span-full h-fit flex mt-2">
-                    <img src="/assets/AstroCalendar.png" className="w-56 mx-auto" />
-                </div>
-                <div className='grid grid-cols-12 mt-10 font-ibm-thai'>
-                    <div className="col-span-3 ">
-                        <div className="w-fit">
-                            <p className="font-semibold text-xl">ปี: 2566</p>
-                            {months.map((month, index) => (
-                                <div className={`${index === currentMonth ? "bg-violet-100 border-[2px] border-violet-200 hover:border-violet-300"
-                                    : "bg-gray-50 border-[1px] border-gray-50 hover:bg-gray-100 hover:border-[1px] hover:border-gray-300"} 
-                            py-3 px-10 my-2 cursor-pointer rounded-md relative transition ease-in-out duration-100 text-lg`}
-                                    onClick={() => { setCurrentMonth(index)
-                                   }}>
-                                    <p className="ml-2">{month.month_th}</p>
-                                </div>
-                            ))}
+                    <div className="absolute right-5 ">
+                        <p className="text-md font-ibm-thai text-gray-400">รับการแจ้งเตือน</p>
+                        <div className="w-[60px] bg-gray-200 flex rounded-3xl ml-auto mt-1">
+                            <label id="toggle-button" className='mt-1 ml-1 w-full cursor-pointer'>
+                                <input type="checkbox" checked={isOn} onChange={handleClick} />
+                                <span className="toggle-button-slider"></span>
+                            </label>
                         </div>
                     </div>
-
-                    <div className="col-span-9">
-                        {calendarData && currentMonth!==0 && <p className='mb-10 font-ibm-thai text-3xl font-bold text-right'>
-                            {currentMonth && months[currentMonth].month_th}</p>}
-                        {calendarData && currentMonth===0 && <p className='mb-10 font-ibm-thai text-3xl font-bold text-right'>
-                            มกราคม</p>}
-                        {calendarData && calendarData
-                            .filter(event => event.month === currentMonth) // Filter events by current month
-                            .map(event => {
-                                const icon = icons[event.type];
-                                return (
-                                    <div className="flex border-b-[1px] mb-10 pb-6" key={event.id}>
-                                        {icon && <img src={icon.url} className="w-20 h-20 mr-5" />}
-                                        <div className="font-ibm-thai">
-                                            <p className='mr-2 text-2xl font-bold text-blue-800'>{event.name}</p>
-                                            <p className="text-lg font-semibold mb-1 text-gray-600">วันที่ {event.date} {months[currentMonth].month_th}</p>
-                                            <p className='text-md'>{event.detail}</p>
-                                        </div>
+                    <div className="col-span-full h-fit flex mt-2">
+                        <img src="/assets/AstroCalendar.png" className="w-56 mx-auto" />
+                    </div>
+                    <div className='grid grid-cols-12 mt-10 font-ibm-thai'>
+                        <div className="hidden md:block col-span-2  lg:col-span-3">
+                            <div className="w-fit">
+                                <p className="font-semibold text-xl">ปี: 2566</p>
+                                {months.map((month, index) => (
+                                    <div className={`${index === currentMonth ? "bg-violet-100 border-[2px] border-violet-200 hover:border-violet-300"
+                                        : "bg-gray-50 border-[1px] border-gray-50 hover:bg-gray-100 hover:border-[1px] hover:border-gray-300"} 
+                                    py-3 px-0 lg:px-10 my-2 cursor-pointer rounded-md relative transition ease-in-out duration-100 text-lg`}
+                                        onClick={() => {
+                                            setCurrentMonth(index)
+                                        }}>
+                                        <p className="ml-2">{month.month_th}</p>
                                     </div>
-                                );
-                            })
-                        }
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="col-span-full md:col-span-10 lg:col-span-9">
+                            {calendarData && currentMonth !== 0 &&
+                                <p className='font-ibm-thai text-3xl font-bold text-right hidden md:block'>
+                                    เดือน: {currentMonth && months[currentMonth].month_th}
+                                </p>}
+                            <div className='w-full mx-auto flex mb-2 md:hidden'>
+                                <select value={currentMonth} onChange={handleMonthChange} 
+                                className='font-semibold text-2xl w-fit h-fit ml-auto'>
+                                    {months.map((month) => (
+                                        <option key={month.value} value={month.value}>{month.month_th}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            {calendarData && currentMonth === 0 && <p className='hidden md:block mb-10 font-ibm-thai text-3xl font-bold text-right'>
+                                มกราคม</p>}
+
+                            {calendarData && calendarData
+                                .filter(event => event.month === currentMonth) // Filter events by current month
+                                .map(event => {
+                                    const icon = icons[event.type];
+                                    return (
+                                        <div className="flex border-b-[1px] mb-10 pb-6" key={event.id}>
+                                            {icon && <img src={icon.url} className="w-20 h-20 mr-5" />}
+                                            <div className="font-ibm-thai">
+                                                <p className='mr-2 text-2xl font-bold text-blue-800'>{event.name}</p>
+                                                <p className="text-lg font-semibold mb-1 text-gray-600">วันที่ {event.date} {months[currentMonth].month_th}</p>
+                                                <p className='text-md'>{event.detail}</p>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            }
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>}
+            </div>}
         </>
     );
 }

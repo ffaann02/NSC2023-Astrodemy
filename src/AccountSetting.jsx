@@ -155,9 +155,9 @@ const AccountSetting = () => {
     const app = initializeApp(firebaseConfig);
     return (
         <>
-            <div className="w-full h-full min-h-screen max-w-4xl  mx-auto flex p-10 drop-shadow-sm">
-                <div className="grid grid-cols-8 w-full font-ibm-thai bg-white p-5 rounded-lg drop-shadow-md border-t-[1px] border-gray-100">
-                    <div className="col-span-2">
+            <div className="w-full h-full min-h-screen max-w-4xl  mx-auto flex p-4 md:p-10 drop-shadow-sm mt-10 md:mt-0">
+                <div className="h-full sm:h-screen grid grid-cols-8 w-full font-ibm-thai bg-white p-5 rounded-lg drop-shadow-md border-t-[1px] border-gray-100">
+                    <div className="col-span-full md:col-span-2">
                         <div
                             className={`w-full ${settingState === 0 ? "bg-gray-100" : ""
                                 } p-2 text-xl pl-4 rounded-lg py-3 my-2 cursor-pointer`}
@@ -177,7 +177,7 @@ const AccountSetting = () => {
                             การแจ้งเตือน
                         </div>
                     </div>
-                    {settingState === 0 && <div className="col-span-6 p-10 pt-0">
+                    {settingState === 0 && <div className="col-span-full md:col-span-6 p-10 pt-0 ">
                         <p className="text-2xl mt-2 font-semibold text-left">ตั้งค่าโปรไฟล์</p>
                         <div className=''>
                             <p className="text-lg mt-6 font-semibold">รูปโปรไฟล์</p>
@@ -191,7 +191,7 @@ const AccountSetting = () => {
                                 </label>
                                 <input
                                     id="file-upload"
-                                    className="bg-red-200 absolute top-0 max-w-44 h-full opacity-0 cursor-pointer w-full"
+                                    className=" absolute top-0 max-w-44 h-full opacity-0 cursor-pointer w-full"
                                     type="file"
                                     accept="image/*"
                                     onChange={handleImageUpload}
@@ -280,7 +280,7 @@ const AccountSetting = () => {
                                 </div>}
                         </div>
                     </div>}
-                    {settingState === 1 && <div className="col-span-6 p-10 pt-0">
+                    {settingState === 1 && <div className="col-span-full md:col-span-6 pr-2 md:pr-10 p-10 pt-0">
                         <p className="text-2xl mt-2 font-semibold text-left">ตั้งค่าการแจ้งเตือน</p>
                         <label id="toggle-button" className='mt-1 ml-1 w-full cursor-pointer'>
                             <div className='flex justify-between'>
