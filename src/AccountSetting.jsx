@@ -26,6 +26,26 @@ const AccountSetting = () => {
     };
 
     const [previewImage, setPreviewImage] = useState("");
+
+    async function dataURItoBlob(dataURI, callback) {
+        // convert base64 to raw binary data held in a string
+        // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+        var byteString = atob(dataURI.split(',')[1]);
+    
+        // separate out the mime component
+        var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+    
+        // write the bytes of the string to an ArrayBuffer
+        var ab = new ArrayBuffer(byteString.length);
+        var ia = new Uint8Array(ab);
+        for (var i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+    
+        // write the ArrayBuffer to a blob, and you're done
+        var bb = new Blob([ab]);
+        return bb;
+    }
     const handleImageUpload = (event) => {
         const file = event.target.files[0];
 
@@ -53,10 +73,18 @@ const AccountSetting = () => {
 
                 // Get the data URL of the cropped image
                 const dataURL = canvas.toDataURL();
-
+                // Convert the base64-encoded dataURL to a Blob object
+      const byteCharacters = atob(dataURL.split(",")[1]);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: "image/png" });
+      console.log(blob)
                 // Set the preview image and the image state
                 setPreviewImage(dataURL);
-                setImage(dataURL);
+                setImage(blob);
             };
 
             // Set the src of the Image to the data URL of the uploaded file
@@ -83,6 +111,7 @@ const AccountSetting = () => {
     const [toggleChangePass, setToggleChangePassword] = useState(false);
     const handleUpload = async () => {
         if (image) {
+            console.log("file that will be uploaded: " + image);
             setIsLoading(true);
             const storageRef = ref(getStorage(app), `userImages/${userData.username}`);
             await uploadBytes(storageRef, image).then(async (snapshot) => {
@@ -93,7 +122,7 @@ const AccountSetting = () => {
                 const userId = userData.userId;
                 const userRef = firebase.firestore().collection('users').doc(userId);
                 userRef.update({
-                    profileImage: image
+                    profileImage: downloadURL
                 })
                     .then(() => {
                         // Reload the page after the profile image has been updated

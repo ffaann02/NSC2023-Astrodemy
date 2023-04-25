@@ -125,7 +125,7 @@ const Register = () => {
     }
 
     return (
-        <div className="w-full h-[96vh] text-center">
+        <div className="w-full h-[96vh] text-center my-10">
             <div className="h-full max-w-md mx-auto flex">
                 <div className="w-full h-fit my-auto relative">
                     <p className="text-2xl font-ibm-thai font-bold">สมัครสมาชิก</p>
