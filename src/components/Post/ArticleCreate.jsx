@@ -11,6 +11,7 @@ import axios from 'axios';
 import firebase from 'firebase/compat/app';
 import { UserContext } from '../../App';
 import { useNavigate } from 'react-router-dom';
+import {IoCheckmarkCircleSharp} from "react-icons/io"
 const ArticleCreate = () => {
     const navigate = useNavigate();
     const { userData, logged, setLogged, setUserData } = useContext(UserContext)
@@ -86,6 +87,7 @@ const ArticleCreate = () => {
     const [comments,setComments] = useState([]);
     function handleImageChange(event) {
         const file = event.target.files[0];
+        console.log(file)
         if (file) {
             const storage = getStorage();
             const storageRef = ref(storage, `cover_articles/${userData.username}` + file.name);

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { BsKeyboardFill } from "react-icons/bs"
 import { MdArticle } from "react-icons/md"
 import { FaRegWindowClose } from "react-icons/fa"
+import {IoCheckmarkCircleSharp} from "react-icons/io5"
 import { BsImage } from "react-icons/bs"
 import { AiOutlineMessage } from "react-icons/ai"
 import { initializeApp } from "firebase/app";
@@ -245,7 +246,7 @@ const Post = () => {
                                                 </div>
                                                 <p className="text-2xl my-1 font-bold" onClick={() => navigate("/post/" + post.path)}>{post.title}</p>
                                                 <p onClick={() => navigate("/post/" + post.path)}>{new DOMParser().parseFromString(post.content, 'text/html').body.innerText.substring(0, 150)}{post.content.length > 150 && "..."}</p>
-                                                <p className='text-blue-700 mt-2'>{post.teacher===1 && "เขียนโดยคุณครู"}</p>
+                                                <p className='text-blue-700 mt-2 flex my-auto'>{post.teacher===1 && <><IoCheckmarkCircleSharp className='mt-[2.5px] mr-1'/> เขียนโดยคุณครู</>}</p>
                                                 {/* <div className='flex mt-3' id="tag-container">
                                         {post.tags.map((tag, index) => (
                                             <div className="px-2 py-1 bg-gray-200 rounded-full text-gray-600 text-sm mr-2" key={index}>
