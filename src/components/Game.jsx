@@ -27,7 +27,7 @@ const Game = () => {
     };
   }, [popupRef]);
   return (
-    <div className="w-full h-screen relative">
+    <div className="w-full  min-h-screen relative">
       {popupGame===1 && (
         <div className="fixed z-[50] w-full h-full flex bg-transparent">
           <div className="w-full h-full z-[15] absolute flex bg-black bg-opacity-50">
@@ -138,23 +138,23 @@ const Game = () => {
           </div>
         </div>
       )}
-      <div className="max-w-5xl m-auto h-fit my-auto grid grid-cols-12 z-[20] relative" id="game-block">
+      <div className="md:max-4-xl xl:max-w-5xl m-auto h-fit grid grid-cols-12 z-[20] relative " id="game-block">
         <div className="col-span-full text-center mt-16">
           <img src="/assets/drawing-game_page/AstroArcade.png" className="w-52 mx-auto" data-aos="fade-down" data-aos-delay="200" />
         </div>
-        <div className={`col-span-6 px-5 opacity-80 hover:opacity-100 cursor-pointer mt-10 hover:mt-4 ease-in-out duration-300
+        <div className={`col-span-full md:col-span-6 px-5 opacity-80 hover:opacity-100 cursor-pointer mt-10 hover:mt-4 ease-in-out duration-300
         `}
           onClick={() => { setPopupGame(1) }}>
           <img src="/assets/drawing-game_page/quiz-game-cover.png" className="rounded-3xl ease-in-out duration-300 hover:border-4 border-blue-500"
             data-aos="fade-right" data-aos-delay="300" />
         </div>
-        <div className="col-span-6 px-5 opacity-80 hover:opacity-100 cursor-pointer mt-10 hover:mt-4 ease-in-out duration-300"
+        <div className="col-span-full md:col-span-6 px-5 opacity-80 hover:opacity-100 cursor-pointer mt-10 hover:mt-4 ease-in-out duration-300"
         onClick={() => { setPopupGame(2) }}>
           <img src="/assets/drawing-game_page/drawing-game-cover.png" className="rounded-3xl ease-in-out duration-300 hover:border-4 border-blue-500"
             data-aos="fade-left" data-aos-delay="300" />
         </div>
       </div>
-      <div className="absolute top-0 left-0 -z-[10] w-full h-full">
+      <div className="absolute top-0 left-0 -z-[10] w-full min-h-screen h-full">
         <StarSky />
       </div>
     </div>
