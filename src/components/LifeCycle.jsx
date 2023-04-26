@@ -8,6 +8,7 @@ const LifeCycle = (event) => {
 
     const canvasRef = useRef();
     const cameraRef = useRef();
+    const renderRef = useRef();
 
     const [nameTH, setNameTH] = useState("เนบิวลา");
     const [nameENG, setNameENG] = useState("Stellar Nebula");
@@ -48,10 +49,14 @@ const LifeCycle = (event) => {
         const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
         cameraRef.current = camera;
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
         camera.position.setX(-2000);
         camera.position.setZ(40);
+        // renderer.setPixelRatio(window.devicePixelRatio);
+        // Responsive Render
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderRef.current = renderer;
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
 
         // Light
         const ambientLight = new THREE.AmbientLight(0x333333);
@@ -83,13 +88,13 @@ const LifeCycle = (event) => {
 
         // Create sun function
         const createSun = function (radius, texture, posX, posY, posZ, shaderScale, shaderIntensity, color_R, color_G, color_B) {
-            
+
             const meshGeometry = new THREE.SphereGeometry(radius, 32, 32);
             const meshMaterial = new THREE.MeshBasicMaterial({
                 map: textureLoader.load(texture),
             })
-            
-            const mesh = new THREE.Mesh(meshGeometry,meshMaterial);
+
+            const mesh = new THREE.Mesh(meshGeometry, meshMaterial);
             mesh.position.set(posX, posY, posZ);
 
             const shader = new THREE.Mesh(
@@ -112,7 +117,7 @@ const LifeCycle = (event) => {
             mesh.add(shader);
             scene.add(mesh);
 
-            return {mesh, meshGeometry, meshMaterial};
+            return { mesh, meshGeometry, meshMaterial };
         }
 
         const averageStar = createSun(12, '/assets/3d_page/texture/sun.jpg', -350, 0, 0, 1.2, 0.6, 1.0, 0.25, 0);
@@ -287,6 +292,13 @@ const LifeCycle = (event) => {
 
     }, []);
 
+    window.addEventListener('resize', function () {
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        renderRef.current.setSize(width, height);
+        cameraRef.current.aspect = width / height;
+        cameraRef.current.updateProjectionMatrix();
+    });
 
     const rangeValues = [1, 2, 3, 4, 5, 6];
     const cameraPosValue = [

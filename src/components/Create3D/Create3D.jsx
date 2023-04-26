@@ -1,15 +1,23 @@
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useContext } from "react"
+import { UserContext } from '../../App';
 import { useNavigate } from "react-router-dom";
 import { AiFillMinusSquare, AiFillPlusSquare } from "react-icons/ai"
 import * as THREE from 'three';
 import { HuePicker } from 'react-color';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content'
+import axios from 'axios';
 
 const Create3D = (event) => {
 
+    const { userData, logged, setLogged, setUserData, userId } = useContext(UserContext)
+
     const [modelAmount, setmodelAmount] = useState(1);
 
+    // 3D Title
+    const [title, setTitle] = useState();
+
+    // Model Name
     const [name, setName] = useState(['']);
 
     // Shape (Done)
@@ -243,12 +251,18 @@ const Create3D = (event) => {
         }
     }
 
+    const handleTitleName = (event) => {
+        const title = event.target.value;
+        setTitle(title);
+    }
+
     const handleName = (event, modelNum) => {
         setFocusOnRefIndex(modelNum - 1);
         const newname = event.target.value;
         const newArray = [...name];
         newArray[focusOnRefIndex] = newname;
         setName(newArray);
+        console.log(newArray[focusOnRefIndex]);
     }
 
     const handleShapeChange = (event, modelNum) => {
@@ -403,28 +417,38 @@ const Create3D = (event) => {
     }
 
     const handleCreateButton = () => {
-        const modelData = [];
+        const model_data = [];
+        // Fill model data
         for (let i = 0; i < modelAmount; i++) {
-            modelData.push({
-                name: name[i],
-                shape: shape[i],
-                size: size[i],
-                texture: texture[i],
-                rotateCheck: hadRotate[i],
-                rotateSpeed: rotateSpeed[i],
-                ringCheck: hadRing[i],
-                ringInnerRadius: ringInnerRadius[i],
-                ringOuterRadius: ringOuterRadius[i],
-                ringTexture: ringTexture[i],
-                detailCheck: hadDetail[i],
-                detailContent: detail[i],
-                light_color_1: color_1[i],
-                light_color_2: color_2[i],
-                light_color_3: color_3[i]
-            });
+            let dataJoined = [name[i], shape[i], size[i], texture[i], hadRotate[i], rotateSpeed[i], hadRing[i], ringInnerRadius[i], 
+                ringOuterRadius[i], ringTexture[i], hadDetail[i], detail[i], color_1[i], color_2[i], color_3[i]].join("@");
+            model_data.push(dataJoined);
         }
-        showAlert('สร้างแบบจำลองสำเร็จ', 'เข้าชมแบบจำลองได้เลย', 'success', '/display-3d');
-        console.log(modelData);
+        // Fill the empty array with -
+        for(let i = modelAmount - 1; i <= 6; i++){
+            model_data.push("-");
+        }
+        // showAlert('สร้างแบบจำลองสำเร็จ', 'เข้าชมแบบจำลองได้เลย', 'success', '/display-3d', modelData);
+        const convertedStr = title.toLowerCase().replace(/[^a-z0-9ก-๙]+/g, "-");
+        axios.post('http://localhost:3005/create_3d', {
+            creator: userData.username,
+            title: title,
+            coverImage: "Image_Path",
+            path: convertedStr,
+            modelAmount: modelAmount,
+            model_1: model_data[0],
+            model_2: model_data[1],
+            model_3: model_data[2],
+            model_4: model_data[3],
+            model_5: model_data[4],
+            model_6: model_data[5],
+        }).then(() => {
+            // navigate to new model
+            showAlert('สร้างแบบจำลองสำเร็จ', 'เข้าชมแบบจำลองได้เลย', 'success', `/display-3d/${convertedStr}`);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
     }
 
     return (
@@ -437,7 +461,8 @@ const Create3D = (event) => {
                 <div className="w-1/2 flex  mx-auto">
                     <label className="font-ibm-thai text-lg mr-4 my-auto">ชื่อแบบจำลอง</label>
                     <input type="text" name="modelName" id="modelName"
-                        className="w-[70%] border-[1.5px] rounded-md px-3 py-2 h-8 text-gray-500  text-lg focus:outline-gray-300 " />
+                        className="w-[70%] border-[1.5px] rounded-md px-3 py-2 h-8 text-gray-500  text-lg focus:outline-gray-300 " 
+                        onChange={handleTitleName}/>
                 </div>
             </div>
 
