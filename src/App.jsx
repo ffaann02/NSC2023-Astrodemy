@@ -41,6 +41,7 @@ import AccountSetting from "./AccountSetting";
 import Create3D from "./components/Create3D/Create3D";
 import FakeDisplay3D from "./components/Create3D/FakeDisplay3D";
 import Display3D from "./components/Create3D/Display3D";
+import Admin from "./components/Admin";
 export const UserContext = createContext();
 
 const firebaseConfig = {
@@ -211,6 +212,9 @@ function App() {
           <Route path="/display-3d/:title" element={
             <Display3D />
           } />
+          <Route path="/admin" element={
+          <Admin/>}
+          />
         </Routes>
         </div>
         <Footer />

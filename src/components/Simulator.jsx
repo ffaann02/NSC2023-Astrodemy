@@ -498,13 +498,13 @@ const Simulator = () => {
 
     return (
         <div className='relative flex justify-center overflow-hidden'>
-            <div className="h-fit absolute left-0 mb-10 pt-2 pb-20 top-0">
+            <div className="h-fit absolute left-0 mb-10 pb-20 top-0 pt-10 lg:pt-0">
                 <div className="w-full h-full rounded-xl rounded-l-none py-4">
                     {planetData.map((planet, index) => (
                         <div onClick={() => { navigate("/simulate/" + planet.id) }}
-                            className={`px-2 2xl:px-4 py-1 2xl:py-2 font-ibm-thai border-b-2 bg-white bg-opacity-50 hover:bg-opacity-70 cursor-pointer
+                            className={`px-2 lg:px-4 xl:px-4 py-2 xl:py-2 font-ibm-thai border-b-2 bg-white bg-opacity-50 hover:bg-opacity-70 cursor-pointer
                 ${index === planetData.length - 1 && "border-none"} ${index === 0 && "rounded-tr-xl"} ${index === planetData.length - 1 && "rounded-br-xl"}`}>
-                            <img src={planet.imageUrl} className="w-[2.25rem] 2xl:w-12 mx-auto" />
+                            <img src={planet.imageUrl} className="w-10 lg:w-12 mx-auto" />
                             <p className="text-center font-bold">{planet.name_th}</p>
                         </div>
                     ))}
@@ -525,10 +525,10 @@ const Simulator = () => {
             </p>
             {hoverNow && <p className='absolute mt-24 font-ibm-thai text-white'>กดที่ดาวเพื่อดูข้อมูลเพิ่มเติม</p>}
             <div className='absolute w-full max-w-4xl top-5 flex h-fit text-white mx-auto font-ibm-thai cursor-pointer'>
-                <p className='ml-auto text-xl'>ช้ามาก</p>
+                <p className='pl-2 ml-auto text-xl'>ช้ามาก</p>
                 <input type="range" className="w-3/4 h-4 appearance-none rounded-full bg-white outline-none mx-auto" min={0} max={slowerRangeValues.length - 1} step={1}
                     defaultValue={0.1} onChange={handleRangeChange} />
-                <p className='mr-auto text-xl'>เร็วมาก</p>
+                <p className='pl-2 mr-auto text-xl'>เร็วมาก</p>
             </div>
         </div>
     )

@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content'
 import "./App.css"
 const AccountSetting = () => {
-    const { userData, logged, setLogged, setUserData,role,setRole,calendarNoti,setCalendarNoti } = useContext(UserContext);
+    const { userData, logged, setLogged, setUserData, role, setRole, calendarNoti, setCalendarNoti } = useContext(UserContext);
 
     const [settingState, setSettingState] = useState(0);
     const [hover, setHover] = useState(false);
@@ -31,17 +31,17 @@ const AccountSetting = () => {
         // convert base64 to raw binary data held in a string
         // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
         var byteString = atob(dataURI.split(',')[1]);
-    
+
         // separate out the mime component
         var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
-    
+
         // write the bytes of the string to an ArrayBuffer
         var ab = new ArrayBuffer(byteString.length);
         var ia = new Uint8Array(ab);
         for (var i = 0; i < byteString.length; i++) {
             ia[i] = byteString.charCodeAt(i);
         }
-    
+
         // write the ArrayBuffer to a blob, and you're done
         var bb = new Blob([ab]);
         return bb;
@@ -74,14 +74,14 @@ const AccountSetting = () => {
                 // Get the data URL of the cropped image
                 const dataURL = canvas.toDataURL();
                 // Convert the base64-encoded dataURL to a Blob object
-      const byteCharacters = atob(dataURL.split(",")[1]);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: "image/png" });
-      console.log(blob)
+                const byteCharacters = atob(dataURL.split(",")[1]);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: "image/png" });
+                console.log(blob)
                 // Set the preview image and the image state
                 setPreviewImage(dataURL);
                 setImage(blob);
@@ -135,12 +135,12 @@ const AccountSetting = () => {
             });
         }
     }
-    const handleUpgradeRole = async() => {
+    const handleUpgradeRole = async () => {
         const userId = userData.userId;
         const userRef = firebase.firestore().collection('users').doc(userId);
         showAlert('ส่งคำร้องสำเร็จ', 'กำลังดำเนินการเลื่อนขั้น', 'success');
         userRef.update({
-            role:"teacher"
+            role: "teacher"
         })
             .then(() => {
                 // Reload the page after the profile image has been updated
@@ -216,9 +216,9 @@ const AccountSetting = () => {
                             </div>}
                             {userData && <div className='w-full flex mt-2'>
                                 <p className="text-md my-auto mt-[2px] text-gray-500">ระดับ: </p>
-                                {role && role==="teacher" && <p className='text-lg ml-2 my-auto font-semibold text-blue-800'>คุณครู</p>}
-                                {role && role==="general" && <p className='text-lg ml-2 my-auto font-semibold text-blue-800'>ผู้ใช้งานทั่วไป</p>}
-                                {role && role!=="teacher" && <p className='text-sm ml-1 my-auto text-gray-400 mt-1 hover:underline 
+                                {role && role === "teacher" && <p className='text-lg ml-2 my-auto font-semibold text-blue-800'>คุณครู</p>}
+                                {role && role === "general" && <p className='text-lg ml-2 my-auto font-semibold text-blue-800'>ผู้ใช้งานทั่วไป</p>}
+                                {role && role !== "teacher" && <p className='text-sm ml-1 my-auto text-gray-400 mt-1 hover:underline 
                                 cursor-pointer hover:text-blue-600' onClick={() => { setUpgradeRole(prev => !prev) }}>เลื่อนขั้น</p>}
                             </div>}
                             {upgradeRole &&
@@ -243,14 +243,14 @@ const AccountSetting = () => {
                                         <p className='text-blue-800 text-sm'>เอกสารยืนยันการเป็นครูผู้สอน</p>
                                         <input type="file" className='' accept=".pdf" />
                                     </div>
-                                    
+
                                     <div className='mt-2'>
                                         <button className="rounded-lg text-md bg-gradient-to-r px-6 py-2 font-ibm-thai w-fit
                         from-[#6e3f92] to-[#a94fa4]
                         hover:marker:from-[#754798] hover:to-[#a65ea3] text-white" onClick={handleUpgradeRole}>ยืนยัน</button>
                                         <button className="py-2 rounded-lg text-md bg-gradient-to-r font-ibm-thai
                 ease-in-out duration-300 from-[#a9a9a9] to-[#afafaf] 
-                text-white px-4 ml-2" onClick={()=>{setUpgradeRole(false)}}>ยกเลิก</button>
+                text-white px-4 ml-2" onClick={() => { setUpgradeRole(false) }}>ยกเลิก</button>
                                     </div>
 
                                 </div>}

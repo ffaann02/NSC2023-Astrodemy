@@ -205,7 +205,7 @@ const Create3D = (event) => {
 
             // Set the src of the Image to the data URL of the uploaded file
             img.src = reader.result;
-
+            console.log(reader.result);
             // Set the preview image and the image state
             setPreviewImage(reader.result);
         };
