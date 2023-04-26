@@ -23,7 +23,7 @@ const Display3D = () => {
   const allRotateSpeedRef = useRef();
 
   const [infoLeft, setInfoLeft] = useState();
-  let array_infoLeft = [];
+  const array_infoLeft = [];
 
   const convertColor = (color) => {
     // Remove '#' from the color string
@@ -35,12 +35,10 @@ const Display3D = () => {
 
   // Fetch Raw Data
   useEffect(() => {
-    console.log(title);
     const fetchData = async () => {
       try {
         const response = await axios.get(`http://localhost:3005/3d_data?title=${title}`);
         setRawData(response.data);
-        console.log(response.data);
         setRawDataLoaded(true);
       } catch (error) {
         console.error(error);
@@ -94,10 +92,8 @@ const Display3D = () => {
           setCameraPosValue(cameraPosValue => [...cameraPosValue, [(i + 1) * 300, 0, 24]]);
         }
 
-        // Store only info
-        for (let i = 0; i < rawData.modelAmount; i++) {
-          array_infoLeft.push(formated_data[i].detail);
-        }
+        // Set initial detail
+        setInfoLeft(formated_data[0].detail);
 
         setRangeValues(Array.apply(null, Array(rawData.modelAmount)).map(function (y, i) { return i + 1; }));
         setFormatedData(formated_data);
@@ -257,6 +253,14 @@ const Display3D = () => {
     cameraRef.current.updateProjectionMatrix();
   });
 
+  const callDetail = () => {
+    let detail = [];
+    for (let i = 0; i < rawData.modelAmount; i++) {
+      detail.push(formatedData[i].detail);
+    }
+    return detail;
+  }
+
   const getCameraPosition = (value) => {
     const index = rangeValues.indexOf(value);
     const [x, y, z] = cameraPosValue[index];
@@ -266,7 +270,8 @@ const Display3D = () => {
   const moveTime = 1.5;
   const handleRangeChange = (event) => {
     const step = event.target.value;
-    setInfoLeft(array_infoLeft[step]);
+    const detail = callDetail();
+    setInfoLeft(detail[step]);
     gsap.to(cameraRef.current.position, {
       duration: moveTime,
       ease: "power3.inOut",
@@ -283,8 +288,14 @@ const Display3D = () => {
           <p className='mx-auto text-white font-ibm-thai text-2xl'>{rawData.title}</p>
         </div>}
       {formatedData &&
-        <div>
+        <>
           <canvas id="space" alt="space" ref={canvasRef} />
+
+          <div className="absolute font-ibm-thai text-white
+               bg-gray-800 bg-opacity-20 w-1/5 h-1/2 left-0 mt-14 ml-14 mr-14
+               overflow-auto overflow-y-scroll scrollbar-thin scrollbar-thumb-transparent pb-14" >
+                <p className="mx-10 mt-4 text-xl">{infoLeft}</p>
+            </div>
 
           <div className="absolute w-full bottom-32">
             <div className={`mx-auto max-w-4xl grid grid-cols-${rawData.modelAmount} w-full font-ibm-thai text-white`}>
@@ -299,10 +310,10 @@ const Display3D = () => {
             </div>
             <div className={`max-w-4xl top-5 grid grid-cols-${rawData.modelAmount} h-fit text-white mx-auto font-ibm-thai cursor-pointer`}>
               <input type="range" className={`col-span-${rawData.modelAmount} w-full h-4 appearance-none rounded-full bg-white outline-none`} min={0} max={rangeValues.length - 1} step={1}
-                defaultValue={0} onChange={handleRangeChange} />
+                defaultValue={0} onChange={(e) => handleRangeChange(e)} />
             </div>
           </div>
-        </div>}
+        </>}
     </div>
   )
 
