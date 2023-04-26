@@ -8,7 +8,7 @@ import { Float32BufferAttribute } from 'three';
 const Simulator = () => {
 
     const atmosphereVertex =
-    `
+        `
     varying vec3 vertexNormal;
     void main() {
         vertexNormal = normalize(normalMatrix * normal);
@@ -17,7 +17,7 @@ const Simulator = () => {
     `;
 
     const atmosphereFragment =
-    `
+        `
     uniform float intensityFactor;
     varying vec3 vertexNormal;
     void main() {
@@ -28,6 +28,7 @@ const Simulator = () => {
 
     const canvasRef = useRef(null);
     const cameraRef = useRef(null);
+    const renderRef = useRef(null);
     const meshesRef = useRef([]);
     const meshesRingRef = useRef([]);
     const meshesOrbitLineRef = useRef([]);
@@ -54,10 +55,14 @@ const Simulator = () => {
         // Renderer
         const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas });
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
         camera.position.setZ(180);
         camera.position.setY(30);
+        // renderer.setPixelRatio(window.devicePixelRatio);
+        // Responsive Render
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderRef.current = renderer;
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
 
         // Light
         const ambientLight = new THREE.AmbientLight(0x333333);
@@ -278,9 +283,18 @@ const Simulator = () => {
         };
     }, []);
 
+
+    window.addEventListener('resize', function () {
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        renderRef.current.setSize(width, height);
+        cameraRef.current.aspect = width / height;
+        cameraRef.current.updateProjectionMatrix();
+    });
+
     const navigate = useNavigate();
 
-    const [hoverIndex,setHoverIndex] = useState(-1);
+    const [hoverIndex, setHoverIndex] = useState(-1);
 
     function handleMouseMove(event) {
         // Get the mouse position relative to the canvas element
@@ -311,9 +325,9 @@ const Simulator = () => {
             setlinkTo(intersectedObject.navigatePath);
             hoveredObjectRef.current = intersectedObject;
 
-            
+
             // Test Change Shader
-            if(hoveredObjectRef.current.children[0] !== null && hoveredObjectRef.current.children[0] !== undefined){
+            if (hoveredObjectRef.current.children[0] !== null && hoveredObjectRef.current.children[0] !== undefined) {
                 // console.log(hoveredObjectRef.current.children[0]);
                 // console.log("Intensity Value = " + hoveredObjectRef.current.children[0].material.uniforms.intensityFactor.value);
                 // hoveredObjectRef.current.children[0].material.visible = false;
@@ -403,73 +417,73 @@ const Simulator = () => {
             setlinkTo(null);
         }
     }
-    const [planetData,setPlanetData] = useState([
+    const [planetData, setPlanetData] = useState([
         {
             id: "sun",
             name: "Sun",
             name_th: "ดวงอาทิตย์",
             imageUrl:
-              "https://www.freeiconspng.com/thumbs/sun/picture-of-real-sun-the-color-of-fire-red-21.png",
-          },
-          {
+                "https://www.freeiconspng.com/thumbs/sun/picture-of-real-sun-the-color-of-fire-red-21.png",
+        },
+        {
             id: "mercury",
             name: "Mercury",
             name_th: "ดาวพุธ",
             imageUrl: "/assets/puzzle_game_page/PlanetSort/mercury.jpeg",
-          },
-          {
+        },
+        {
             id: "venus",
             name: "Venus",
             name_th: "ดาวศุกร์",
             imageUrl: "/assets/puzzle_game_page/PlanetSort/venus.png",
-          },
-          {
+        },
+        {
             id: "earth",
             name: "Earth",
             name_th: "ดาวโลก",
             imageUrl: "/assets/puzzle_game_page/PlanetSort/earth.png",
-          },
-          {
+        },
+        {
             id: "mars",
             name: "Mars",
             name_th: "ดาวอังคาร",
             imageUrl: "/assets/puzzle_game_page/PlanetSort/mars.png",
-          },
-          {
+        },
+        {
             id: "jupiter",
             name: "Jupiter",
             name_th: "ดาวพฤหัส",
             imageUrl: "/assets/puzzle_game_page/PlanetSort/jupiter.png",
-          },
-          {
+        },
+        {
             id: "saturn",
             name: "Saturn",
             name_th: "ดาวเสาร์",
             imageUrl: "/assets/puzzle_game_page/PlanetSort/saturn.png",
-          },
-          {
+        },
+        {
             id: "uranus",
             name: "Uranus",
             name_th: "ดาวยูเรนัส",
             imageUrl: "/assets/puzzle_game_page/PlanetSort/uranus.png",
-          },{
-            id:"neptune",
-            name:"Neptune",
-            name_th:"ดาวเนปจูน",
+        }, {
+            id: "neptune",
+            name: "Neptune",
+            name_th: "ดาวเนปจูน",
             imageUrl: "/assets/puzzle_game_page/PlanetSort/neptune.png"
         }
     ]
     )
 
     const rangeValues = [0.25, 0.5, 1, 1.5, 3];
-    const slowerRangeValues = [0.1,0.2,0.5,0.75, 1, 1.5, 2, 3];
+    const slowerRangeValues = [0.1, 0.2, 0.5, 0.75, 1, 1.5, 2, 3];
     const handleRangeChange = (event) => {
         const step = event.target.value;
         orbitSpeedRef.current = slowerRangeValues[step]; // Update the value using useRef
     };
-    useEffect(()=>{
+    useEffect(() => {
         orbitSpeedRef.current = 0.1;
-    },[])
+    }, [])
     const planets = [
         { name: 'Mercury', orbitalPeriod: 88 },
         { name: 'Venus', orbitalPeriod: 225 },
@@ -479,22 +493,22 @@ const Simulator = () => {
         { name: 'Saturn', orbitalPeriod: 10759 },
         { name: 'Uranus', orbitalPeriod: 30687 },
         { name: 'Neptune', orbitalPeriod: 60190 },
-      ];
-      
-      
+    ];
+
+
     return (
         <div className='relative flex justify-center overflow-hidden'>
             <div className="h-fit absolute left-0 mb-10 pt-2 pb-20 top-0">
-               <div className="w-full h-full rounded-xl rounded-l-none py-4">
-               {planetData.map((planet,index)=>(
-                <div onClick={()=>{navigate("/simulate/"+planet.id)}}
-                className={`px-2 2xl:px-4 py-1 2xl:py-2 font-ibm-thai border-b-2 bg-white bg-opacity-50 hover:bg-opacity-70 cursor-pointer
-                ${index===planetData.length-1 && "border-none"} ${index===0 && "rounded-tr-xl"} ${index===planetData.length-1 && "rounded-br-xl"}`}>
-                    <img src={planet.imageUrl} className="w-[2.25rem] 2xl:w-12 mx-auto"/>
-                    <p className="text-center font-bold">{planet.name_th}</p>
+                <div className="w-full h-full rounded-xl rounded-l-none py-4">
+                    {planetData.map((planet, index) => (
+                        <div onClick={() => { navigate("/simulate/" + planet.id) }}
+                            className={`px-2 2xl:px-4 py-1 2xl:py-2 font-ibm-thai border-b-2 bg-white bg-opacity-50 hover:bg-opacity-70 cursor-pointer
+                ${index === planetData.length - 1 && "border-none"} ${index === 0 && "rounded-tr-xl"} ${index === planetData.length - 1 && "rounded-br-xl"}`}>
+                            <img src={planet.imageUrl} className="w-[2.25rem] 2xl:w-12 mx-auto" />
+                            <p className="text-center font-bold">{planet.name_th}</p>
+                        </div>
+                    ))}
                 </div>
-               ))}
-               </div>
             </div>
             {/* <div className='absolute'>
     {planets.map((planet, i) => (
@@ -512,8 +526,8 @@ const Simulator = () => {
             {hoverNow && <p className='absolute mt-24 font-ibm-thai text-white'>กดที่ดาวเพื่อดูข้อมูลเพิ่มเติม</p>}
             <div className='absolute w-full max-w-4xl top-5 flex h-fit text-white mx-auto font-ibm-thai cursor-pointer'>
                 <p className='ml-auto text-xl'>ช้ามาก</p>
-            <input type="range" className="w-3/4 h-4 appearance-none rounded-full bg-white outline-none mx-auto" min={0} max={slowerRangeValues.length - 1} step={1} 
-                defaultValue={0.1} onChange={handleRangeChange}/>
+                <input type="range" className="w-3/4 h-4 appearance-none rounded-full bg-white outline-none mx-auto" min={0} max={slowerRangeValues.length - 1} step={1}
+                    defaultValue={0.1} onChange={handleRangeChange} />
                 <p className='mr-auto text-xl'>เร็วมาก</p>
             </div>
         </div>
