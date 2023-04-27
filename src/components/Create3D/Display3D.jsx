@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import * as THREE from 'three';
 import gsap from 'gsap';
+import ReactAudioPlayer from 'react-audio-player';
+import { BiVolumeMute } from 'react-icons/bi'
 
 const Display3D = () => {
 
@@ -23,7 +25,9 @@ const Display3D = () => {
   const allRotateSpeedRef = useRef();
 
   const [infoLeft, setInfoLeft] = useState();
-  const array_infoLeft = [];
+  const [audioURL, setAudioURL] = useState();
+
+  const [name_onlyOne_Model, setName_onlyOne_Model] = useState();
 
   const convertColor = (color) => {
     // Remove '#' from the color string
@@ -39,6 +43,7 @@ const Display3D = () => {
       try {
         const response = await axios.get(`http://localhost:3005/3d_data?title=${title}`);
         setRawData(response.data);
+        console.log(response.data);
         setRawDataLoaded(true);
       } catch (error) {
         console.error(error);
@@ -53,10 +58,29 @@ const Display3D = () => {
     const splitString = async (concatString) => {
       let splited_jsonFormat;
       let [name, shape, size, texture, hadRotate, rotateSpeed, hadRing, ringInnerRadius,
-        ringOuterRadius, ringTexture, hadDetail, detail, color_1, color_2, color_3] = await concatString.split("@");
+        ringOuterRadius, ringTexture, hadDetail, detail, color_1, color_2, color_3, audio] = await concatString.split("@");
+
+      // Init rotate speed
       if (hadRotate === 'false' || shape === 'Nebula') {
         rotateSpeed = 0;
       }
+
+      // If color undefind then change it to init value
+      if (!color_1){
+        color_1 = "#d8547e"
+      }
+      if (!color_2){
+        color_2 = "#cc6600"
+      }
+      if (!color_3){
+        color_3 = "#3677ac"
+      }
+
+      // If audio undefind then change it to string '-'
+      if(!audio){
+        audio = '-'
+      }
+
       splited_jsonFormat = {
         name: name,
         shape: shape,
@@ -72,7 +96,8 @@ const Display3D = () => {
         detail: detail,
         color_1: color_1,
         color_2: color_2,
-        color_3: color_3
+        color_3: color_3,
+        audio: audio
       }
       return splited_jsonFormat;
     }
@@ -94,6 +119,9 @@ const Display3D = () => {
 
         // Set initial detail
         setInfoLeft(formated_data[0].detail);
+        setAudioURL(formated_data[0].audio);
+        // Set name if data had only one model
+        setName_onlyOne_Model(formated_data[0].name);
 
         setRangeValues(Array.apply(null, Array(rawData.modelAmount)).map(function (y, i) { return i + 1; }));
         setFormatedData(formated_data);
@@ -261,6 +289,14 @@ const Display3D = () => {
     return detail;
   }
 
+  const callAudio = () => {
+    let audio = [];
+    for (let i = 0; i < rawData.modelAmount; i++) {
+      audio.push(formatedData[i].audio);
+    }
+    return audio;
+  }
+
   const getCameraPosition = (value) => {
     const index = rangeValues.indexOf(value);
     const [x, y, z] = cameraPosValue[index];
@@ -271,7 +307,9 @@ const Display3D = () => {
   const handleRangeChange = (event) => {
     const step = event.target.value;
     const detail = callDetail();
+    const audio = callAudio();
     setInfoLeft(detail[step]);
+    setAudioURL(audio[step]);
     gsap.to(cameraRef.current.position, {
       duration: moveTime,
       ease: "power3.inOut",
@@ -291,28 +329,66 @@ const Display3D = () => {
         <>
           <canvas id="space" alt="space" ref={canvasRef} />
 
-          <div className="absolute font-ibm-thai text-white
-               bg-gray-800 bg-opacity-20 w-1/5 h-1/2 left-0 mt-14 ml-14 mr-14
-               overflow-auto overflow-y-scroll scrollbar-thin scrollbar-thumb-transparent pb-14" >
-                <p className="mx-10 mt-4 text-xl">{infoLeft}</p>
+          {audioURL && audioURL !== '-' ? 
+            <div className='w-full absolute flex mt-20'>
+              <div className="font-ibm-thai text-black mx-auto">
+                <ReactAudioPlayer src={audioURL} autoPlay controls/>
+              </div>
+            </div> : 
+            <div className='w-full absolute flex mt-20'>
+              <div className='absolute w-full flex'>
+                <BiVolumeMute className='mx-auto text-white text-2xl mt-1'/>
+              </div>
+              <div className='absolute w-full flex'>
+                <p className='mx-auto text-white font-ibm-thai text-xl mt-7'>ไม่มีเสียงบรรยายประกอบ</p>
+              </div>
+              <div className="font-ibm-thai text-black mx-auto opacity-40">
+                <ReactAudioPlayer src={audioURL} autoPlay controls/>
+              </div>
             </div>
+          }
+          
+          {infoLeft !== '' ?
+            <div className="absolute font-ibm-thai text-white
+            bg-gray-800 bg-opacity-20 w-1/5 h-1/2 left-0 mt-14 ml-14 mr-14
+            overflow-auto overflow-y-scroll scrollbar-thin scrollbar-thumb-transparent pb-14" >
+              <p className="mx-10 mt-4 text-xl">{infoLeft}</p>
+            </div>
+          : null}
+          
 
-          <div className="absolute w-full bottom-32">
-            <div className={`mx-auto max-w-4xl grid grid-cols-${rawData.modelAmount} w-full font-ibm-thai text-white`}>
-              {[...Array(rawData.modelAmount)].map((_, index) => (
-                <div className={`col-span-1 
-                  ${index === 0 ? "text-left" : null}
-                  ${(index !== 0) && (index + 1 !== rawData.modelAmount) ? "text-center" : null}
-                  ${index + 1 === rawData.modelAmount ? "text-right" : null}`} key={index}>
-                  <p>{formatedData[index].name}</p>
-                </div>
-              ))}
+          {rawData.modelAmount > 1 ? 
+            <div className="absolute w-full bottom-32">
+              <div className={`mx-auto max-w-4xl grid grid-cols-${rawData.modelAmount} w-full font-ibm-thai text-white`}>
+                {[...Array(rawData.modelAmount)].map((_, index) => (
+                  <>
+                  <div className={`col-span-1 
+                    ${index === 0 ? "text-left" : null}
+                    ${(index !== 0) && (index + 1 !== rawData.modelAmount) ? "text-center" : null}
+                    ${index + 1 === rawData.modelAmount ? "text-right" : null}`} key={index}>
+                    <p>{formatedData[index].name}</p>
+                  </div>
+                  </>
+                ))}
+              </div>
             </div>
-            <div className={`max-w-4xl top-5 grid grid-cols-${rawData.modelAmount} h-fit text-white mx-auto font-ibm-thai cursor-pointer`}>
-              <input type="range" className={`col-span-${rawData.modelAmount} w-full h-4 appearance-none rounded-full bg-white outline-none`} min={0} max={rangeValues.length - 1} step={1}
-                defaultValue={0} onChange={(e) => handleRangeChange(e)} />
+          : 
+            <div className="absolute w-full bottom-40">
+              <div className='w-full absolute flex'>
+                <p className='mx-auto text-white font-ibm-thai text-2xl'>{name_onlyOne_Model}</p>
+              </div>
             </div>
-          </div>
+          }
+
+          {rawData.modelAmount > 1 ? 
+          <div className="absolute w-full bottom-28">
+              <div className={`max-w-4xl top-5 grid grid-cols-${rawData.modelAmount} h-fit text-white mx-auto font-ibm-thai cursor-pointer`}>
+                <input type="range" className={`col-span-${rawData.modelAmount} w-full h-4 appearance-none rounded-full bg-white outline-none`} min={0} max={rangeValues.length - 1} step={1}
+                  defaultValue={0} onChange={(e) => handleRangeChange(e)} />
+              </div>
+            </div>
+          : null}
+          
         </>}
     </div>
   )

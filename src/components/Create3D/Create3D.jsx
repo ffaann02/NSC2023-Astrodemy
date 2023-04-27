@@ -9,6 +9,7 @@ import withReactContent from 'sweetalert2-react-content'
 import axios from 'axios';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { initializeApp } from "firebase/app";
+import ReactAudioPlayer from 'react-audio-player';
 
 const Create3D = (event) => {
 
@@ -63,6 +64,11 @@ const Create3D = (event) => {
     const [color_3, setColor_3] = useState(['#3677ac']);
     const modelNebula_Color3_Ref = useRef(['#3677ac']);
 
+    // Audio
+    const [hadAudio, setHadAudio] = useState([false]);
+    const [previewAudioURL, setPreviewAudioURL] = useState([]);
+    const [audioURL, setAudioURL] = useState([]);
+
     const canvasRef = useRef([]);
     const cameraRef = useRef([]);
 
@@ -84,6 +90,7 @@ const Create3D = (event) => {
         measurementId: process.env.REACT_APP_MEASUREMENT_ID
     };
     const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
 
     const navigate = useNavigate();
     const sweetAlert = withReactContent(Swal)
@@ -274,6 +281,7 @@ const Create3D = (event) => {
             setColor_1(current => [...current, '#d8547e']);
             setColor_2(current => [...current, '#cc6600']);
             setColor_3(current => [...current, '#3677ac']);
+            setHadAudio(current => [...current, false]);
             canvasRef.current.push(null);
             modelShapeRef.current.push('Sphere');
             modelSizeRef.current.push(1);
@@ -486,10 +494,39 @@ const Create3D = (event) => {
         setDetail(newArray);
     }
 
+    const handleAudioUpload = (event, modelNum) => {
+        setFocusOnRefIndex(modelNum - 1);
+        const file = event.target.files[0];
+        const timeStamp = Date.now();
+        const audioRef = ref(storage, `model_audio/${userData.username}/${timeStamp}`);
+        uploadBytes(audioRef, file)
+            .then((snapshot) => {
+                console.log("Audio uploaded successfully");
+                return getDownloadURL(audioRef);
+            })
+            .then((downloadURL) => {
+                console.log("Audio uploaded successfully:", downloadURL);
+                const newArray = [...audioURL];
+                newArray[focusOnRefIndex] = downloadURL;
+                setAudioURL(newArray);
+
+                const previewArr = [...previewAudioURL];
+                previewArr[focusOnRefIndex] = downloadURL;
+                setPreviewAudioURL(previewArr);
+            })
+                
+            
+            .catch((error) => {
+                console.error("Error uploading audio:", error);
+            });
+
+    }
+
     const handleCreateButton = async () => {
         const model_data = [];
         const textureURL_downloaded = [];
         const ringtextureURL_downloaded = [];
+        const audioURL_downloaded = [];
 
         // Get texture download url
         for (let i = 0; i < modelAmount; i++) {
@@ -521,10 +558,22 @@ const Create3D = (event) => {
             }
         }
 
+        // Get audio download url
+        for (let i = 0; i < modelAmount; i++) {
+            if (audioURL[i] && hadAudio[i] !== false) {
+                audioURL_downloaded.push(audioURL[i]);
+            }
+            else {
+                audioURL_downloaded.push('-');
+            }
+        }
+        console.log(audioURL_downloaded);
+
+
         // Fill model data
         for (let i = 0; i < modelAmount; i++) {
             let dataJoined = [name[i], shape[i], size[i], textureURL_downloaded[i], hadRotate[i], rotateSpeed[i], hadRing[i], ringInnerRadius[i],
-            ringOuterRadius[i], ringtextureURL_downloaded[i], hadDetail[i], detail[i], color_1[i], color_2[i], color_3[i]].join("@");
+            ringOuterRadius[i], ringtextureURL_downloaded[i], hadDetail[i], detail[i], color_1[i], color_2[i], color_3[i], audioURL_downloaded[i]].join("@");
             model_data.push(dataJoined);
         }
         // Fill the empty array with -
@@ -555,9 +604,9 @@ const Create3D = (event) => {
                     // navigate to new model
                     showAlert('สร้างแบบจำลองสำเร็จ', 'เข้าชมแบบจำลองได้เลย', 'success', `/display-3d/${convertedStr}`);
                 })
-                .catch((error) => {
-                    console.log(error);
-                });
+                    .catch((error) => {
+                        console.log(error);
+                    });
             });
         }
         else {
@@ -718,12 +767,32 @@ const Create3D = (event) => {
                             </label>
                         </div>
                         {hadDetail[modelNumber - 1] ?
-                            <div className="w-fit font-ibm-thai mt-6 ml-4 mb-6">
-                                <p className="text-center font-ibm-thai mr-4 text-base my-auto  text-gray-500">เขียนอธิบาย</p>
-                                <input type="text" name="modelName" id="modelName"
-                                    className="w-5/6  mx-auto absolute border-[1.5px] rounded-md py-2 h-8 text-gray-500  text-lg focus:outline-gray-300 "
-                                    onChange={(e) => handleDetail(e, modelNumber)} />
+                            <div className="w-full font-ibm-thai mt-4 ml-4">
+                                <p className="text-left font-ibm-thai text-base my-auto  text-gray-500">เขียนอธิบาย</p>
+                                <div className="w-[90%]">
+                                    <textarea type="text" name="modelName" id="modelName"
+                                        className="w-full mx-auto px-2 border-[1.5px] rounded-md py-2 text-gray-500  text-lg focus:outline-gray-300 "
+                                        rows={2} onChange={(e) => handleDetail(e, modelNumber)} />
+                                </div>
                             </div>
+                            : null}
+
+                        <div className="w-fit my-auto font-ibm-thai flex mt-4 text-lg">
+                            <label><input type="checkbox" className="mr-4 mt-2" onChange={() => handleCheckbox(modelNumber, setHadAudio, hadAudio)} />
+                                เสียงบรรยาย
+                            </label>
+                        </div>
+                        {hadAudio[modelNumber - 1] ?
+                            <>
+                            <div className="w-fit font-ibm-thai mt-6 ml-4 mb-6">
+                                <input type="file" className="my-auto" onChange={(e) => handleAudioUpload(e, modelNumber)} />
+                            </div>
+                            {previewAudioURL[modelNumber - 1] ? 
+                                <div className="w-fit font-ibm-thai mt-6 ml-4 mb-6">
+                                    <ReactAudioPlayer src={previewAudioURL[modelNumber - 1]} autoPlay controls/>
+                                </div>
+                                    : null}
+                            </>
                             : null}
 
 
