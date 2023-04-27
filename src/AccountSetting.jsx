@@ -6,6 +6,7 @@ import firebase from 'firebase/compat/app';
 import { AiFillEdit, AiFillCheckCircle } from "react-icons/ai"
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content'
+import axios from 'axios';
 import "./App.css"
 const AccountSetting = () => {
     const { userData, logged, setLogged, setUserData, role, setRole, calendarNoti, setCalendarNoti } = useContext(UserContext);
@@ -15,6 +16,8 @@ const AccountSetting = () => {
     const [image, setImage] = useState(null);
     const [imageUrl, setImageUrl] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [pdfFile,setPdfFile] = useState("");
+    const [pdfUrl,setPdfUrl] = useState("");
     const firebaseConfig = {
         apiKey: process.env.REACT_APP_API_KEY,
         authDomain: process.env.REACT_APP_AUTH_DOMAIN,
@@ -27,25 +30,12 @@ const AccountSetting = () => {
 
     const [previewImage, setPreviewImage] = useState("");
 
-    async function dataURItoBlob(dataURI, callback) {
-        // convert base64 to raw binary data held in a string
-        // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
-        var byteString = atob(dataURI.split(',')[1]);
+    const handleChange = (e) => {
+        const selectedFile = e.target.files[0];
+        console.log(selectedFile);
+        setPdfFile(selectedFile);
+      };
 
-        // separate out the mime component
-        var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
-
-        // write the bytes of the string to an ArrayBuffer
-        var ab = new ArrayBuffer(byteString.length);
-        var ia = new Uint8Array(ab);
-        for (var i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-        }
-
-        // write the ArrayBuffer to a blob, and you're done
-        var bb = new Blob([ab]);
-        return bb;
-    }
     const handleImageUpload = (event) => {
         const file = event.target.files[0];
 
@@ -138,6 +128,26 @@ const AccountSetting = () => {
     const handleUpgradeRole = async () => {
         const userId = userData.userId;
         const userRef = firebase.firestore().collection('users').doc(userId);
+        if (pdfFile) {
+            console.log("File that will be uploaded: " + pdfFile.name);
+            setIsLoading(true);
+            const storageRef = ref(getStorage(), `userPDFs/${pdfFile.name}`);
+            await uploadBytes(storageRef, pdfFile).then(async (snapshot) => {
+              const downloadURL = await getDownloadURL(storageRef);
+              console.log(downloadURL);
+              setPdfUrl(downloadURL);
+              setIsLoading(false);
+              const today = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+              const formattedDate = today.toLocaleDateString('th-TH', options);
+              axios.post('http://localhost:3005/report', {
+                title:"ขอเลื่อนขั้นเป็นคุณครู",
+                username:userData.username,
+                date:formattedDate,
+                status:downloadURL
+                })
+            });
+          }
         showAlert('ส่งคำร้องสำเร็จ', 'กำลังดำเนินการเลื่อนขั้น', 'success');
         userRef.update({
             role: "teacher"
@@ -241,7 +251,7 @@ const AccountSetting = () => {
                                     <p className='text-blue-800 text-md mb-1'>ข้อมูลประกอบเพิ่มเติม</p>
                                     <div className='w-full'>
                                         <p className='text-blue-800 text-sm'>เอกสารยืนยันการเป็นครูผู้สอน</p>
-                                        <input type="file" className='' accept=".pdf" />
+                                        <input type="file" className='' accept=".pdf"  onChange={handleChange}/>
                                     </div>
 
                                     <div className='mt-2'>

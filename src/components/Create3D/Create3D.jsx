@@ -7,6 +7,9 @@ import { HuePicker } from 'react-color';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content'
 import axios from 'axios';
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { initializeApp } from "firebase/app";
+import ReactAudioPlayer from 'react-audio-player';
 
 const Create3D = (event) => {
 
@@ -29,8 +32,9 @@ const Create3D = (event) => {
     const modelSizeRef = useRef([1]);
 
     // Texture (Done)
-    const [texture, setTexture] = useState(['/assets/3d_page/texture/moon.jpg']);
-    const modelTextureRef = useRef(['/assets/3d_page/texture/moon.jpg']);
+    const [texture, setTexture] = useState(['/assets/3d_page/texture/moon.jpg']); // Preview on page
+    const [textureURL, setTextureURL] = useState([]); // Blob
+    const modelTextureRef = useRef(['/assets/3d_page/texture/moon.jpg']); // Preview on model
 
     // Rotation (Done)
     const [hadRotate, setHadRotate] = useState([false]);
@@ -45,6 +49,7 @@ const Create3D = (event) => {
     const [ringOuterRadius, SetRingOuterRadius] = useState([10]);
     const modelRingOuterRadiusRef = useRef([10]);
     const [ringTexture, setRingTexture] = useState(['/assets/3d_page/texture/saturn ring.png']);
+    const [ringTextureURL, setRingTextureURL] = useState([]); // Blob
     const modelRingTextureRef = useRef(['/assets/3d_page/texture/saturn ring.png']);
 
 
@@ -59,6 +64,11 @@ const Create3D = (event) => {
     const [color_3, setColor_3] = useState(['#3677ac']);
     const modelNebula_Color3_Ref = useRef(['#3677ac']);
 
+    // Audio
+    const [hadAudio, setHadAudio] = useState([false]);
+    const [previewAudioURL, setPreviewAudioURL] = useState([]);
+    const [audioURL, setAudioURL] = useState([]);
+
     const canvasRef = useRef([]);
     const cameraRef = useRef([]);
 
@@ -67,7 +77,20 @@ const Create3D = (event) => {
 
     // Preview Cover Image
     const [previewImage, setPreviewImage] = useState("");
+    const [image, setImage] = useState(null);
     const [hover, setHover] = useState(false);
+
+    const firebaseConfig = {
+        apiKey: process.env.REACT_APP_API_KEY,
+        authDomain: process.env.REACT_APP_AUTH_DOMAIN,
+        projectId: process.env.REACT_APP_PROJECT_ID,
+        storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
+        messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
+        appId: process.env.REACT_APP_APP_ID,
+        measurementId: process.env.REACT_APP_MEASUREMENT_ID
+    };
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
 
     const navigate = useNavigate();
     const sweetAlert = withReactContent(Swal)
@@ -110,7 +133,7 @@ const Create3D = (event) => {
         if (modelShapeRef.current[focusOnRefIndex] === 'Sphere') {
             // Create Sphere object
             const sphereGeometry = new THREE.SphereGeometry(modelSizeRef.current[focusOnRefIndex], 32, 32);
-            const sphereMaterial = new THREE.MeshStandardMaterial({ map: textureLoader.load(texture) });
+            const sphereMaterial = new THREE.MeshStandardMaterial({ map: textureLoader.load(modelTextureRef.current[focusOnRefIndex]) });
             const sphereObject = new THREE.Mesh(sphereGeometry, sphereMaterial);
             object.add(sphereObject);
         }
@@ -169,7 +192,6 @@ const Create3D = (event) => {
         else {
             ringOpacity = 0;
         }
-        // console.log(modelHadRingRef.current[focusOnRefIndex] + " index " + focusOnRefIndex + " opacity " + ringOpacity);
 
         // Create ring object
         let ringTexture = modelRingTextureRef.current[focusOnRefIndex];
@@ -203,11 +225,37 @@ const Create3D = (event) => {
         reader.onload = () => {
             const img = new Image();
 
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+
+                // Determine the size of the cropped square
+                const size = Math.min(img.width, img.height);
+
+                // Set the canvas dimensions to the size of the cropped square
+                canvas.width = 300;
+                canvas.height = 300;
+
+                // Draw the image onto the canvas
+                ctx.drawImage(img, (img.width - size) / 2, (img.height - size) / 2, size, size, 0, 0, size, size);
+
+                // Get the data URL of the cropped image
+                const dataURL = canvas.toDataURL();
+
+                const byteCharacters = atob(dataURL.split(",")[1]);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: "image/png" });
+                // Set the preview image and the image state
+                setPreviewImage(reader.result);
+                setImage(blob);
+            }
+
             // Set the src of the Image to the data URL of the uploaded file
             img.src = reader.result;
-            console.log(reader.result);
-            // Set the preview image and the image state
-            setPreviewImage(reader.result);
         };
 
         // Read the uploaded file as a data URL
@@ -233,6 +281,7 @@ const Create3D = (event) => {
             setColor_1(current => [...current, '#d8547e']);
             setColor_2(current => [...current, '#cc6600']);
             setColor_3(current => [...current, '#3677ac']);
+            setHadAudio(current => [...current, false]);
             canvasRef.current.push(null);
             modelShapeRef.current.push('Sphere');
             modelSizeRef.current.push(1);
@@ -262,7 +311,6 @@ const Create3D = (event) => {
         const newArray = [...name];
         newArray[focusOnRefIndex] = newname;
         setName(newArray);
-        console.log(newArray[focusOnRefIndex]);
     }
 
     const handleShapeChange = (event, modelNum) => {
@@ -304,6 +352,21 @@ const Create3D = (event) => {
             setTexture(newArray);
 
             modelTextureRef.current[focusOnRefIndex] = reader.result;
+
+            // Get the data URL of preview image
+            const dataURL = reader.result;
+
+            const byteCharacters = atob(dataURL.split(",")[1]);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: "image/png" });
+
+            const arrTextureURL = [...textureURL];
+            arrTextureURL[focusOnRefIndex] = blob;
+            setTextureURL(arrTextureURL);
         };
 
         // Read the uploaded file as a data URL
@@ -329,6 +392,21 @@ const Create3D = (event) => {
             setRingTexture(newArray);
 
             modelRingTextureRef.current[focusOnRefIndex] = reader.result;
+
+            // Get the data URL of preview image
+            const dataURL = reader.result;
+
+            const byteCharacters = atob(dataURL.split(",")[1]);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: "image/png" });
+
+            const arrRingTextureURL = [...ringTextureURL];
+            arrRingTextureURL[focusOnRefIndex] = blob;
+            setRingTextureURL(arrRingTextureURL);
         };
 
         // Read the uploaded file as a data URL
@@ -416,39 +494,124 @@ const Create3D = (event) => {
         setDetail(newArray);
     }
 
-    const handleCreateButton = () => {
+    const handleAudioUpload = (event, modelNum) => {
+        setFocusOnRefIndex(modelNum - 1);
+        const file = event.target.files[0];
+        const timeStamp = Date.now();
+        const audioRef = ref(storage, `model_audio/${userData.username}/${timeStamp}`);
+        uploadBytes(audioRef, file)
+            .then((snapshot) => {
+                console.log("Audio uploaded successfully");
+                return getDownloadURL(audioRef);
+            })
+            .then((downloadURL) => {
+                console.log("Audio uploaded successfully:", downloadURL);
+                const newArray = [...audioURL];
+                newArray[focusOnRefIndex] = downloadURL;
+                setAudioURL(newArray);
+
+                const previewArr = [...previewAudioURL];
+                previewArr[focusOnRefIndex] = downloadURL;
+                setPreviewAudioURL(previewArr);
+            })
+                
+            
+            .catch((error) => {
+                console.error("Error uploading audio:", error);
+            });
+
+    }
+
+    const handleCreateButton = async () => {
         const model_data = [];
+        const textureURL_downloaded = [];
+        const ringtextureURL_downloaded = [];
+        const audioURL_downloaded = [];
+
+        // Get texture download url
+        for (let i = 0; i < modelAmount; i++) {
+            if (textureURL[i] && textureURL[i] !== '/assets/3d_page/texture/moon.jpg') {
+                const timeStamp = Date.now();
+                const storageRef = ref(getStorage(app), `/model_texture/${userData.username}/${timeStamp}`);
+                await uploadBytes(storageRef, textureURL[i]).then(async (snapshot) => {
+                    const downloadURL = await getDownloadURL(storageRef);
+                    textureURL_downloaded.push(downloadURL);
+                });
+            }
+            else {
+                textureURL_downloaded.push('/assets/3d_page/texture/moon.jpg');
+            }
+        }
+
+        // Get ring texture download url
+        for (let i = 0; i < modelAmount; i++) {
+            if (ringTextureURL[i] && ringTextureURL[i] !== '/assets/3d_page/texture/saturn ring.png') {
+                const timeStamp = Date.now();
+                const storageRef = ref(getStorage(app), `/model_texture/${userData.username}/${timeStamp}`);
+                await uploadBytes(storageRef, ringTextureURL[i]).then(async (snapshot) => {
+                    const downloadURL = await getDownloadURL(storageRef);
+                    ringtextureURL_downloaded.push(downloadURL);
+                });
+            }
+            else {
+                ringtextureURL_downloaded.push('/assets/3d_page/texture/saturn ring.png');
+            }
+        }
+
+        // Get audio download url
+        for (let i = 0; i < modelAmount; i++) {
+            if (audioURL[i] && hadAudio[i] !== false) {
+                audioURL_downloaded.push(audioURL[i]);
+            }
+            else {
+                audioURL_downloaded.push('-');
+            }
+        }
+        console.log(audioURL_downloaded);
+
+
         // Fill model data
         for (let i = 0; i < modelAmount; i++) {
-            let dataJoined = [name[i], shape[i], size[i], texture[i], hadRotate[i], rotateSpeed[i], hadRing[i], ringInnerRadius[i], 
-                ringOuterRadius[i], ringTexture[i], hadDetail[i], detail[i], color_1[i], color_2[i], color_3[i]].join("@");
+            let dataJoined = [name[i], shape[i], size[i], textureURL_downloaded[i], hadRotate[i], rotateSpeed[i], hadRing[i], ringInnerRadius[i],
+            ringOuterRadius[i], ringtextureURL_downloaded[i], hadDetail[i], detail[i], color_1[i], color_2[i], color_3[i], audioURL_downloaded[i]].join("@");
             model_data.push(dataJoined);
         }
         // Fill the empty array with -
-        for(let i = modelAmount - 1; i <= 6; i++){
+        for (let i = modelAmount - 1; i <= 6; i++) {
             model_data.push("-");
         }
-        // showAlert('สร้างแบบจำลองสำเร็จ', 'เข้าชมแบบจำลองได้เลย', 'success', '/display-3d', modelData);
-        const convertedStr = title.toLowerCase().replace(/[^a-z0-9ก-๙]+/g, "-");
-        axios.post('http://localhost:3005/create_3d', {
-            creator: userData.username,
-            title: title,
-            coverImage: "Image_Path",
-            path: convertedStr,
-            modelAmount: modelAmount,
-            model_1: model_data[0],
-            model_2: model_data[1],
-            model_3: model_data[2],
-            model_4: model_data[3],
-            model_5: model_data[4],
-            model_6: model_data[5],
-        }).then(() => {
-            // navigate to new model
-            showAlert('สร้างแบบจำลองสำเร็จ', 'เข้าชมแบบจำลองได้เลย', 'success', `/display-3d/${convertedStr}`);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+
+        if (image) {
+            const timeStamp = Date.now();
+            const storageRef = ref(getStorage(app), `cover_model/${timeStamp}`);
+            await uploadBytes(storageRef, image).then(async (snapshot) => {
+                const downloadURL = await getDownloadURL(storageRef);
+
+                const convertedStr = title.toLowerCase().replace(/[^a-z0-9ก-๙]+/g, "-");
+                axios.post('http://localhost:3005/create_3d', {
+                    creator: userData.username,
+                    title: title,
+                    coverImage: downloadURL,
+                    path: convertedStr,
+                    modelAmount: modelAmount,
+                    model_1: model_data[0],
+                    model_2: model_data[1],
+                    model_3: model_data[2],
+                    model_4: model_data[3],
+                    model_5: model_data[4],
+                    model_6: model_data[5],
+                }).then(() => {
+                    // navigate to new model
+                    showAlert('สร้างแบบจำลองสำเร็จ', 'เข้าชมแบบจำลองได้เลย', 'success', `/display-3d/${convertedStr}`);
+                })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+            });
+        }
+        else {
+            console.log("Please upload cover image");
+        }
     }
 
     return (
@@ -461,8 +624,8 @@ const Create3D = (event) => {
                 <div className="w-1/2 flex  mx-auto">
                     <label className="font-ibm-thai text-lg mr-4 my-auto">ชื่อแบบจำลอง</label>
                     <input type="text" name="modelName" id="modelName"
-                        className="w-[70%] border-[1.5px] rounded-md px-3 py-2 h-8 text-gray-500  text-lg focus:outline-gray-300 " 
-                        onChange={handleTitleName}/>
+                        className="w-[70%] border-[1.5px] rounded-md px-3 py-2 h-8 text-gray-500  text-lg focus:outline-gray-300 "
+                        onChange={handleTitleName} />
                 </div>
             </div>
 
@@ -470,7 +633,7 @@ const Create3D = (event) => {
             <div className="w-full mt-0 relative">
                 <label htmlFor="file-upload">
                     <img
-                        src = {previewImage ? previewImage : "/assets/3d-cover-default.png"}
+                        src={previewImage ? previewImage : "/assets/3d-cover-default.png"}
                         className={`mx-auto max-w-64 max-h-64 ${hover ? "opacity-70" : "opacity-90"} cursor-pointer p-1`}
                     />
 
@@ -507,12 +670,12 @@ const Create3D = (event) => {
                             <label className="text-lg mr-4 my-auto">ชื่อโมเดล</label>
                             <input type="text" name="modelName" id="modelName"
                                 className="w-3/4 border-[1.5px] rounded-md px-3 py-2 h-8 text-gray-500  text-lg focus:outline-gray-300 "
-                                onChange={handleName} />
+                                onChange={(e) => handleName(e, modelNumber)} />
                         </div>
 
                         <div className="w-fit font-ibm-thai flex mt-4">
                             <p className="text-lg my-auto mr-4">รูปทรง</p>
-                            <select value={shape[modelNumber - 1]} onChange={(e) => handleShapeChange(e, modelNumber)}>
+                            <select value={shape[modelNumber - 1]} onChange={(e) => handleShapeChange(e, modelNumber)} >
                                 <option value="Sphere">ทรงกลม</option>
                                 <option value="Box" >ทรงสี่เหลี่ยม</option>
                                 <option value="Nebula" >ฝุ่นในอวกาศ</option>
@@ -604,12 +767,32 @@ const Create3D = (event) => {
                             </label>
                         </div>
                         {hadDetail[modelNumber - 1] ?
-                            <div className="w-fit font-ibm-thai mt-6 ml-4 mb-6">
-                                <p className="text-center font-ibm-thai mr-4 text-base my-auto  text-gray-500">เขียนอธิบาย</p>
-                                <input type="text" name="modelName" id="modelName"
-                                    className="w-5/6  mx-auto absolute border-[1.5px] rounded-md py-2 h-8 text-gray-500  text-lg focus:outline-gray-300 "
-                                    onChange={handleDetail} />
+                            <div className="w-full font-ibm-thai mt-4 ml-4">
+                                <p className="text-left font-ibm-thai text-base my-auto  text-gray-500">เขียนอธิบาย</p>
+                                <div className="w-[90%]">
+                                    <textarea type="text" name="modelName" id="modelName"
+                                        className="w-full mx-auto px-2 border-[1.5px] rounded-md py-2 text-gray-500  text-lg focus:outline-gray-300 "
+                                        rows={2} onChange={(e) => handleDetail(e, modelNumber)} />
+                                </div>
                             </div>
+                            : null}
+
+                        <div className="w-fit my-auto font-ibm-thai flex mt-4 text-lg">
+                            <label><input type="checkbox" className="mr-4 mt-2" onChange={() => handleCheckbox(modelNumber, setHadAudio, hadAudio)} />
+                                เสียงบรรยาย
+                            </label>
+                        </div>
+                        {hadAudio[modelNumber - 1] ?
+                            <>
+                            <div className="w-fit font-ibm-thai mt-6 ml-4 mb-6">
+                                <input type="file" className="my-auto" onChange={(e) => handleAudioUpload(e, modelNumber)} />
+                            </div>
+                            {previewAudioURL[modelNumber - 1] ? 
+                                <div className="w-fit font-ibm-thai mt-6 ml-4 mb-6">
+                                    <ReactAudioPlayer src={previewAudioURL[modelNumber - 1]} autoPlay controls/>
+                                </div>
+                                    : null}
+                            </>
                             : null}
 
 
